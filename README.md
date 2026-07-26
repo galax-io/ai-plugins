@@ -1,5 +1,15 @@
 # Galaxio Performance Kit
 
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Plugin Marketplace](https://img.shields.io/badge/type-plugin--marketplace-orange.svg)
+![Cursor](https://img.shields.io/badge/Cursor-compatible-black.svg)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-blueviolet.svg)
+![Codex](https://img.shields.io/badge/Codex-compatible-green.svg)
+[![CI](https://github.com/galax-io/ai-plugins/actions/workflows/validate.yml/badge.svg)](https://github.com/galax-io/ai-plugins/actions/workflows/validate.yml)
+![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen.svg)
+[![Plugins](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fgalax-io%2Fai-plugins%2Fmain%2F.claude-plugin%2Fmarketplace.json&query=%24.plugins.length&label=plugins&color=informational)](.claude-plugin/marketplace.json)
+[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-standard-informational.svg)](https://agentskills.io)
+
 Galaxio engineering workflows packaged as portable agent plugins for **Cursor**, **Claude Code** and **Codex**.
 
 One plugin is authored once. The three agents disagree about manifests, not about
