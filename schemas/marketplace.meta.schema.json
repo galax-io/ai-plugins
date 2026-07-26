@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/galax-io/ai-plugins/schemas/marketplace.meta.schema.json",
+  "title": "Galaxio Performance Kit marketplace source manifest",
+  "description": "Single authored source of truth for the marketplace itself. The three per-agent catalogs are generated from this file by scripts/sync-manifests.mjs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "displayName", "description", "owner"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": {
+      "type": "string",
+      "description": "Public marketplace identifier. Users see it as plugin-name@<this>.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "displayName": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "description": { "type": "string", "minLength": 10, "maxLength": 300 },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "email": { "type": "string", "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$" },
+        "url": { "type": "string", "pattern": "^https?://" }
+      }
+    },
+    "repository": { "type": "string", "pattern": "^https?://" }
+  }
+}

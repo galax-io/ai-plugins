@@ -1,0 +1,13 @@
+{
+  "name": "zzz-later",
+  "displayName": "Later Plugin",
+  "version": "1.0.0",
+  "description": "Fixture plugin sorted after the malformed one; its problems must still be reported.",
+  "author": {
+    "name": "Galaxio Team"
+  },
+  "license": "Apache-2.0",
+  "components": {
+    "skills": "./skills/"
+  }
+}

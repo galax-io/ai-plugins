@@ -1,0 +1,11 @@
+{
+  "name": "broken-plugin",
+  "displayName": "Broken Plugin",
+  "version": "1.0",
+  "description": "Fixture plugin with an invalid version, a misspelled property and no components.",
+  "author": {
+    "name": "Galaxio Team"
+  },
+  "license": "Apache-2.0",
+  "keyword": ["typo"]
+}

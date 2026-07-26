@@ -1,0 +1,112 @@
+name: validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifests:
+    name: manifests and skills
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Schema, manifest drift, skill portability, links, and plugin-tree hygiene.
+      - name: Run repository checks
+        run: npm run check
+
+      - name: Run script tests
+        run: npm test
+
+      # Claude Code is the strictest manifest reader of the three; --strict turns
+      # unrecognized and misspelled fields into errors instead of warnings.
+      - name: Validate manifests with Claude Code
+        run: |
+          shopt -s nullglob
+          dirs=(plugins/*/)
+          if [ ${#dirs[@]} -eq 0 ]; then
+            echo "no plugins yet — nothing to validate"
+            exit 0
+          fi
+          for dir in "${dirs[@]}"; do
+            npx --yes @anthropic-ai/claude-code plugin validate "$dir" --strict
+          done
+
+  prose:
+    name: markdown and spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run format:check
+      - run: npm run lint:md
+      - run: npm run spell
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for committed secrets
+        uses: docker://zricethezav/gitleaks:latest
+        with:
+          args: detect --source=/github/workspace --redact --verbose
+
+      - name: Lint workflow files
+        uses: docker://rhysd/actionlint:latest
+        with:
+          args: -color
+
+      - name: Lint plugin shell scripts
+        run: |
+          shopt -s nullglob globstar
+          scripts=(plugins/**/*.sh)
+          if [ ${#scripts[@]} -eq 0 ]; then
+            echo "no plugin shell scripts"
+            exit 0
+          fi
+          shellcheck "${scripts[@]}"
+
+      - name: Byte-compile plugin Python scripts
+        run: |
+          shopt -s nullglob globstar
+          files=(plugins/**/*.py)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no plugin python scripts"
+            exit 0
+          fi
+          python3 -m py_compile "${files[@]}"
+
+  release-gate:
+    name: version bump
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require a version bump and changelog entry
+        run: |
+          git fetch --no-tags origin "$GITHUB_BASE_REF"
+          npm run check:version-bump

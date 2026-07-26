@@ -1,0 +1,13 @@
+{
+  "name": "demo-plugin",
+  "displayName": "Demo Plugin",
+  "version": "1.0.0",
+  "description": "Fixture plugin whose skill carries non-portable frontmatter.",
+  "author": {
+    "name": "Galaxio Team"
+  },
+  "license": "Apache-2.0",
+  "components": {
+    "skills": "./skills/"
+  }
+}

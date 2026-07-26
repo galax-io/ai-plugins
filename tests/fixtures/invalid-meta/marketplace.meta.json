@@ -1,0 +1,8 @@
+{
+  "name": "fixture-marketplace",
+  "displayName": "Fixture Marketplace",
+  "description": "Fixture marketplace whose plugin manifest is deliberately malformed.",
+  "owner": {
+    "name": "Galaxio Team"
+  }
+}

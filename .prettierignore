@@ -1,0 +1,11 @@
+node_modules/
+
+# Written by scripts/sync-manifests.mjs in its own canonical form.
+.claude-plugin/marketplace.json
+.cursor-plugin/marketplace.json
+.agents/plugins/marketplace.json
+plugins/*/.claude-plugin/plugin.json
+plugins/*/.cursor-plugin/plugin.json
+plugins/*/.codex-plugin/plugin.json
+
+tests/fixtures/

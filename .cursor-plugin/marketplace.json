@@ -1,0 +1,11 @@
+{
+  "name": "galaxio-performance-kit",
+  "owner": {
+    "name": "Galaxio Team",
+    "url": "https://github.com/galax-io"
+  },
+  "metadata": {
+    "description": "Galaxio engineering workflows packaged as portable agent plugins for Cursor, Claude Code and Codex"
+  },
+  "plugins": []
+}

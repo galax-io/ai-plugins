@@ -1,0 +1,11 @@
+{
+  "name": "quiet-plugin",
+  "displayName": "Quiet Plugin",
+  "version": "1.0.0",
+  "description": "Fixture plugin that ships skills on disk without declaring components.skills.",
+  "author": {
+    "name": "Galaxio Team"
+  },
+  "license": "Apache-2.0",
+  "components": {}
+}

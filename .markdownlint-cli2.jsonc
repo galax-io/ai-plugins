@@ -1,0 +1,12 @@
+{
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**", "tests/fixtures/**"],
+  "config": {
+    // Tables and links in this repo are wider than any sane wrap column.
+    "MD013": false,
+    // Repeated "## Steps" headings across sibling skills are fine.
+    "MD024": { "siblings_only": true },
+    // HTML comments carry the PR template instructions.
+    "MD033": false,
+  },
+}
