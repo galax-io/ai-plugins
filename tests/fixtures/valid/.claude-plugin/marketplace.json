@@ -1,0 +1,28 @@
+{
+  "name": "fixture-marketplace",
+  "owner": {
+    "name": "Galaxio Team",
+    "url": "https://github.com/galax-io"
+  },
+  "metadata": {
+    "description": "Fixture marketplace used by the repository test suite; never published.",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "demo-plugin",
+      "source": "demo-plugin",
+      "description": "Fixture plugin used by the repository test suite; never published.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Galaxio Team",
+        "url": "https://github.com/galax-io"
+      },
+      "license": "Apache-2.0",
+      "category": "developer-tools",
+      "keywords": [
+        "fixture"
+      ]
+    }
+  ]
+}

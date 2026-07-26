@@ -1,0 +1,10 @@
+{
+  "name": "fixture-marketplace",
+  "displayName": "Fixture Marketplace",
+  "description": "Fixture marketplace used by the repository test suite; never published.",
+  "owner": {
+    "name": "Galaxio Team",
+    "url": "https://github.com/galax-io"
+  },
+  "repository": "https://github.com/galax-io/ai-plugins"
+}

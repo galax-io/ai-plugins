@@ -1,0 +1,9 @@
+# Everything that ships to users, or decides what ships, needs a review.
+/plugins/   @galax-io/maintainers
+/scripts/   @galax-io/maintainers
+/schemas/   @galax-io/maintainers
+/tests/     @galax-io/maintainers
+/.github/   @galax-io/maintainers
+/marketplace.meta.json @galax-io/maintainers
+# Defines the commands CI runs; editing it can disable a gate.
+/package.json @galax-io/maintainers

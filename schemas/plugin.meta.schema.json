@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/galax-io/ai-plugins/schemas/plugin.meta.schema.json",
+  "title": "Galaxio Performance Kit plugin source manifest",
+  "description": "Single authored source of truth for one plugin. The Cursor, Claude Code and Codex manifests are generated from this file by scripts/sync-manifests.mjs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "displayName", "version", "description", "author", "license", "components"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Plugin identifier. Must equal the directory name.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version. Always set: without it Claude Code falls back to the git SHA and every commit ships as an update.",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\\+[0-9A-Za-z.-]+)?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "One sentence: what the plugin does and when to reach for it.",
+      "minLength": 10,
+      "maxLength": 300
+    },
+    "author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "email": { "type": "string", "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$" },
+        "url": { "type": "string", "pattern": "^https?://" }
+      }
+    },
+    "homepage": { "type": "string", "pattern": "^https?://" },
+    "repository": { "type": "string", "pattern": "^https?://" },
+    "license": {
+      "type": "string",
+      "description": "SPDX identifier. Must match the repository LICENSE.",
+      "enum": [
+        "Apache-2.0",
+        "MIT",
+        "BSD-2-Clause",
+        "BSD-3-Clause",
+        "ISC",
+        "MPL-2.0",
+        "GPL-3.0-only",
+        "AGPL-3.0-only",
+        "Unlicense"
+      ]
+    },
+    "keywords": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+    },
+    "category": {
+      "type": "string",
+      "description": "Cursor marketplace category slug.",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "tags": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" }
+    },
+    "components": {
+      "type": "object",
+      "description": "Relative paths to component directories, or null when the plugin does not ship that component.",
+      "additionalProperties": false,
+      "properties": {
+        "skills": { "type": ["string", "null"] },
+        "agents": {
+          "type": ["string", "null"],
+          "description": "Subagents. Cursor and Claude Code only — Codex has no equivalent."
+        },
+        "rules": {
+          "type": ["string", "null"],
+          "description": "Cursor .mdc rules. Cursor only."
+        },
+        "hooks": { "type": ["string", "null"] },
+        "mcpServers": {
+          "type": ["string", "null"],
+          "description": "Path to the MCP config. All three agents accept an explicit manifest path, so one file serves them all; ./.mcp.json is the convention here."
+        }
+      }
+    },
+    "userConfig": {
+      "type": "object",
+      "description": "Claude Code user-configurable values, prompted at enable time. The only sanctioned way to give a ${VAR} placeholder a value; never put the value itself here.",
+      "minProperties": 1
+    },
+    "codex": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "interface": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "displayName": { "type": "string" },
+            "shortDescription": { "type": "string", "maxLength": 120 },
+            "longDescription": { "type": "string" },
+            "developerName": { "type": "string" },
+            "category": { "type": "string" },
+            "websiteURL": { "type": "string", "pattern": "^https?://" },
+            "logo": { "type": "string" }
+          }
+        }
+      }
+    },
+    "cursor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "logo": { "type": "string" },
+        "variables": {
+          "type": "object",
+          "description": "Cursor variable declarations. Users set the values in the dashboard; config files reference them as ${VAR}.",
+          "minProperties": 1
+        }
+      }
+    }
+  }
+}

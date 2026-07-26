@@ -1,1 +1,90 @@
-# ai-plugins
+# Galaxio Performance Kit
+
+Galaxio engineering workflows packaged as portable agent plugins for **Cursor**, **Claude Code** and **Codex**.
+
+One plugin is authored once. The three agents disagree about manifests, not about
+skills, so this repository keeps a single `skills/` tree per plugin and generates the
+Cursor, Claude Code and Codex manifests from one source file.
+
+> Status: infrastructure only. `plugins/` is empty — the first plugin has not landed yet.
+
+## Install
+
+Claude Code:
+
+```bash
+claude plugin marketplace add galax-io/ai-plugins
+```
+
+Codex:
+
+```bash
+codex plugin marketplace add galax-io/ai-plugins
+```
+
+Cursor installs from the marketplace UI once the kit is published. Until then, copy a
+plugin directory into `~/.cursor/plugins/local` and restart Cursor.
+
+Then install a plugin by name, for example `plugin-name@galaxio-performance-kit`.
+
+## Repository layout
+
+```text
+marketplace.meta.json              authored: marketplace identity
+plugins/<name>/plugin.meta.json    authored: everything about one plugin
+plugins/<name>/skills/<skill>/SKILL.md
+schemas/                           JSON Schema for both authored sources
+scripts/                           generator and checks
+tests/                             the suite and its fixtures — not shipped content
+.claude-plugin/marketplace.json    generated
+.cursor-plugin/marketplace.json    generated
+.agents/plugins/marketplace.json   generated
+plugins/<name>/.claude-plugin/plugin.json   generated
+plugins/<name>/.cursor-plugin/plugin.json   generated
+plugins/<name>/.codex-plugin/plugin.json    generated
+```
+
+Generated files are never edited by hand. `npm run check` fails when they drift from
+the authored sources.
+
+## Commands
+
+```bash
+npm run sync
+```
+
+```bash
+npm run check
+```
+
+```bash
+npm test
+```
+
+`sync` regenerates the manifests. `check` runs the same generator in verify mode plus
+the portability, link and security checks. `test` exercises the scripts against the
+fixtures in `tests/fixtures/`. All three run on Node built-ins alone.
+
+The plugins under `tests/fixtures/` are deliberately broken inputs for the suite,
+not marketplace content. Nothing there is published, and the checks skip it.
+
+CI also requires the prose gates, so run them before opening a PR. They need
+`npm install` first:
+
+```bash
+npm run format:check && npm run lint:md && npm run spell
+```
+
+## Adding a plugin
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: create
+`plugins/<name>/plugin.meta.json`, write skills under `plugins/<name>/skills/`, run
+`npm run sync`, run `npm run check`, and install the result in at least one agent
+before opening a PR.
+
+Background on the primitives and the three manifest dialects:
+[docs/plugins-vs-skills.md](docs/plugins-vs-skills.md).
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).

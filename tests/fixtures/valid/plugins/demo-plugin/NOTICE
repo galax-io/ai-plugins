@@ -1,0 +1,2 @@
+Extensionless file that a plugin may legitimately ship. The security check must
+allow it by name instead of rejecting it as a binary.

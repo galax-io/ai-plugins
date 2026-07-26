@@ -1,0 +1,11 @@
+# sync --check compares generated manifests byte-for-byte against LF output, so a
+# CRLF checkout would fail the drift gate on a clean clone.
+* text=auto eol=lf
+
+# Written by scripts/sync-manifests.mjs — never edit by hand.
+.claude-plugin/marketplace.json      linguist-generated=true
+.cursor-plugin/marketplace.json      linguist-generated=true
+.agents/plugins/marketplace.json     linguist-generated=true
+plugins/*/.claude-plugin/plugin.json linguist-generated=true
+plugins/*/.cursor-plugin/plugin.json linguist-generated=true
+plugins/*/.codex-plugin/plugin.json  linguist-generated=true
