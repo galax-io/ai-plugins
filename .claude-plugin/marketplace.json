@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "galaxio-gatling-pro",
-      "source": "galaxio-gatling-pro",
+      "source": "./plugins/galaxio-gatling-pro",
       "description": "Gatling JVM performance testing in Galaxio style: Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, and the cases/feeders/scenarios/simulations layout.",
       "version": "1.0.0",
       "author": {

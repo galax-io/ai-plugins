@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "demo-plugin",
-      "source": "demo-plugin",
+      "source": "./plugins/demo-plugin",
       "description": "Fixture plugin used by the repository test suite; never published.",
       "version": "1.0.0",
       "author": {

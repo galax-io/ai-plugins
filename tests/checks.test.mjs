@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, rmSync, appendFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, appendFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -44,6 +44,21 @@ test('valid fixture passes every check', () => {
     const args = script === 'sync-manifests.mjs' ? ['--check'] : [];
     const result = runScript(script, fixture('valid'), ...args);
     assert.equal(result.code, 0, `${script} failed:\n${result.output}`);
+  }
+});
+
+test('marketplace plugin sources are paths Claude Code accepts', () => {
+  // `source: "<name>"` passes every check in this repo and then fails at install
+  // time with "plugins.0.source: Invalid input". Only a ./-relative path resolves.
+  const catalog = JSON.parse(
+    readFileSync(path.join(fixture('valid'), '.claude-plugin', 'marketplace.json'), 'utf8'),
+  );
+  for (const plugin of catalog.plugins) {
+    assert.equal(
+      plugin.source,
+      `./plugins/${plugin.name}`,
+      `plugin "${plugin.name}" has source "${plugin.source}"; Claude Code needs a ./-relative path`,
+    );
   }
 });
 
