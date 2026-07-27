@@ -267,7 +267,9 @@ function claudeMarketplace(marketplace, plugins) {
     },
     plugins: plugins.map(({ meta }) => ({
       name: meta.name,
-      source: meta.name,
+      // A path relative to the marketplace root, not a bare name: Claude Code
+      // rejects `source: "<name>"` with "Invalid input" regardless of pluginRoot.
+      source: `./plugins/${meta.name}`,
       description: meta.description,
       version: meta.version,
       author: meta.author,
