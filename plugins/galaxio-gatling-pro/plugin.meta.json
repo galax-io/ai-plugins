@@ -1,0 +1,43 @@
+{
+  "$schema": "../../schemas/plugin.meta.schema.json",
+  "name": "galaxio-gatling-pro",
+  "displayName": "Galaxio Gatling Pro",
+  "version": "1.0.0",
+  "description": "Gatling JVM performance testing in Galaxio style: Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, and the cases/feeders/scenarios/simulations layout.",
+  "author": {
+    "name": "Galaxio Team",
+    "url": "https://github.com/galax-io"
+  },
+  "homepage": "https://github.com/galax-io/ai-plugins",
+  "repository": "https://github.com/galax-io/ai-plugins",
+  "license": "Apache-2.0",
+  "keywords": [
+    "gatling",
+    "performance-testing",
+    "load-testing",
+    "scala",
+    "java",
+    "kotlin",
+    "sbt",
+    "maven",
+    "gradle",
+    "picatinny"
+  ],
+  "category": "testing",
+  "tags": ["gatling", "performance-testing", "jvm"],
+  "components": {
+    "skills": "./skills/",
+    "agents": null,
+    "rules": null,
+    "hooks": null,
+    "mcpServers": null
+  },
+  "codex": {
+    "interface": {
+      "displayName": "Galaxio Gatling Pro",
+      "shortDescription": "Gatling JVM performance test patterns",
+      "category": "Testing",
+      "websiteURL": "https://github.com/galax-io/ai-plugins"
+    }
+  }
+}

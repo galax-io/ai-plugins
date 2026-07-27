@@ -16,7 +16,11 @@ One plugin is authored once. The three agents disagree about manifests, not abou
 skills, so this repository keeps a single `skills/` tree per plugin and generates the
 Cursor, Claude Code and Codex manifests from one source file.
 
-> Status: infrastructure only. `plugins/` is empty — the first plugin has not landed yet.
+## Plugins
+
+| Plugin                                              | What it does                                                                                                                              |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, HTTP/JDBC/JMS/Kafka/AMQP |
 
 ## Install
 
@@ -35,7 +39,7 @@ codex plugin marketplace add galax-io/ai-plugins
 Cursor installs from the marketplace UI once the kit is published. Until then, copy a
 plugin directory into `~/.cursor/plugins/local` and restart Cursor.
 
-Then install a plugin by name, for example `plugin-name@galaxio-performance-kit`.
+Then install a plugin by name, for example `galaxio-gatling-pro@galaxio-performance-kit`.
 
 ## Repository layout
 

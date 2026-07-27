@@ -3,5 +3,18 @@
   "interface": {
     "displayName": "Galaxio Performance Kit"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "galaxio-gatling-pro",
+      "source": {
+        "source": "local",
+        "path": "./plugins/galaxio-gatling-pro"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Testing"
+    }
+  ]
 }

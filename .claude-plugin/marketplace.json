@@ -8,5 +8,30 @@
     "description": "Galaxio engineering workflows packaged as portable agent plugins for Cursor, Claude Code and Codex",
     "pluginRoot": "./plugins"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "galaxio-gatling-pro",
+      "source": "galaxio-gatling-pro",
+      "description": "Gatling JVM performance testing in Galaxio style: Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, and the cases/feeders/scenarios/simulations layout.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Galaxio Team",
+        "url": "https://github.com/galax-io"
+      },
+      "license": "Apache-2.0",
+      "category": "testing",
+      "keywords": [
+        "gatling",
+        "performance-testing",
+        "load-testing",
+        "scala",
+        "java",
+        "kotlin",
+        "sbt",
+        "maven",
+        "gradle",
+        "picatinny"
+      ]
+    }
+  ]
 }

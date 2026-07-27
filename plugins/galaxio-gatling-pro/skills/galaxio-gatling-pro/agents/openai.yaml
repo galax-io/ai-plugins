@@ -1,0 +1,8 @@
+interface:
+  display_name: Galaxio Gatling Pro
+  short_description: Gatling Scala performance test patterns
+  default_prompt: >
+    Use the Galaxio Gatling Pro skill to create a Gatling Scala performance
+    test with the Galaxio project layout.
+policy:
+  allow_implicit_invocation: true
