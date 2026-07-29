@@ -12,3 +12,7 @@ This skill is a test fixture. It carries only the portable frontmatter core
 
 1. Do nothing.
 2. Report that nothing was done.
+
+## Reference
+
+- [references/notes.md](references/notes.md)

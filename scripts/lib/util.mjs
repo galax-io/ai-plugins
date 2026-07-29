@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -94,6 +95,51 @@ export function walk(dir, predicate) {
     else if (predicate(full)) out.push(full);
   }
   return out;
+}
+
+/**
+ * Absolute paths git would ignore. Returns an empty set outside a work tree, so
+ * a check that filters on this scans everything rather than silently skipping.
+ */
+/**
+ * Files that legitimately carry no extension.
+ *
+ * Shared by check-security, which allows them inside `plugins/`, and check-links,
+ * which exempts them from reachability: none of them can carry a Markdown link,
+ * so demanding one would make a file its sibling check just blessed unshippable.
+ * Two lists would drift the moment either check gained an entry.
+ */
+export const EXTENSIONLESS_NAMES = new Set([
+  '.gitkeep',
+  '.gitignore',
+  '.gitattributes',
+  '.editorconfig',
+  'LICENSE',
+  'NOTICE',
+  'CODEOWNERS',
+  'Makefile',
+  'Dockerfile',
+]);
+
+export function gitIgnored(root, files) {
+  if (files.length === 0) return new Set();
+  try {
+    const out = execFileSync('git', ['check-ignore', '--stdin'], {
+      cwd: root,
+      input: `${files.join('\n')}\n`,
+      encoding: 'utf8',
+    });
+    return new Set(
+      out
+        .split('\n')
+        .filter(Boolean)
+        .map((f) => path.resolve(root, f)),
+    );
+  } catch {
+    // Exit 1 means nothing was ignored; any other failure means git could not
+    // answer (no work tree, no git). Either way, scan everything.
+    return new Set();
+  }
 }
 
 /** Collects problems and turns them into a single exit code, so one run reports everything at once. */

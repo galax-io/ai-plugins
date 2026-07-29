@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { compareSemver } from '../scripts/lib/semver.mjs';
 import { parseFrontmatter } from '../scripts/lib/frontmatter.mjs';
 import { validate } from '../scripts/lib/schema.mjs';
-import { stripNonProse } from '../scripts/lib/markdown.mjs';
+import { linkPathVariants, linkTargets, stripNonProse } from '../scripts/lib/markdown.mjs';
 import { findSecrets, looksLikeCredential } from '../scripts/lib/secrets.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -111,6 +111,17 @@ test('one malformed manifest names its plugin and does not abort the run', () =>
   assert.match(result.output, /wrong-name/, 'the plugin sorted after it must still be checked');
 });
 
+test('a bundled file no link reaches is reported; reachability is transitive and skill-local', () => {
+  const result = runScript('check-links.mjs', fixture('orphan-reference'));
+  assert.equal(result.code, 1);
+  assert.match(result.output, /references\/orphan\.md: no link from SKILL\.md reaches this file/);
+  assert.doesNotMatch(result.output, /linked\.md/, 'the directly linked reference is reachable');
+  assert.doesNotMatch(result.output, /deep\.md/, 'a reference linked from a reference is reachable');
+  // The fixture's own README links the orphan from outside the skill. Following
+  // that would launder every file the repository mentions into the reachable set.
+  assert.match(result.output, /1 problem/, 'a link from outside the skill must not count');
+});
+
 test('literal credentials are rejected, including positional ones and inside __fixtures__', () => {
   const result = runScript('check-security.mjs', fixture('invalid-security'));
   assert.equal(result.code, 1);
@@ -143,6 +154,37 @@ test('markdown scanning ignores fences, code spans and HTML comments', () => {
   assert.match(stripped, /before/);
   assert.match(stripped, /after/);
   assert.equal(stripped.split('\n').length, 7, 'line numbers must survive stripping');
+});
+
+test('the link grammar sees every destination a reachable file can be named by', () => {
+  // A miss here is not a skipped check: reachability reads the same grammar and
+  // reports anything it cannot see as an orphan, so each of these would fail CI
+  // on a file that is correctly linked.
+  assert.deepEqual(
+    linkTargets('[![thumb](assets/thumb.png)](references/linked.md)'),
+    ['assets/thumb.png', 'references/linked.md'],
+    'a nested destination must not be swallowed by the outer link',
+  );
+  assert.deepEqual(
+    linkTargets('<img src="assets/logo.png"> and <a href="references/x.md">x</a>'),
+    ['assets/logo.png', 'references/x.md'],
+    'HTML is valid Markdown and carries real paths',
+  );
+  assert.deepEqual(linkTargets('[a](<references/with space.md>)'), ['references/with space.md']);
+  assert.deepEqual(linkTargets('[a](https://example.org) [b](#anchor)'), [], 'external and anchor');
+});
+
+test('a percent-encoded destination resolves to the file it names', () => {
+  assert.deepEqual(linkPathVariants('references/my%20file.md#frag'), [
+    'references/my%20file.md',
+    'references/my file.md',
+  ]);
+  assert.deepEqual(linkPathVariants('references/plain.md'), ['references/plain.md']);
+  assert.deepEqual(
+    linkPathVariants('references/100%.md'),
+    ['references/100%.md'],
+    'a malformed escape is a literal name, not an encoding',
+  );
 });
 
 test('frontmatter parser reports list and nested values as unsupported', () => {

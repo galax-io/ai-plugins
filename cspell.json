@@ -24,6 +24,7 @@
     "Dependabot",
     "Dgatling",
     "dparam",
+    "extensionless",
     "fqcn",
     "Galaxio",
     "gitleaks",
@@ -51,6 +52,7 @@
     "stdlib",
     "subagent",
     "subagents",
+    "unshippable",
     "zricethezav"
   ]
 }
