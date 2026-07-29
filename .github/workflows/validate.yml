@@ -22,7 +22,8 @@ jobs:
         with:
           node-version: '22'
 
-      # Schema, manifest drift, skill portability, links, and plugin-tree hygiene.
+      # Schema, manifest drift, plugin-tree hygiene, skill portability, and links
+      # in both directions — resolvable targets, and no bundled file left stranded.
       - name: Run repository checks
         run: npm run check
 
