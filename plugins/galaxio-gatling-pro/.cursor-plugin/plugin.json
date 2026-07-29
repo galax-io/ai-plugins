@@ -1,8 +1,8 @@
 {
   "name": "galaxio-gatling-pro",
   "displayName": "Galaxio Gatling Pro",
-  "version": "1.0.0",
-  "description": "Gatling JVM performance testing in Galaxio style: Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, and the cases/feeders/scenarios/simulations layout.",
+  "version": "1.1.0",
+  "description": "Gatling JVM performance testing in Galaxio style: Gatling 3.13.x and legacy 3.11.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny and the Galaxio JDBC, Kafka and AMQP plugins, and the cases/feeders/scenarios/simulations layout.",
   "author": {
     "name": "Galaxio Team",
     "url": "https://github.com/galax-io"
@@ -20,7 +20,11 @@
     "sbt",
     "maven",
     "gradle",
-    "picatinny"
+    "picatinny",
+    "jdbc",
+    "kafka",
+    "amqp",
+    "jms"
   ],
   "category": "testing",
   "tags": [

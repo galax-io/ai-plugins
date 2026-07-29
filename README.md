@@ -18,9 +18,9 @@ Cursor, Claude Code and Codex manifests from one source file.
 
 ## Plugins
 
-| Plugin                                              | What it does                                                                                                                              |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny helpers, HTTP/JDBC/JMS/Kafka/AMQP |
+| Plugin                                              | What it does                                                                                                                                                        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Gatling 3.13.x and legacy 3.11.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny, HTTP/JDBC/JMS/Kafka/AMQP |
 
 ## Install
 
@@ -36,8 +36,10 @@ Codex:
 codex plugin marketplace add galax-io/ai-plugins
 ```
 
-Cursor installs from the marketplace UI once the kit is published. Until then, copy a
-plugin directory into `~/.cursor/plugins/local` and restart Cursor.
+Cursor has no CLI for third-party marketplaces. Either import this repository as a team
+marketplace — Dashboard → **Plugins** → **Add Marketplace** → **Import from Repo** — and
+install from the UI, or copy a plugin directory into `~/.cursor/plugins/local` and run
+**Developer: Reload Window**.
 
 Then install a plugin by name, for example `galaxio-gatling-pro@galaxio-performance-kit`.
 
