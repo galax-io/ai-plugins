@@ -1,343 +1,265 @@
 ---
 name: galaxio-gatling-pro
-description: 'Use when creating, reviewing, or refactoring Gatling JVM performance tests in Galaxio style: Scala/Java/Kotlin projects with sbt, Maven, or Gradle, Gatling 3.x, Picatinny config/feeders where available, cases/feeders/scenarios/simulations layout, HTTP/JDBC/JMS/Kafka/AMQP protocols, open and closed workload models, smoke/debug simulations, and build-tool-correct project structure.'
+description: 'Use when creating, reviewing, refactoring or upgrading Gatling JVM performance tests in Galaxio style: Gatling 3.13.x or legacy 3.11.x, Scala, Java or Kotlin on sbt, Maven or Gradle, gatling-picatinny plus the Galaxio gatling-jdbc-plugin, gatling-kafka-plugin and gatling-amqp-plugin, HTTP, JDBC, Kafka, AMQP and JMS protocols, open and closed workload models, smoke and debug simulations, the cases/feeders/scenarios/simulations layout, and migrating between Gatling versions.'
 ---
 
 # Galaxio Gatling Pro
 
-## Core Rules
+This file carries the rules that hold on every stack, plus the index. Everything that varies by
+Gatling version, build tool, language or protocol lives in `references/`, so only the part
+matching the target project is loaded.
 
-Use Gatling `3.11.x` and Scala `2.13.x` as the Galaxio baseline.
+## How To Use This Skill
 
-Supported JVM combinations:
+1. Run the detection below.
+2. From the dispatch tables, read **one** language file, then **one** build file for that
+   language, then **one** version file — plus only the protocol files the project actually uses.
+3. Apply the invariants at the end of this file. They are here rather than in `references/`
+   because they are needed on every task, and a file needed on every task is body, not
+   reference.
 
-- Scala + sbt: Scala DSL, `src/test/scala`, optional `src/it/scala`.
-- Scala + Maven: Scala DSL, `src/test/scala`, `scala-maven-plugin`.
-- Scala + Gradle: Scala DSL, `src/gatling/scala`, Gradle `gatling` source set.
-- Java + Maven: Java DSL, `src/test/java`.
-- Java + Gradle: Java DSL, `src/gatling/java`, Gradle `gatling` source set.
-- Kotlin + Maven: Java DSL from Kotlin, `src/test/kotlin`, `kotlin-maven-plugin`.
-- Kotlin + Gradle: Java DSL from Kotlin, `src/gatling/kotlin`, Gradle `gatling` source set.
+A typical task loads five to nine files out of twenty-four. Do not read `references/` in bulk: the
+version files disagree with each other on purpose, and reading two of them produces advice that
+matches no real project. The split is for correctness per stack, not for token count — a task
+that needs the whole matrix reads about as much as one flat file would.
 
-Prefer `org.galaxio.gatling-picatinny` helpers when the repo has the dependency.
-Picatinny examples in this skill are Scala-first; for Java/Kotlin, keep the same
-architecture and use small local config/feeder helpers if Picatinny is not exposed
-through the project's chosen DSL.
+**Writing and reviewing take the same route.** The skill produces the boilerplate and the
+minimal working project; for a review, the same detection and dispatch identify what the code
+should have been, and the invariants below are the checklist — layer boundaries, feeder choice,
+config and secrets, checks, session handling, the injection model, and the `Do Not` list. A
+review that skips detection compares the code against the wrong version's rules.
 
-Generated Scala code in sbt projects must pass:
+Nothing detected — a new project with no build file yet? Use the greenfield default: Gatling
+`3.13.x`, Picatinny `1.25.0`, Scala `2.13`, Java 17, sbt.
+
+**An existing repository outranks this skill.** When the project already has a layout, naming,
+config keys, formatting or a Gatling version, follow it and add to it. Everything here
+describes what to do when there is nothing to follow — it is not a mandate to restructure
+working code.
+
+## Detect The Target
+
+Dispatch narrows in this order: **language, then build tool, then Gatling version.** Language is
+the widest filter — it decides the DSL you write and already rules out combinations, since sbt
+serves Scala only. Detection gathers the evidence in a different order, because the version
+literal lives in the build file; that is a fact about where to look, not about what to decide
+first.
+
+Run these from the directory holding the build file. Most of them name paths that will not all
+exist, so **a non-zero exit here means nothing** — read the output, not the status. Silence
+across every step means greenfield, not failure.
+
+Find the language and source root — the directory holding `*Simulation.*` wins any ambiguity:
 
 ```bash
-sbt scalafmtAll scalafmtSbt
+ls -d src/test/scala src/test/java src/test/kotlin src/gatling/scala src/gatling/java src/gatling/kotlin 2>/dev/null
+find src -name '*Simulation.*' 2>/dev/null
 ```
 
-When changing existing repo, follow local style first. If no style, use this skill.
-
-## Build Tool Matrix
-
-Use the build tool's conventional Gatling source roots. Do not move everything into
-`src/test/scala` just because the Galaxio template started as sbt.
-
-| Build tool | Languages | Simulation source root             | Resource root           | Run one simulation                                     |
-| ---------- | --------- | ---------------------------------- | ----------------------- | ------------------------------------------------------ |
-| sbt        | Scala     | `src/test/scala` or `src/it/scala` | `src/test/resources`    | `sbt 'Gatling/testOnly <fqcn>'`                        |
-| Maven      | Scala     | `src/test/scala`                   | `src/test/resources`    | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
-| Maven      | Java      | `src/test/java`                    | `src/test/resources`    | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
-| Maven      | Kotlin    | `src/test/kotlin`                  | `src/test/resources`    | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
-| Gradle     | Scala     | `src/gatling/scala`                | `src/gatling/resources` | `./gradlew gatlingRun --simulation <fqcn>`             |
-| Gradle     | Java      | `src/gatling/java`                 | `src/gatling/resources` | `./gradlew gatlingRun --simulation <fqcn>`             |
-| Gradle     | Kotlin    | `src/gatling/kotlin`               | `src/gatling/resources` | `./gradlew gatlingRun --simulation <fqcn>`             |
-
-Compile/pre-flight commands:
+Find the build file:
 
 ```bash
-sbt Gatling/compile
-./mvnw test-compile
-./gradlew testClasses
+ls -d build.sbt project pom.xml build.gradle build.gradle.kts settings.gradle settings.gradle.kts 2>/dev/null
 ```
 
-## Project Layout
+Read the Gatling version. Restrict the search to authored build inputs — a recursive walk of
+`project/` picks up sbt's own build output, where a stale resolution-cache report will name a
+version the build no longer uses:
 
-Keep the Galaxio boundaries regardless of language or build tool. Only the source
-root changes.
+```bash
+grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
+  --include='*.toml' --include='*.properties' 'gatling|picatinny' . 2>/dev/null
+```
 
-Canonical Scala/sbt layout:
+That covers `gradle/libs.versions.toml`, `settings.gradle[.kts]` and `gradle.properties`, where
+a Gradle project usually keeps the literal. If it still comes back empty, look in `buildSrc/`
+and in a Maven parent POM before concluding greenfield.
+
+Two different numbering schemes come back, so read the artifact, not just the number:
+
+- `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, or a
+  `${gatling.version}` property — **this is the Gatling line.**
+- `gatling-maven-plugin` (4.x) and `gatling-sbt` (4.x) are build-plugin versions on their own
+  numbering. They say nothing about the Gatling line.
+- `io.gatling.gradle` is the exception: its leading major.minor tracks the Gatling line, so
+  `3.11.1` means 3.11.x and `3.13.1` means 3.13.x.
+- A Gradle project often names no Gatling version at all and takes the plugin's default. When
+  nothing above appears, treat the `io.gatling.gradle` version as the line, and say so.
+
+Check for Galaxio libraries:
+
+```bash
+grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
+  --include='*.toml' --include='*.properties' 'org\.galaxio' . 2>/dev/null
+```
+
+Three rules decide the rest:
+
+- **A Galaxio version does not tell you the Gatling line — check it against the line instead.**
+  Every Galaxio artifact declares `gatling-core` at `provided` scope, so it never carries a
+  Gatling version into the project; the project's own pin is authoritative. All four libraries
+  ship for both lines:
+
+  | Artifact               | Top release on 3.11.x | First release on 3.13.x |
+  | ---------------------- | --------------------- | ----------------------- |
+  | `gatling-picatinny`    | `1.10.4`              | `1.12.0`                |
+  | `gatling-jdbc-plugin`  | `0.17.2`              | `0.19.0`                |
+  | `gatling-kafka-plugin` | `0.20.5`              | `0.22.0`                |
+  | `gatling-amqp-plugin`  | `1.0.4`               | `1.2.0`                 |
+
+  Between those columns sit the 3.12 releases. A `-latest` suffix jumps the line — `0.17.1` is
+  a 3.11 release and `0.17.1-latest` is not — and `gatling-jdbc-plugin 0.13.0` is a mis-publish
+  pinned to 3.13.1 between two 3.11 releases, so read the artifact's POM when a pin looks out
+  of sequence.
+
+- **Language does not gate the Galaxio libraries.** Picatinny and the JDBC, Kafka and AMQP
+  plugins ship Java facades under `org.galaxio.gatling…javaapi`, so Java and Kotlin use them
+  directly. The substitutions in
+  [references/picatinny-substitutes.md](references/picatinny-substitutes.md) are for a project
+  that cannot take the dependency — one that simply does not have it yet should add it.
+- **A protocol plugin on 3.11 is a version choice, not an upgrade.** Adding JDBC, Kafka or AMQP
+  to a 3.11 project means taking that library's 3.11 release from the table above, not moving
+  the project. Only a request that genuinely needs 3.13 — the current release of a library, or
+  a Gatling feature added after 3.11 — makes it an upgrade, and that is a decision to put to
+  the user before changing the build. Never hand-roll a substitute for a protocol plugin.
+
+## Dispatch
+
+These four tables are the whole reference index. Each axis owns one kind of fact: language files
+own DSL syntax and declaration shapes, build files own source roots, run commands, build-file
+shape and the build-plugin floor, version files own the version numbers that do not depend on
+the build tool. Where a fact has to appear twice, the version files are the source of truth.
+
+**1. By language** — read one:
+
+| Detected   | Read                                                   |
+| ---------- | ------------------------------------------------------ |
+| `*/scala`  | [references/lang-scala.md](references/lang-scala.md)   |
+| `*/java`   | [references/lang-java.md](references/lang-java.md)     |
+| `*/kotlin` | [references/lang-kotlin.md](references/lang-kotlin.md) |
+
+**2. By build tool, within that language** — read one. Each cell is its own file, so nothing
+here mixes languages:
+
+| Language | `build.sbt`                                         | `pom.xml`                                                 | `build.gradle[.kts]`                                        |
+| -------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
+| Scala    | [build-sbt-scala.md](references/build-sbt-scala.md) | [build-maven-scala.md](references/build-maven-scala.md)   | [build-gradle-scala.md](references/build-gradle-scala.md)   |
+| Java     | not supported — sbt serves Scala only               | [build-maven-java.md](references/build-maven-java.md)     | [build-gradle-java.md](references/build-gradle-java.md)     |
+| Kotlin   | not supported                                       | [build-maven-kotlin.md](references/build-maven-kotlin.md) | [build-gradle-kotlin.md](references/build-gradle-kotlin.md) |
+
+**3. By Gatling version** — read one. The numbers here are build-tool-independent; the plugin
+floors live in the build file above:
+
+| Detected                      | Read                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| `3.13.x`, or nothing detected | [references/version-3-13.md](references/version-3-13.md)                       |
+| `3.11.x`                      | [references/version-3-11.md](references/version-3-11.md)                       |
+| `3.12.x`                      | [references/version-3-13.md](references/version-3-13.md), and flag the upgrade |
+| `3.14.x`, `3.15.x`            | [references/beyond-3-13.md](references/beyond-3-13.md)                         |
+| Moving between lines          | [references/migrate-3-11-to-3-13.md](references/migrate-3-11-to-3-13.md)       |
+
+**4. By protocol and library** — read only what the task uses:
+
+| Task involves                                                             | Read                                                                       |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Creating a project from nothing                                           | [references/starter-tree.md](references/starter-tree.md)                   |
+| Writing `simulation.conf`, `logback.xml`, a feeder CSV or a body template | [references/resource-files.md](references/resource-files.md)               |
+| HTTP requests                                                             | [references/protocol-http.md](references/protocol-http.md)                 |
+| SQL, a database                                                           | [references/protocol-jdbc.md](references/protocol-jdbc.md)                 |
+| Kafka topics                                                              | [references/protocol-kafka.md](references/protocol-kafka.md)               |
+| AMQP, RabbitMQ, JMS queues                                                | [references/protocol-messaging.md](references/protocol-messaging.md)       |
+| Picatinny pinned `1.x`                                                    | [references/picatinny-1-x.md](references/picatinny-1-x.md)                 |
+| Picatinny pinned `0.x` — a materially different API                       | [references/picatinny-0-x.md](references/picatinny-0-x.md)                 |
+| A project that cannot take Picatinny                                      | [references/picatinny-substitutes.md](references/picatinny-substitutes.md) |
+| Writing or changing a simulation                                          | [references/workload-models.md](references/workload-models.md)             |
+
+## Invariants
+
+True for every version, build tool and language below. The snippets are Scala; Java and Kotlin
+syntax is in [references/lang-java.md](references/lang-java.md) and
+[references/lang-kotlin.md](references/lang-kotlin.md).
+
+### Layout
+
+One tree, with only the source root changing per build tool:
 
 ```text
-src/test/scala/org/galaxio/performance/
-  performance.scala # package object with protocols
+<source-root>/org/galaxio/performance/
+  performance.scala | Performance.java | Performance.kt   # shared protocols
   cases/            # atomic actions: HTTP, Kafka, JDBC, AMQP, JMS
-  feeders/          # custom feeders; prefer Picatinny feeders
+  feeders/          # custom feeders
   scenarios/        # flows built from cases
-  *Simulation.scala # simulations only
-src/test/resources/
+  *Simulation.*     # simulations only
+<resource-root>/
   simulation.conf
-  gatling.conf
   logback.xml
 ```
 
-Same layout adapted to each build tool:
+The source and resource roots come from the build tool, not from preference — they are in the
+build reference the dispatch table sent you to.
 
-```text
-# sbt or Maven + Scala
-src/test/scala/org/galaxio/performance/{performance.scala,cases,feeders,scenarios,*Simulation.scala}
-src/test/resources/{simulation.conf,gatling.conf,logback.xml}
+Boundaries:
 
-# Maven + Java
-src/test/java/org/galaxio/performance/{Performance.java,cases,feeders,scenarios,*Simulation.java}
-src/test/resources/{simulation.conf,gatling.conf,logback.xml}
-
-# Maven + Kotlin
-src/test/kotlin/org/galaxio/performance/{Performance.kt,cases,feeders,scenarios,*Simulation.kt}
-src/test/resources/{simulation.conf,gatling.conf,logback.xml}
-
-# Gradle + Scala
-src/gatling/scala/org/galaxio/performance/{performance.scala,cases,feeders,scenarios,*Simulation.scala}
-src/gatling/resources/{simulation.conf,gatling.conf,logback.xml}
-
-# Gradle + Java
-src/gatling/java/org/galaxio/performance/{Performance.java,cases,feeders,scenarios,*Simulation.java}
-src/gatling/resources/{simulation.conf,gatling.conf,logback.xml}
-
-# Gradle + Kotlin
-src/gatling/kotlin/org/galaxio/performance/{Performance.kt,cases,feeders,scenarios,*Simulation.kt}
-src/gatling/resources/{simulation.conf,gatling.conf,logback.xml}
-```
-
-Keep boundaries strict:
-
-- `cases`: request/action only. No workload. No scenario.
+- `cases`: request or action only. No workload, no scenario.
 - `feeders`: data only. No requests.
 - `scenarios`: business flow only. No injection profile.
 - `simulations`: injection, protocols, max duration. No request definitions.
-- `performance.scala`, `Performance.java`, or `Performance.kt`: shared protocols only.
+- `performance.scala`, `Performance.java`, `Performance.kt`: shared protocols only.
 
-Do not use Gradle's `src/test/*` for Gatling simulations unless the project already
-customizes the `gatling` source set. Do not use Maven's `src/gatling/*` unless the
-project explicitly customizes plugin/source directories.
+`pace` belongs inside the scenario loop. Injection controls how many users arrive; `pace`
+controls the rhythm of one user's iterations. They are not interchangeable.
 
-## Imports
+### Feeders
 
-Scala, Java and Kotlin import sets, plus the per-protocol imports:
-[references/imports.md](references/imports.md).
-
-Only add assertion imports when user explicitly asks for NFR/assertions.
-
-## Config
-
-Use Picatinny `SimulationConfig`.
-For Java/Kotlin projects without Picatinny bindings, centralize the same config
-keys in `Performance.java`/`Performance.kt` or a dedicated `Config` helper using
-system properties and resource config. Keep names compatible with Scala projects.
-
-Default params:
-
-```scala
-baseUrl
-baseAuthUrl
-wsBaseUrl
-intensity
-stagesNumber
-rampDuration
-stageDuration
-testDuration
-```
-
-Custom params:
-
-```scala
-val kafkaUrl = getStringParam("kafkaUrl")
-val pacing   = getDurationParam("pacing")
-val debug    = getBooleanParam("debug", false)
-```
-
-Do not hardcode env data in Scala. Put host, login, password, topic, queue, DB URL in `simulation.conf` or pass via `-Dparam=value`.
-
-## Cases
-
-Case = one atomic action. HTTP, Kafka, JDBC, AMQP and JMS case examples in Scala,
-Java and Kotlin: [references/cases.md](references/cases.md).
-
-## Feeders
-
-Prefer Picatinny feeders:
-
-```scala
-object Feeders {
-  val messageId = RandomUUIDFeeder("messageId")
-  val phone     = RandomPhoneFeeder("phone")
-}
-```
-
-CSV feeder:
+Default to `circular`:
 
 ```scala
 val accounts = csv("accounts.csv").circular
 ```
 
-Use `queue` only when each row must be unique and data volume is enough.
+Use `queue` only when each row must be consumed once and the file is large enough for the whole
+run. A small `queue` feeder runs dry mid-test and the simulation fails. Feeder exhaustion is a
+test defect, not a finding about the system under test.
 
-Do not use tiny `queue` feeder under load. Feeder ends, test fails.
+**Generated data or a CSV is decided by the field, not by preference.** A value the system
+under test must already know — an account id, a customer number, an existing order — comes from
+a CSV of real identifiers. A value the system only stores or echoes — a message id, a name, a
+phone, a payload field — can be generated, and generated feeders never exhaust. Getting this
+backwards produces the worst kind of result: a generated account id that no lookup matches, so
+every request 404s or returns an empty set, the run is green because nothing asserted on the
+body, and the report measures the error path at full speed.
 
-## Scenarios
+Feeder files and body templates resolve against the **resource root**, not the source root:
+`csv("accounts.csv")` reads `<resource-root>/accounts.csv`, which is `src/test/resources` under
+sbt and Maven but `src/gatling/resources` under Gradle.
 
-Scala pattern:
+### Config And Secrets
 
-```scala
-object MainScenario {
-  def apply(): ScenarioBuilder = new MainScenario().scn
-}
+No environment data in source. Host, port, topic, queue and database URL live in
+`simulation.conf`. Keep the key names identical across languages so one `simulation.conf` serves
+a Scala, Java or Kotlin project unchanged.
 
-class MainScenario {
-  val scn: ScenarioBuilder = scenario("Main Scenario")
-    .feed(Feeders.messageId)
-    .exec(HttpCases.getMainPage)
-}
+Credentials are the exception: `simulation.conf` is a committed resource, so a password written
+into it is a committed secret. Reference the environment instead — HOCON substitutes it at load
+time and the file stays safe to commit:
+
+```hocon
+dbUser = ${?DB_USER}
+dbPassword = ${?DB_PASSWORD}
 ```
 
-Closed model with pacing:
+Give such a key **no default line**. `${?VAR}` is HOCON's optional substitution: with a default
+above it, an unset variable silently leaves the default in place; with no default, the key stays
+undefined and the getter fails at class-initialization naming it. The same rule applies to
+`baseUrl`, where a surviving `localhost` default turns a load test into a green report against
+nothing.
 
-```scala
-object ClosedPacingScenario {
-  def apply(): ScenarioBuilder = new ClosedPacingScenario().scn
-}
+`-Dparam=value` is not a substitute for a secret: it lands in `ps` output and in CI job logs.
+Use it for non-sensitive overrides.
 
-class ClosedPacingScenario {
-  val scn: ScenarioBuilder = scenario("Closed Pacing Scenario")
-    .forever(
-      pace(pacing)
-        .feed(Feeders.messageId)
-        .exec(HttpCases.getMainPage),
-    )
-}
-```
+### Checks
 
-`pace` belongs inside scenario loop. Injection controls users. `pace` controls iteration rhythm.
-
-Java pattern:
-
-```java
-public final class MainScenario {
-  public static ScenarioBuilder create() {
-    return scenario("Main Scenario")
-        .feed(Feeders.messageId)
-        .exec(HttpCases.getMainPage);
-  }
-
-  private MainScenario() {}
-}
-```
-
-Kotlin pattern:
-
-```kotlin
-object MainScenario {
-    fun create(): ScenarioBuilder = scenario("Main Scenario")
-        .feed(Feeders.messageId)
-        .exec(HttpCases.getMainPage)
-}
-```
-
-## Protocols
-
-Keep in `performance.scala`, `Performance.java`, or `Performance.kt`. HTTP, JDBC,
-Kafka, AMQP and JMS protocol builders: [references/protocols.md](references/protocols.md).
-
-## Simulations
-
-Simulation = load profile only.
-
-Scala open model, stable load:
-
-```scala
-class StabilitySimulation extends Simulation {
-  setUp(
-    MainScenario().inject(
-      rampUsersPerSec(0).to(intensity).during(rampDuration),
-      constantUsersPerSec(intensity).during(stageDuration),
-    ),
-  ).protocols(httpProtocol)
-    .maxDuration(testDuration)
-}
-```
-
-Open model, stages:
-
-```scala
-class MaxPerformanceSimulation extends Simulation {
-  setUp(
-    MainScenario().inject(
-      incrementUsersPerSec(intensity / stagesNumber)
-        .times(stagesNumber)
-        .eachLevelLasting(stageDuration)
-        .separatedByRampsLasting(rampDuration)
-        .startingFrom(0.0),
-    ),
-  ).protocols(httpProtocol)
-    .maxDuration(testDuration)
-}
-```
-
-Closed model with pacing:
-
-```scala
-class ClosedPacingSimulation extends Simulation {
-  setUp(
-    ClosedPacingScenario().inject(
-      rampConcurrentUsers(0).to(intensity.toInt).during(rampDuration),
-      constantConcurrentUsers(intensity.toInt).during(stageDuration),
-    ),
-  ).protocols(httpProtocol)
-    .maxDuration(testDuration)
-}
-```
-
-Smoke/debug:
-
-```scala
-class DebugSimulation extends Simulation {
-  setUp(
-    MainScenario().inject(atOnceUsers(1)),
-  ).protocols(httpProtocol)
-    .maxDuration(1.minute)
-}
-```
-
-Run:
-
-```bash
-sbt 'Gatling/testOnly org.galaxio.performance.DebugSimulation'
-sbt 'Gatling/testOnly org.galaxio.performance.StabilitySimulation'
-```
-
-Java simulation shape:
-
-```java
-public class DebugSimulation extends Simulation {
-  {
-    setUp(
-        MainScenario.create().injectOpen(atOnceUsers(1))
-    ).protocols(Performance.httpProtocol);
-  }
-}
-```
-
-Kotlin simulation shape:
-
-```kotlin
-class DebugSimulation : Simulation() {
-    init {
-        setUp(
-            MainScenario.create().injectOpen(atOnceUsers(1))
-        ).protocols(Performance.httpProtocol)
-    }
-}
-```
-
-## Checks
-
-Check technical and business success.
-
-Good:
+Validate technically and on business meaning:
 
 ```scala
 .check(
@@ -346,15 +268,13 @@ Good:
 )
 ```
 
-Do not check HTTP `200` only when response body carries business error.
+`status.is(200)` alone is wrong whenever the body can carry a business error. A saved value
+exists only after its check succeeded — anything downstream that reads it must be on the success
+path. Use `checkIf` for optional branches rather than a second unconditional check.
 
-Saved value exists only after successful check.
+### Session
 
-Use `checkIf` for optional branches.
-
-## Session
-
-Session immutable. Return changed session.
+The session is immutable. Return the changed session; do not discard it.
 
 Bad:
 
@@ -373,15 +293,8 @@ exec { session =>
 }
 ```
 
-EL strings work inside Gatling DSL. Plain Scala functions need explicit session read.
-
-Bad:
-
-```scala
-myFunction("#{id}")
-```
-
-Good:
+Expression-language strings resolve inside the Gatling DSL. Plain functions do not — they need
+an explicit read:
 
 ```scala
 exec { session =>
@@ -390,21 +303,14 @@ exec { session =>
 }
 ```
 
-## Assertions And NFR
+`myFunction("#{id}")` passes the literal text, not the value.
 
-Do not add NFR/assertions by default.
+### Assertions And NFR
 
-Add only when user explicitly asks for NFR, SLA, assertions, or pass/fail gates.
+Never add assertions by default. Add them only when the user asks for NFR, SLA, pass/fail gates
+or a quality gate in CI. A gate nobody asked for turns a measurement run into a red build.
 
-When asked and Picatinny exists:
-
-```scala
-import org.galaxio.gatling.assertions.AssertionsBuilder.assertionFromYaml
-
-.assertions(assertionFromYaml("src/test/resources/nfr.yml"))
-```
-
-Without Picatinny:
+When asked, the plain form is:
 
 ```scala
 .assertions(
@@ -413,49 +319,32 @@ Without Picatinny:
 )
 ```
 
-## Operations
+Picatinny's YAML form is in the Picatinny file for your line.
 
-Use `maxDuration` as safety fuse.
+### Operations
 
-Use groups for business transaction timings.
+- `maxDuration` on every simulation, as a safety fuse.
+- Groups for business transaction timings.
+- `before` and `after` for setup and teardown only, never for virtual-user work.
+- No `println` under load. Debug output belongs in the smoke simulation.
+- Ship `logback.xml` at `WARN` for the Gatling loggers. Request and response logging —
+  `io.gatling.http.engine.response` at `DEBUG` or `TRACE` — writes every body and every header
+  to the log, including `Authorization` and any token a virtual user minted. It is a debugging
+  aid for one smoke run, never a committed default: under load it also costs more than the
+  requests being measured.
 
-Use `before` and `after` only for setup/teardown outside virtual-user flow.
+### Do Not
 
-No `println` under load. Debug only in smoke simulation.
-
-## Build Files
-
-`.scalafmt.conf`, `build.sbt`, Maven `pom.xml` and Gradle build shapes for every
-supported language: [references/build-files.md](references/build-files.md).
-
-## Do Not
-
-Do not mix cases, scenario, simulation in one file.
-
-Do not put injection in scenarios.
-
-Do not put request definitions in simulations.
-
-Do not hardcode secrets.
-
-Do not use `Thread.sleep`; use `pause` or `pace`.
-
-Do not use throttling as main workload model. Use injection first.
-
-Do not use `status.is(200)` as only validation for business APIs.
-
-Do not create clients/connections per request.
-
-Do not mutate shared vars from virtual users unless thread-safe.
-
-Do not ignore feeder exhaustion.
-
-Do not add NFR gates unless user asks.
-
-Do not use Scala 3 for Gatling plugin projects unless repo already supports it.
-
-Do not put Gatling Gradle simulations in `src/test/*` unless the project has
-explicitly customized the `gatling` source set.
-
-Do not omit `scala-maven-plugin` in Maven Scala projects; Gatling Maven plugin v4+
-does not compile Scala simulations by itself.
+- Do not mix cases, scenarios and simulations in one file.
+- Do not put injection in a scenario.
+- Do not put request definitions in a simulation.
+- Do not hardcode secrets.
+- Do not use `Thread.sleep`; use `pause` or `pace`.
+- Do not use throttling as the primary workload model. Model with injection first.
+- Do not create a client or connection per request.
+- Do not mutate shared state from virtual users unless it is thread-safe.
+- Do not ignore feeder exhaustion.
+- Do not add NFR gates unless asked.
+- Do not use Scala 3: every Galaxio artifact is published for `_2.13` only.
+- Do not mix a Gatling line with a Galaxio plugin line — see
+  [references/beyond-3-13.md](references/beyond-3-13.md).
