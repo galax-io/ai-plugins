@@ -44,6 +44,11 @@ needed and push the rest out:
 
 The portability check fails a `SKILL.md` body over 500 lines.
 
+Whatever you push out has to be linked back: `check-links.mjs` fails a bundled file that no
+link from `SKILL.md` reaches, transitively and within the skill. A reference the agent cannot
+discover is dead weight that still ships, and the next author edits it believing it is live.
+`agents/` and marker files like `.gitkeep` are exempt — nothing can link them.
+
 ## 5. Portable frontmatter only
 
 Allowed keys: `name` and `description`. Nothing else.
@@ -110,7 +115,7 @@ claude plugin validate ./plugins/<name> --strict
 Then install the plugin in at least one agent and exercise the skill for real:
 
 - Claude Code — `/plugin marketplace add /abs/path/ai-plugins`, then `/plugin install <name>@galaxio-performance-kit`
-- Cursor — copy `plugins/<name>` into `~/.cursor/plugins/local`, restart, check the Customize panel
+- Cursor — copy `plugins/<name>` into `~/.cursor/plugins/local` (the `.cursor-plugin/plugin.json` manifest must sit at the plugin root), run **Developer: Reload Window**, check the Customize panel
 - Codex — `codex plugin marketplace add /abs/path/ai-plugins`, then `/plugins`, invoke with `$<skill-name>`
 
 State in the PR which agent you verified in.
