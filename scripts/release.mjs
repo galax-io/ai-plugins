@@ -46,10 +46,12 @@ run(() => {
   const target = flagValue('--target') ?? process.env.GITHUB_SHA;
   if (!dryRun && !target) throw new Error('release needs --target <commit-ish>');
 
-  // Newest first, drafts included: a draft is a human preparing that release by
-  // hand, and publishing over it would duplicate their work.
-  const published = publishedTags(root);
-  const since = published.find((tag) => tag.startsWith(PREFIX)) ?? null;
+  // Newest first. A draft reserves its tag name — publishing over one would
+  // duplicate a human's work in progress — but it cannot be the state to diff
+  // against: a draft has no tag behind it, so asking git for that ref would fail
+  // and every later release with it.
+  const releases = publishedTags(root);
+  const since = releases.find((release) => !release.draft && release.tag.startsWith(PREFIX))?.tag ?? null;
   if (since) verify(root, since);
 
   const { plugins, errors } = listPlugins(root);
@@ -89,7 +91,7 @@ run(() => {
     return reporter.finish(root);
   }
 
-  const tag = freeTag(date, new Set(published));
+  const tag = freeTag(date, new Set(releases.map((release) => release.tag)));
   const title =
     moved.length === 1
       ? `${date} — ${moved[0].name} ${moved[0].version}`
@@ -136,10 +138,12 @@ function compact(entry) {
 
 function publishedTags(root) {
   try {
-    return gh(root, ['api', '--paginate', 'repos/{owner}/{repo}/releases', '--jq', '.[].tag_name'])
+    const jq = '.[] | [.tag_name, (.draft | tostring)] | @tsv';
+    return gh(root, ['api', '--paginate', 'repos/{owner}/{repo}/releases', '--jq', jq])
       .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
+      .map((line) => line.trim().split('\t'))
+      .filter(([tag]) => tag)
+      .map(([tag, draft]) => ({ tag, draft: draft === 'true' }));
   } catch (error) {
     throw new Error(`cannot list published releases: ${reason(error)}`);
   }

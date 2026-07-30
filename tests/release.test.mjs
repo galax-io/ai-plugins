@@ -71,17 +71,22 @@ function addPlugin(root, name, version) {
  * A `gh` on PATH that records its calls, so the API-shaped behaviour — which
  * releases exist, and an API that will not answer — is driven rather than trusted.
  */
-function fakeGh(dir, { existing = [], failApi = false } = {}) {
+function fakeGh(dir, { existing = [], drafts = [], failApi = false } = {}) {
   const bin = path.join(dir, 'bin');
   mkdirSync(bin, { recursive: true });
   const log = path.join(dir, 'calls.log');
   const file = path.join(bin, 'gh');
+  // The API answers tag and draft flag per release, newest first, as the real
+  // `--jq` does. Kept in a file rather than inlined into the script: `printf` does
+  // not expand `\t` or `\n` in its argument, so an inlined table is one long line.
+  const table = path.join(dir, 'releases.tsv');
+  writeFileSync(table, [...drafts.map((t) => `${t}\ttrue`), ...existing.map((t) => `${t}\tfalse`)].join('\n'));
   writeFileSync(
     file,
     `#!/bin/sh
 echo "$@" >> ${JSON.stringify(log)}
 if [ "$1 $2" = 'api --paginate' ]; then
-  ${failApi ? 'echo "gh: HTTP 503" >&2; exit 1' : `printf '%s' ${JSON.stringify(existing.join('\n'))}`}
+  ${failApi ? 'echo "gh: HTTP 503" >&2; exit 1' : `cat ${JSON.stringify(table)}`}
 fi
 exit 0
 `,
@@ -183,6 +188,16 @@ test('a second release on one day gets its own tag', () => {
   bump(root, 'demo-plugin', '1.1.0');
 
   const result = release(root, { existing: [`release-${DATE}`] });
+  assert.equal(result.code, 0, result.output);
+  assert.match(result.created[0], new RegExp(`release create release-${DATE}\\.2 `));
+});
+
+test('a draft reserves its tag name but is not the state to diff against', () => {
+  // A draft has no tag behind it, so treating one as the previous release asks git
+  // for a ref that does not exist — and every later release fails with it.
+  const { root } = gitFixture('valid');
+
+  const result = release(root, { drafts: [`release-${DATE}`] });
   assert.equal(result.code, 0, result.output);
   assert.match(result.created[0], new RegExp(`release create release-${DATE}\\.2 `));
 });
