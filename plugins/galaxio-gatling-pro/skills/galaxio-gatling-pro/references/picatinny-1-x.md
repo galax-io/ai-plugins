@@ -1,9 +1,8 @@
 # Picatinny 1.x
 
-The `1.x` line of `gatling-picatinny`. **This line spans both Gatling lines** — `1.0.1` through
-`1.10.4` target Gatling 3.11.5, `1.12.0` and later target 3.13.5 — so the API you get is decided
-by the Picatinny version, not by the Gatling version. A 3.11 project pinned to `1.5.0` belongs
-here.
+The `1.x` line of `gatling-picatinny`. **It spans two Gatling lines** — [versions.md](versions.md)
+says which releases sit on which — so the API you get is decided by the Picatinny version, not by
+the Gatling version. A 3.11 project on a `1.x` pin belongs here.
 
 For a `0.x` pin the API is materially different — see [picatinny-0-x.md](picatinny-0-x.md). For
 a project without the dependency, [picatinny-substitutes.md](picatinny-substitutes.md).
@@ -17,8 +16,7 @@ Source: [galax-io/gatling-picatinny](https://github.com/galax-io/gatling-picatin
 
 Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suffix with `%%`;
 Maven and Gradle need `gatling-picatinny_2.13` written out. Which version pairs with which
-Gatling line is in [version-3-13.md](version-3-13.md) and
-[version-3-11.md](version-3-11.md).
+Gatling line is in [versions.md](versions.md).
 
 ## Config
 

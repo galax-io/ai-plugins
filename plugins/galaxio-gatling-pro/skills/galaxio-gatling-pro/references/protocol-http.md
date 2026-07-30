@@ -51,6 +51,6 @@ one-liners only.
 
 ## Resources And Concurrency
 
-`resources(...)` fetches a request's dependencies as children of that request. On Gatling 3.15
-and later `httpConcurrentRequests` covers concurrent requests without a parent — not available
-on the lines this skill profiles, see [beyond-3-13.md](beyond-3-13.md).
+`resources(...)` fetches a request's dependencies as children of that request.
+`httpConcurrentRequests` covers concurrent requests without a parent, and it arrives at 3.15 —
+[migrate.md](migrate.md).

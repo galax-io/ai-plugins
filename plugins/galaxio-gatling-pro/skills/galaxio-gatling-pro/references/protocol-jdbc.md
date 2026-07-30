@@ -1,15 +1,11 @@
 # JDBC
 
-`gatling-jdbc-plugin` from Galaxio, usable from all three languages. It has releases for both
-Gatling lines; pick by the line the project is already on.
+`gatling-jdbc-plugin` from Galaxio, usable from all three languages. The version comes from the
+project's Gatling line, not from here — the column for that line in
+[versions.md](versions.md) names it.
 
-| Plugin            | Gatling | Scala | Java                         |
-| ----------------- | ------- | ----- | ---------------------------- |
-| `0.19.0`–`1.5.0`  | 3.13.x  | 2.13  | 17+ (the facade is major 61) |
-| `0.12.0`–`0.17.2` | 3.11.x  | 2.13  | follow the project           |
-
-`0.18.1` sits on 3.12 between them, and `0.13.0` is a mis-publish pinned to 3.13.1 out of
-sequence. Nothing targets anything above 3.13 — see [beyond-3-13.md](beyond-3-13.md).
+`gatling-jdbc-plugin`'s own `1.x` releases compile their `javaapi` facade for Java 17, whatever
+the upstream README says, so taking one means a Java 17 toolchain.
 
 Import spellings are in your language file; the entry points are `org.galaxio.gatling.jdbc`
 for Scala and `org.galaxio.gatling.javaapi.JdbcDsl` for the facade. Two types sit in their own

@@ -2,8 +2,8 @@
   "$schema": "../../schemas/plugin.meta.schema.json",
   "name": "galaxio-gatling-pro",
   "displayName": "Galaxio Gatling Pro",
-  "version": "1.1.0",
-  "description": "Gatling JVM performance testing in Galaxio style: Gatling 3.13.x and legacy 3.11.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny and the Galaxio JDBC, Kafka and AMQP plugins, and the cases/feeders/scenarios/simulations layout.",
+  "version": "1.2.0",
+  "description": "Gatling JVM performance testing in Galaxio style: Gatling 3.9.x through 3.15.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny and the Galaxio JDBC, Kafka and AMQP plugins, and the cases/feeders/scenarios/simulations layout.",
   "author": {
     "name": "Galaxio Team",
     "url": "https://github.com/galax-io"
@@ -39,7 +39,7 @@
   "codex": {
     "interface": {
       "displayName": "Galaxio Gatling Pro",
-      "shortDescription": "Gatling 3.11 and 3.13 JVM performance test patterns",
+      "shortDescription": "Gatling 3.9 to 3.15 JVM performance test patterns",
       "category": "Testing",
       "websiteURL": "https://github.com/galax-io/ai-plugins"
     }

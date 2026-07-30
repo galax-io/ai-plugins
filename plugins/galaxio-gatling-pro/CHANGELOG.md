@@ -4,6 +4,55 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-30
+
+Four Gatling lines are covered — 3.9.x, 3.11.x, 3.13.x, 3.15.x — and every version number now lives in one file.
+
+### Added
+
+- **Gatling 3.9.x**, where both the old and new API spellings compile — the skill says to write
+  the one that survives 3.11.
+- **Gatling 3.15.x**, a supported target for any project without a Galaxio dependency.
+- **`references/versions.md`.** One matrix, a column per line, holding every coordinate the skill
+  names — a row read across the columns _is_ where that library crosses.
+- **`references/version-lookup.md`.** Two commands: what is published, and which line a release
+  targets. Used wherever a current version used to be written down.
+- **Routing for 3.10.x, 3.12.x and 3.14.x.** A detected 3.10.x used to match no row and silently
+  got 3.13 coordinates — wrong on every one.
+
+### Changed
+
+- **Snapshots are gone, thresholds stay.** Out: `3.13.5`, `3.11.5`, `1.25.0` and every other
+  "current release" number. In: every crossing, every build-plugin floor, the version traps.
+- **Bounds follow the line.** A range is a closed line, `+` an open one whose top is looked up.
+- **The Galaxio ceiling is a dependency fact, not a limit of the skill** — stopping at 3.13.x
+  applies only to projects keeping Picatinny or a protocol plugin.
+- **One fact, one file.** Numbers live in `versions.md`, line deltas in `migrate.md`, Picatinny's
+  API thresholds in the Picatinny references. Protocol and build references carry no versions at
+  all — `--add-opens` had been spelled out in twelve files, the crossing table in four.
+- **Picatinny `0.x` covers `0.14.0` upward** — the class set is identical up to `0.16.0`.
+
+### Fixed
+
+- **Java 8 on 3.9.x is a Scala-only floor.** The `javaapi` facade every Java and Kotlin project
+  goes through is class-file major 61 in the very first `0.14.x` and `0.10.3` jars, so a Java or
+  Kotlin project on that line needs 17 like every other.
+- `gatling-gradle` is bounded on every line: an open bound on a plugin whose major.minor _is_ the
+  Gatling line silently moves the project off it.
+- `gatling-maven-plugin 4.8.0` needs Maven 3.6.3+, dropped in the consolidation while three build
+  references still promised it.
+- Picatinny's two extra utility classes arrive at `0.17.0`, not `0.18.2`.
+- `gatling-picatinny` has no 3.12 release at all — `SKILL.md` claimed one sat between the
+  crossing columns.
+- A `0.x` Picatinny pin spans three Gatling lines, so raising it can move the Gatling line
+  without changing an import. The reference said it never could.
+- `httpConcurrentRequests` was marked unavailable on the profiled lines; 3.15.x is now one.
+
+### Removed
+
+- `references/beyond-3-13.md` and the four `references/version-3-*.md` profiles, folded into
+  `versions.md`; `references/migrate-3-11-to-3-13.md` renamed to `references/migrate.md`.
+
 ## [1.1.0] - 2026-07-28
 
 ### Added

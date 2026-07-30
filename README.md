@@ -18,9 +18,9 @@ Cursor, Claude Code and Codex manifests from one source file.
 
 ## Plugins
 
-| Plugin                                              | What it does                                                                                                                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Gatling 3.13.x and legacy 3.11.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny, HTTP/JDBC/JMS/Kafka/AMQP |
+| Plugin                                              | What it does                                                                                                                                                    |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Gatling 3.9.x through 3.15.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny, HTTP/JDBC/JMS/Kafka/AMQP |
 
 ## Install
 

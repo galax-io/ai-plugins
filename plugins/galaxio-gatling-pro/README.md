@@ -75,10 +75,10 @@ flowchart TD
 
     DET --> L["<b>1. Language</b><br/>Scala · Java · Kotlin"]
     L --> B["<b>2. Build tool</b><br/>sbt · Maven · Gradle<br/><i>7 valid cells</i>"]
-    B --> V["<b>3. Gatling version</b><br/>3.13.x default · 3.11.x legacy"]
+    B --> V["<b>3. Gatling version</b><br/>3.13.x default · 3.9.x · 3.11.x · 3.15.x"]
     V --> P["<b>4. Protocol</b><br/>HTTP · JDBC · Kafka · AMQP · JMS"]
 
-    P --> OUT["<b>5–9 files loaded, of 24</b>"]
+    P --> OUT["<b>4–8 files loaded, of 23</b>"]
     INV["<b>Invariants</b><br/>always in context<br/>layers · feeders · secrets<br/>checks · session · Do Not"] --> OUT
 
     OUT --> WORK["Write · Review · Upgrade"]
@@ -88,8 +88,9 @@ Each step discards the references that cannot apply. Language goes first because
 widest filter — sbt serves Scala only, so a Kotlin project has already lost a third of the
 build matrix before the version is read.
 
-The split is there for correctness, not to save tokens: the two version profiles contradict
-each other on purpose, and an agent that reads both produces advice matching no real project.
+The split is there for correctness, not to save tokens: each build file describes one language
+and they contradict each other on purpose, so an agent that reads two produces advice matching no
+real project.
 
 ## First run
 
@@ -135,9 +136,9 @@ Review this simulation
 ```
 
 Covers layer boundaries, feeder choice, config and secrets, checks, session handling, the
-injection model and `maxDuration`. It applies the rules for **your** Gatling line — they
-differ between 3.11 and 3.13, and a review that skips detection compares your code against
-the wrong ones.
+injection model and `maxDuration`. It applies the rules for **your** Gatling line — they differ
+from one line to the next, and a review that skips detection compares your code against the
+wrong ones.
 
 ### Work out why a green run sent no load
 
@@ -161,7 +162,7 @@ larger than the server's `max_connections` takes down every other client of a sh
 environment.
 
 Asked to add Kafka on an older Gatling, it will usually answer with a **pin, not an
-upgrade** — the Galaxio libraries publish for both lines.
+upgrade** — the Galaxio libraries publish for older lines too.
 
 ### Move up a Gatling line
 
@@ -176,12 +177,15 @@ stops on. The skill will not raise the version by itself; it proposes and waits.
 
 ### Gatling
 
-| Line               | What you get                                                             |
-| ------------------ | ------------------------------------------------------------------------ |
-| `3.13.x`           | **Default.** Every Galaxio library's current release targets it          |
-| `3.12.x`           | Treated as 3.13; the skill flags that you are on an intermediate line    |
-| `3.11.x`           | Fully covered as legacy — and not a reason to upgrade on its own         |
-| `3.14.x`, `3.15.x` | Not supported. The skill says what breaks above 3.13 instead of guessing |
+| Line     | What you get                                                                        |
+| -------- | ----------------------------------------------------------------------------------- |
+| `3.15.x` | Covered as a plain Gatling target, with Picatinny substituted rather than guessed   |
+| `3.14.x` | Covered, sharing the 3.15.x column; the Jakarta move is what separates it from 3.13 |
+| `3.13.x` | **Default.** The newest line every Galaxio library publishes for                    |
+| `3.12.x` | Not profiled. The skill says so and reads the artifact's POM — it never guesses     |
+| `3.11.x` | Fully covered as legacy — and not a reason to upgrade on its own                    |
+| `3.10.x` | Not profiled. The skill says so and reads the artifact's POM — it never guesses     |
+| `3.9.x`  | Fully covered, including the pre-3.11 API that still compiles there                 |
 
 ### Language and build tool
 
@@ -193,47 +197,48 @@ stops on. The skill will not raise the version by itself; it proposes and waits.
 
 Seven cells, seven build references, so no file mixes languages. Baseline for all of them:
 Scala `2.13.x` — any patch, since 2.13 is binary-compatible across them and Galaxio publishes
-`_2.13` artifacts only — and Java 17+, which Picatinny requires.
+`_2.13` artifacts only. The Java floor comes from the line: 17+ wherever the Picatinny `1.x`
+facade is used, and Java 8 on the 3.9.x profile.
 
 ### Protocols
 
-| Protocol | Comes from                      | Available on            |
-| -------- | ------------------------------- | ----------------------- |
-| HTTP     | Gatling core                    | both lines              |
-| JDBC     | `gatling-jdbc-plugin`, Galaxio  | both lines              |
-| Kafka    | `gatling-kafka-plugin`, Galaxio | both lines              |
-| AMQP     | `gatling-amqp-plugin`, Galaxio  | both lines              |
-| JMS      | Gatling core                    | both lines, `javax.jms` |
+| Protocol | Comes from                      | Available on                         |
+| -------- | ------------------------------- | ------------------------------------ |
+| HTTP     | Gatling core                    | every line                           |
+| JDBC     | `gatling-jdbc-plugin`, Galaxio  | 3.9.x, 3.11.x, 3.13.x                |
+| Kafka    | `gatling-kafka-plugin`, Galaxio | 3.9.x, 3.11.x, 3.13.x                |
+| AMQP     | `gatling-amqp-plugin`, Galaxio  | 3.9.x, 3.11.x, 3.13.x                |
+| JMS      | Gatling core                    | every line; `javax.jms` up to 3.13.x |
 
-The move from `javax.jms` to `jakarta.jms` lands at 3.14, outside the supported range.
+The move from `javax.jms` to `jakarta.jms` lands at 3.14, which is why a 3.14+ project needs a
+broker client that speaks the Jakarta API.
 
 All five work from all three languages: the Galaxio libraries ship first-party facades under
 `org.galaxio.gatling…javaapi`, so the `_2.13` suffix names the artifact, not the caller.
 
 ### Galaxio libraries
 
-Each publishes for **both** Gatling lines, so a Galaxio dependency never tells you which line
-a project is on — every one of them declares `gatling-core` at `provided` scope, which means
+Each publishes for **more than one** Gatling line, so a Galaxio dependency never tells you which
+line a project is on — every one of them declares `gatling-core` at `provided` scope, which means
 your own Gatling pin decides and the library version is checked against it.
 
-| Artifact               | Top release on 3.11.x | First release on 3.13.x |
-| ---------------------- | --------------------- | ----------------------- |
-| `gatling-picatinny`    | `1.10.4`              | `1.12.0`                |
-| `gatling-jdbc-plugin`  | `0.17.2`              | `0.19.0`                |
-| `gatling-kafka-plugin` | `0.20.5`              | `0.22.0`                |
-| `gatling-amqp-plugin`  | `1.0.4`               | `1.2.0`                 |
+Each library crosses onto a new line at its own release, and the four do not cross together. The
+skill knows where every crossing is and checks a pin against the detected line before touching it;
+the numbers live in one place,
+[references/versions.md](skills/galaxio-gatling-pro/references/versions.md), rather than being
+restated here where they could quietly disagree.
 
 ### Picatinny API
 
 Picatinny breaks on its own version rather than on the Gatling line, which is why the skill
 splits it that way. There are two boundaries and they are not in the same place:
 
-| Picatinny           | Config getters | Faker API | `Random*Feeder` | Gatling |
-| ------------------- | -------------- | --------- | --------------- | ------- |
-| `0.16.0` – `1.0.1`  | 5              | —         | current         | 3.11.x  |
-| `1.2.0` – below 1.5 | 14             | —         | current         | 3.11.x  |
-| `1.5.0` – `1.10.4`  | 14             | ✅        | deprecated      | 3.11.x  |
-| `1.12.0` – `1.25.0` | 14             | ✅        | deprecated      | 3.13.x  |
+| Picatinny           | Config getters | Faker API | `Random*Feeder` | Gatling        |
+| ------------------- | -------------- | --------- | --------------- | -------------- |
+| `0.14.0` – `1.0.1`  | 5              | —         | current         | 3.9.x – 3.11.x |
+| `1.2.0` – below 1.5 | 14             | —         | current         | 3.11.x         |
+| `1.5.0` – `1.10.4`  | 14             | ✅        | deprecated      | 3.11.x         |
+| `1.12.0` and up     | 14             | ✅        | deprecated      | 3.13.x         |
 
 The five-getter set is `getStringParam`, `getIntParam`, `getDoubleParam`, `getDurationParam`
 and `getBooleanParam`. `getStringListParam`, `getConfigParam` and the seven `getOpt…`
