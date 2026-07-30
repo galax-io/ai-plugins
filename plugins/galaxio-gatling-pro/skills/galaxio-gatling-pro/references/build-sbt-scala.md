@@ -3,8 +3,7 @@
 sbt serves Scala only; Java and Kotlin Gatling projects use Maven or Gradle.
 
 What to add to an existing `build.sbt`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [version-3-13.md](version-3-13.md) or
-[version-3-11.md](version-3-11.md).
+[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
 
 ## Roots And Commands
 
@@ -41,8 +40,8 @@ In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version
 
 ## Plugin Floor And The JVM Option
 
-From Gatling 3.13 the run needs `--add-opens=java.base/java.lang=ALL-UNNAMED`. `gatling-sbt`
-**4.10.2** and later add it for you, which is why raising the plugin is the first fix. Only
+Raise `gatling-sbt` past the floor in [versions.md](versions.md) and it adds the JVM option 3.13
+requires ([migrate.md](migrate.md)) for you, which is why that is the first fix. Only
 when it is pinned lower and cannot move, add the flag to `Gatling / javaOptions`.
 
 On the 3.11 line the flag is unnecessary and there is no floor — follow what the repository

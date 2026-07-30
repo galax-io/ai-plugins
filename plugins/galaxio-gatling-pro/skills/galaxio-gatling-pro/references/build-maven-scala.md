@@ -5,8 +5,7 @@ and unverified against a generated project. Prefer sbt for Scala unless the repo
 already committed to Maven — see [build-sbt-scala.md](build-sbt-scala.md).
 
 What to add to an existing `pom.xml`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [version-3-13.md](version-3-13.md) or
-[version-3-11.md](version-3-11.md).
+[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
 
 ## Roots And Commands
 
@@ -55,9 +54,9 @@ and no suffix.
 
 ## Plugin Floor And The JVM Option
 
-From Gatling 3.13 the report generator needs `--add-opens=java.base/java.lang=ALL-UNNAMED`.
-`gatling-maven-plugin` **4.11.0** and later set it themselves, so raising the plugin is the
-first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>`
+Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM
+option 3.13 requires ([migrate.md](migrate.md)) on its own, so that is the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>`
 list containing that one flag.
 
-On the 3.11 line the flag is unnecessary and the floor is `4.8.0`, which needs Maven 3.6.3+.
+On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven
+version of its own — [versions.md](versions.md) names both.

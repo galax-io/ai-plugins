@@ -1,8 +1,7 @@
 # Gradle + Java
 
 What to add to an existing `build.gradle`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [version-3-13.md](version-3-13.md) or
-[version-3-11.md](version-3-11.md).
+[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
 
 ## Roots And Commands
 
@@ -41,8 +40,8 @@ call is a syntax error there.
 
 ## Plugin Floor, The JVM Option, And Gradle 9
 
-From Gatling 3.13 the run needs `--add-opens=java.base/java.lang=ALL-UNNAMED`. `gatling-gradle`
-**3.13.1** and later set it themselves; only when pinned lower, set `jvmArgs` in the `gatling`
+Raise `gatling-gradle` past the floor in [versions.md](versions.md) and it sets the JVM option
+3.13 requires ([migrate.md](migrate.md)) on its own; only when pinned lower, set `jvmArgs` in the `gatling`
 block to a list containing that flag.
 
 Check the Gradle version before promising `gatlingRun`. `io.gatling.gradle` `3.13.1` fails to

@@ -1,9 +1,8 @@
 # Kafka
 
-`gatling-kafka-plugin` from Galaxio. The current `1.x` releases pin Gatling `3.13.5`, and
-`0.14.0`–`0.20.5` are the 3.11 line — pick by the line the project is on. Nothing targets above
-3.13; see [beyond-3-13.md](beyond-3-13.md). Usable from all three languages: Scala takes the
-Scala DSL, Java and Kotlin take the `KafkaDsl` facade.
+`gatling-kafka-plugin` from Galaxio. The version comes from the project's Gatling line, not from
+here — the column for that line in [versions.md](versions.md) names it. Usable from all three languages: Scala takes
+the Scala DSL, Java and Kotlin take the `KafkaDsl` facade.
 
 It supports produce, consume and request-reply, with Avro, Protobuf and Schema Registry.
 

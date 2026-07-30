@@ -3,10 +3,13 @@
 Two transports with different provenance: AMQP comes from the Galaxio plugin, JMS is Gatling
 core.
 
-| Transport | Dependency                         | Languages           | Lines                                           |
-| --------- | ---------------------------------- | ------------------- | ----------------------------------------------- |
-| AMQP      | `gatling-amqp-plugin` from Galaxio | Scala, Java, Kotlin | `1.2.0`+ on 3.13.x, `1.0.4` and below on 3.11.x |
-| JMS       | `gatling-jms` from Gatling         | Scala, Java, Kotlin | any                                             |
+| Transport | Dependency                         | Languages           |
+| --------- | ---------------------------------- | ------------------- |
+| AMQP      | `gatling-amqp-plugin` from Galaxio | Scala, Java, Kotlin |
+| JMS       | `gatling-jms` from Gatling         | Scala, Java, Kotlin |
+
+The AMQP version comes from the project's Gatling line, not from here — the column for that line
+in [versions.md](versions.md) names it.
 
 The snippets below are Scala. Java and Kotlin write the same builders through the facades —
 `org.galaxio.gatling.amqp.javaapi.AmqpDsl` for AMQP, `io.gatling.javaapi.jms.JmsDsl` for JMS —
@@ -92,7 +95,6 @@ is how a reply is validated without parsing its body.
 
 ### Package Boundary
 
-On 3.11.x and 3.13.x the API is `javax.jms`. From 3.14 it is `jakarta.jms`, which means both an
-import rewrite and a broker client that speaks the Jakarta API — see
-[beyond-3-13.md](beyond-3-13.md). Pick the broker client to match the Gatling line, not the
+The package moves from `javax.jms` to `jakarta.jms` at 3.14 —
+[migrate.md](migrate.md). Pick the broker client to match the Gatling line, not the
 other way round.

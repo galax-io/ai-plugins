@@ -31,8 +31,8 @@ import org.galaxio.gatling.utils.IntensityConverter._
 
 Both faker imports are needed: `Predef` carries only the implicit conversions, while `Faker`
 and `GeneratedFeeder` are siblings in the same package. The older `RandomUUIDFeeder`-style
-objects live in `org.galaxio.gatling.feeders` and are deprecated from Picatinny `1.5.0`. Below
-that — the whole `0.x` line and `1.0.1`–`1.2.0` — the faker package does not exist and those
+objects live in `org.galaxio.gatling.feeders` and are deprecated from the release named in
+[picatinny-1-x.md](picatinny-1-x.md). Below it the faker package does not exist and those
 objects are the current API. The boundary is the Picatinny pin, not the Gatling version; see
 [picatinny-1-x.md](picatinny-1-x.md) and [picatinny-0-x.md](picatinny-0-x.md).
 
