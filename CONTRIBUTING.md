@@ -76,6 +76,22 @@ Every change to a plugin needs:
 This is enforced. Without a version bump, Claude Code keeps serving the previous
 release to everyone who already installed the plugin.
 
+The bump is also the release. When your PR lands on main and every check passes, CI
+publishes one `release-<date>` for the whole marketplace, with a section per plugin
+that moved — your CHANGELOG entry for the new version, verbatim, folded if long. One
+release per merge, not one per plugin.
+
+So write the entry for the people who will read it on the release page, and make its
+heading name the version you bumped to: `## [1.2.0] - 2026-07-30`. The gate checks for
+that exact section, so a heading still naming the old version fails your PR rather
+than the release.
+
+Preview what your merge would announce:
+
+```bash
+node scripts/release.mjs --dry-run
+```
+
 ## 7. Secrets
 
 Never commit a credential, not even a throwaway one.

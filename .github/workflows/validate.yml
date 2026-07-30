@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # A release left behind by a rate limit or a cancelled run is published by
+  # re-running this on main. The plan is read from the tag list, so a manual run
+  # picks up exactly what is missing and needs no empty commit to trigger it.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -111,3 +115,36 @@ jobs:
         run: |
           git fetch --no-tags origin "$GITHUB_BASE_REF"
           npm run check:version-bump
+
+  # A tag is public and permanent, so it is cut only from a green main. The
+  # release-gate job above has already refused any plugin change that reached
+  # main without a version bump and a changelog entry, which is exactly the
+  # material this job turns into a release.
+  release:
+    name: release
+    needs: [manifests, prose, security]
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The notes are the diff against the previous release, so the plugin
+          # manifests at that tag have to be readable here.
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # One release for the marketplace, tagged at this commit, with a section per
+      # plugin whose version moved. Moved none, released nothing. Re-running this
+      # workflow on main is safe: the plan is derived, so it is a no-op once the
+      # release exists.
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs --target "$GITHUB_SHA"

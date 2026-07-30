@@ -24,10 +24,12 @@
     "codespell",
     "cspell",
     "Dependabot",
+    "esac",
     "extensionless",
     "fqcn",
     "Galaxio",
     "gitleaks",
+    "gpgsign",
     "gradlew",
     "highcharts",
     "Hikari",
@@ -56,6 +58,7 @@
     "subagent",
     "subagents",
     "typesafe",
+    "unfetched",
     "unshippable",
     "zricethezav"
   ]
