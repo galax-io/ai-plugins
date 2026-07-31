@@ -43,6 +43,28 @@ install from the UI, or copy a plugin directory into `~/.cursor/plugins/local` a
 
 Then install a plugin by name, for example `galaxio-gatling-pro@galaxio-performance-kit`.
 
+## Update
+
+Installing pins the version. Re-running install does not move an existing install — it
+reports the plugin as already installed and keeps serving the cached build, however many
+releases have shipped since. Update it explicitly:
+
+```bash
+claude plugin marketplace update galaxio-performance-kit
+```
+
+```bash
+claude plugin update galaxio-gatling-pro@galaxio-performance-kit
+```
+
+The first refreshes the catalog, the second replaces the installed copy. It prints
+`Restart to apply changes` — until you restart, the session keeps serving the old skill.
+
+Codex has no `plugin update`: run `codex plugin marketplace upgrade galaxio-performance-kit`
+to refresh the snapshot, then `codex plugin remove` and `codex plugin add` the plugin.
+Cursor updates a team install from the Plugins UI; a local install is the directory you
+copied into `~/.cursor/plugins/local`, so re-copy it and run **Developer: Reload Window**.
+
 ## Repository layout
 
 ```text

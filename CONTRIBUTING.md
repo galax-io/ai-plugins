@@ -134,6 +134,30 @@ Then install the plugin in at least one agent and exercise the skill for real:
 - Cursor — copy `plugins/<name>` into `~/.cursor/plugins/local` (the `.cursor-plugin/plugin.json` manifest must sit at the plugin root), run **Developer: Reload Window**, check the Customize panel
 - Codex — `codex plugin marketplace add /abs/path/ai-plugins`, then `/plugins`, invoke with `$<skill-name>`
 
+Installing pins the build. Claude Code unpacks one version into its cache and keeps
+serving it: a second `install` reports the plugin as already installed and changes
+nothing, so a reinstall exercises the code you had before your change. Moving it takes
+both commands, then a restart:
+
+```bash
+claude plugin marketplace update galaxio-performance-kit
+```
+
+```bash
+claude plugin update <name>@galaxio-performance-kit
+```
+
+`marketplace update` refreshes the catalog only. `plugin update` replaces the installed
+copy and prints `Restart to apply changes`, so the running session keeps the old skill
+body until you restart. Stale is silent: the skill still activates, answers from its
+previous body, and points at reference files this repository no longer has.
+
+Codex has no `plugin update` — refresh the snapshot with
+`codex plugin marketplace upgrade <marketplace>`, then `codex plugin remove <name>` and
+`codex plugin add <name>@<marketplace>`. Cursor's local path keeps no separate cache: the
+directory under `~/.cursor/plugins/local` _is_ the installed copy, so re-copy it and run
+**Developer: Reload Window**.
+
 State in the PR which agent you verified in.
 
 ## 10. PR checklist
