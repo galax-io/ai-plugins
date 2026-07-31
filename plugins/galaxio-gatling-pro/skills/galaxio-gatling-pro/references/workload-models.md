@@ -1,8 +1,5 @@
 # Workload Models
 
-A simulation is a load profile and nothing else: injection, protocols, max duration. Request
-definitions belong in cases, flows in scenarios.
-
 Scala uses `inject` for every model. Java and Kotlin split it into `injectOpen` and
 `injectClosed`, and the profile must match the method.
 
@@ -78,9 +75,7 @@ concurrent users, which is anywhere from 5 to 5000 req/s depending on latency â€
 below 1 truncates to zero, so `constantConcurrentUsers(0)` injects nobody and the run finishes
 green with no requests.
 
-The `pace` that makes this work sits inside the scenario, not here. Injection sets population;
-`pace` sets iteration rhythm. Putting either in the other's place produces a profile that
-cannot be reasoned about.
+The `pace` that makes this work sits inside the scenario, not here.
 
 ## Smoke And Debug
 
@@ -98,19 +93,15 @@ class DebugSimulation extends Simulation {
 
 ## Where The Languages Differ
 
-One difference, and it is the whole list: the profile builders above are named the same
-everywhere, but Scala takes them all through `inject`, while Java and Kotlin split it into
-`injectOpen` for the open profiles and `injectClosed` for `rampConcurrentUsers` and
-`constantConcurrentUsers`. Passing an open profile to `injectClosed` does not compile.
-
-Simulation shapes for each language are in [lang-scala.md](lang-scala.md),
-[lang-java.md](lang-java.md) and [lang-kotlin.md](lang-kotlin.md).
+Java and Kotlin use `injectOpen` for the open profiles and `injectClosed` for
+`rampConcurrentUsers` and `constantConcurrentUsers`. Passing an open profile to `injectClosed`
+does not compile.
 
 ## Rules
 
-- `maxDuration` on every simulation. It is the fuse that stops a runaway profile â€” set it
-  **above** the length the profile implies, or it silently truncates the run. The staged profile
-  above lasts `stagesNumber * (stageDuration + rampDuration)`, because a starting rate of zero
+- Set `maxDuration` **above** the length the profile implies, or it silently truncates the run.
+  The staged profile above lasts `stagesNumber * (stageDuration + rampDuration)`, because a
+  starting rate of zero
   puts a ramp before **every** level, including the first. Only a non-zero `startingFrom` gives
   the `(stagesNumber - 1)` ramp count. If `testDuration` is shorter, the top stages never
   execute and the report still looks complete.

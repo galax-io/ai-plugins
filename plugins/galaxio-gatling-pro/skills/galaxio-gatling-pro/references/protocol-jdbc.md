@@ -1,13 +1,12 @@
 # JDBC
 
-`gatling-jdbc-plugin` from Galaxio, usable from all three languages. The version comes from the
-project's Gatling line, not from here — the column for that line in
-[versions.md](versions.md) names it.
+`gatling-jdbc-plugin` from Galaxio, versioned by the project's Gatling line —
+[versions.md](versions.md).
 
 `gatling-jdbc-plugin`'s own `1.x` releases compile their `javaapi` facade for Java 17, whatever
 the upstream README says, so taking one means a Java 17 toolchain.
 
-Import spellings are in your language file; the entry points are `org.galaxio.gatling.jdbc`
+The entry points are `org.galaxio.gatling.jdbc`
 for Scala and `org.galaxio.gatling.javaapi.JdbcDsl` for the facade. Two types sit in their own
 packages and need imports of their own, which a static import of `JdbcDsl` does not reach:
 `org.galaxio.gatling.javaapi.check.simpleCheckType` and
@@ -69,28 +68,23 @@ transport layer cannot see, so check for it.
 
 ## Where The Languages Differ
 
-Three differences, and they are the whole list:
-
 - **`params` takes a map** outside Scala, where it takes tuple pairs.
 - **`simpleCheck` takes an enum** outside Scala — `simpleCheckType.NonEmpty` — because a Scala
   function literal does not cross the facade. `allResults` becomes `allResults()`.
 - **A case is a `ChainBuilder`** in the facade, so it is wrapped in `exec(...)` like any other
   action. In Scala the DSL does that for you.
 
-Declaration shapes for each language are in [lang-scala.md](lang-scala.md),
-[lang-java.md](lang-java.md) and [lang-kotlin.md](lang-kotlin.md).
-
 ## Parameter Binding
 
-Session values go through `queryP` plus `params`. This is not a style preference: from plugin
-`1.5.0` a `where(...)` clause **rejects Gatling expression language**, precisely so that session
-data cannot be concatenated into SQL. Code that interpolated `#{}` into a `where` clause fails
-and must be rewritten as a parameterized query.
+Session values go through `queryP` plus `params`, so that session data is never concatenated into
+SQL. This holds on every pin. From plugin `1.5.0` it is also enforced: a `where(...)` clause
+**rejects Gatling expression language**, so code that interpolated `#{}` into a `where` clause
+fails and must be rewritten as a parameterized query.
 
 ## Behavior Changes In 1.5.0
 
 - The literal text `"NULL"` is preserved as a string instead of being coerced to SQL `NULL`. A
   test that relied on the coercion silently changes meaning after the upgrade.
-- `where(...)` no longer accepts expression language, as above.
+- `where(...)` no longer accepts expression language — see Parameter Binding above.
 - Error messages in reports were restructured so they do not expose row data. Any check that
   matched on the old error text needs updating.

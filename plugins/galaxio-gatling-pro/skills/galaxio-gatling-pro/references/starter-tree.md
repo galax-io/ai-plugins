@@ -1,12 +1,8 @@
 # Starter Tree
 
-The minimal project that compiles and runs, for creating a Gatling project from nothing. The
-sources are Scala on sbt with Picatinny; Java and Kotlin use the same tree with the declaration
-shapes from [lang-java.md](lang-java.md) and [lang-kotlin.md](lang-kotlin.md).
-
-The resource files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template —
-are in [resource-files.md](resource-files.md). They are language- and build-tool-neutral, so
-they live apart; read that file alone when only one of them has to be written.
+The sources are Scala on sbt with Picatinny; Java and Kotlin use the same tree. The resource
+files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template — are in
+[resource-files.md](resource-files.md).
 
 Every import here is load-bearing.
 
@@ -27,8 +23,7 @@ src/test/resources/
 ```
 
 Each directory under `performance/` is a real Scala package, so cross-directory references need
-an explicit import. The snippets in the other references omit those imports for brevity; here
-they are spelled out.
+an explicit import.
 
 ## performance.scala
 
@@ -83,8 +78,7 @@ object HttpCases {
 Take the status and the JSON path from the API, not from this example: a creating `POST`
 usually answers `201`, and `$.orderId` is a guess. Ask, or leave a marked TODO — a wrong path
 fails the check against a healthy service. `bodies/order.json` must exist before the run, or
-Gatling sends nothing and dies in the report generator; its contents are in
-[resource-files.md](resource-files.md).
+Gatling sends nothing and dies in the report generator.
 
 ## feeders/Feeders.scala
 

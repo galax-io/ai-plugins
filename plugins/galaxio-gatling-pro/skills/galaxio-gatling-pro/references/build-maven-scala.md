@@ -1,11 +1,7 @@
 # Maven + Scala
 
-`galax-io/templates-gatling` ships no Maven + Scala template, so this combination is hand-wired
-and unverified against a generated project. Prefer sbt for Scala unless the repository is
-already committed to Maven — see [build-sbt-scala.md](build-sbt-scala.md).
-
-What to add to an existing `pom.xml`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
+Prefer sbt for Scala unless the repository is already committed to Maven —
+[build-sbt-scala.md](build-sbt-scala.md).
 
 ## Roots And Commands
 
@@ -49,8 +45,7 @@ repository already declares.
 ## The `_2.13` Suffix
 
 Maven cannot append the Scala suffix even for a Scala project, so every Galaxio artifact
-carries it explicitly. This is the one place sbt and Maven differ in spelling — sbt writes `%%`
-and no suffix.
+carries it explicitly.
 
 ## Plugin Floor And The JVM Option
 

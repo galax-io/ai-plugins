@@ -1,14 +1,13 @@
 # Picatinny 1.x
 
-The `1.x` line of `gatling-picatinny`. **It spans two Gatling lines** — [versions.md](versions.md)
-says which releases sit on which — so the API you get is decided by the Picatinny version, not by
-the Gatling version. A 3.11 project on a `1.x` pin belongs here.
+The `1.x` line of `gatling-picatinny`. **It spans two Gatling lines**, so the API is decided by
+the Picatinny version, not the Gatling version — [versions.md](versions.md).
 
 For a `0.x` pin the API is materially different — see [picatinny-0-x.md](picatinny-0-x.md). For
 a project without the dependency, [picatinny-substitutes.md](picatinny-substitutes.md).
 
-Written in Scala, with a first-party Java and Kotlin facade under `org.galaxio.gatling.javaapi`
-in the same artifact, so all three languages use it. Import spellings are in your language file.
+Written in Scala, with a Java and Kotlin facade under `org.galaxio.gatling.javaapi` in the same
+artifact.
 
 Source: [galax-io/gatling-picatinny](https://github.com/galax-io/gatling-picatinny).
 
@@ -20,8 +19,7 @@ Gatling line is in [versions.md](versions.md).
 
 ## Config
 
-`SimulationConfig` reads `simulation.conf` and lets JVM system properties override it, so one
-build runs against any environment.
+`SimulationConfig` reads `simulation.conf` and lets JVM system properties override it.
 
 | Parameter                                       | Type     | Meaning                     |
 | ----------------------------------------------- | -------- | --------------------------- |
@@ -36,14 +34,13 @@ Scala additionally has two-argument forms carrying a default; the facade does no
 `getOpt….orElse(…)`.
 
 **The last two and every `getOpt…` arrive at `1.2.0`.** `1.0.1` still carries the five-getter
-set of the `0.x` line — see [picatinny-0-x.md](picatinny-0-x.md) — so this is a second
-boundary inside `1.x`, and it is not where the Faker one sits.
+set of the `0.x` line — see [picatinny-0-x.md](picatinny-0-x.md). This boundary is not where the
+Faker one sits.
 
-`intensity` being a rate is the trap, twice over: feeding it to a closed profile silently
-reinterprets it as a population, and the rate it sets is virtual-user arrivals per second, which
-equals requests per second only when an iteration issues one request. `IntensityConverter` takes
-the business figure in `rps`/`rpm`/`rph` — dividing by the requests per iteration is still your
-job. See [workload-models.md](workload-models.md).
+`intensity` traps twice over: feeding it to a closed profile silently reinterprets it as a
+population, and arrivals per second equal requests per second only when an iteration issues one
+request. `IntensityConverter` takes the business figure in `rps`/`rpm`/`rph` — dividing by the
+requests per iteration is still your job. See [workload-models.md](workload-models.md).
 
 Every credential goes through a getter — see the Config And Secrets invariant in `SKILL.md`.
 
@@ -59,9 +56,8 @@ identifiers, document numbers — plus the simple ones.
 Check the pin before writing either form. Read `Random*Feeder` in an existing project; do not
 write new uses above `1.5.0`.
 
-Generated feeders never exhaust, which is why they beat a short CSV for fields the system under
-test does not have to know. For identifiers that must already exist there, a CSV of real values
-is the only correct source — see the Feeders invariant in `SKILL.md`.
+Generated feeders never exhaust. For identifiers the system under test must already know, a CSV
+of real values is the only correct source.
 
 ## Other Modules
 

@@ -1,14 +1,5 @@
 # Kotlin DSL
 
-Gatling's `javaapi`, called from Kotlin. Picatinny and the Galaxio protocol plugins ship
-first-party Java facades under `org.galaxio.gatling.javaapi` that Kotlin consumes directly.
-Take the Picatinny file for the pinned line, and the protocol file for the transport the task
-actually uses — dispatch table 4 in `SKILL.md` names them. Do not read all of them.
-
-`kotlin("plugin.allopen")` is **not** required. Gatling instantiates a simulation reflectively
-through its no-argument constructor rather than extending it, so a final Kotlin class is fine —
-the Galaxio `kotlin-gradle` and `kotlin-maven` templates declare no allopen plugin.
-
 ## Imports
 
 ```kotlin
@@ -48,8 +39,7 @@ object HttpCases {
 }
 ```
 
-Kotlin cannot call the Java DSL's `is`, which is a Kotlin keyword. The alias is
-**`shouldBe`** — `status().shouldBe(200)`, not `status().is(200)`.
+Kotlin cannot call the Java DSL's `is`, a Kotlin keyword — the alias is **`shouldBe`**.
 
 ## Feeder
 
@@ -63,8 +53,7 @@ Picatinny's generated feeders come from the same two imports as Java, without `s
 `org.galaxio.gatling.javaapi.FakerApi` for the generators and
 `org.galaxio.gatling.javaapi.Feeders.GeneratedFeeder` to compose them into fields. They return
 `Iterator<Map<String, Any>>`, a different `feed(...)` overload from `FeederBuilder<*>`, so
-declare the type accordingly. Which of the two sources to use for a given field is decided by
-the Feeders invariant in `SKILL.md`.
+declare the type accordingly.
 
 ## Scenario
 
@@ -89,8 +78,8 @@ class DebugSimulation : Simulation() {
 }
 ```
 
-Like Java, Kotlin uses **`injectOpen`** or **`injectClosed`** rather than a single `inject`.
-Profiles are in [workload-models.md](workload-models.md).
+Kotlin uses **`injectOpen`** or **`injectClosed`** rather than a single `inject`. Profiles are in
+[workload-models.md](workload-models.md).
 
 ## Config
 
@@ -118,8 +107,7 @@ object Params {
 
 `ConfigFactory.load` takes a resource **basename** and appends the extension itself, so the
 argument is `"simulation"`. Passing `"simulation.conf"` makes it look for `simulation.conf.conf`,
-find nothing, and fall through to system properties alone — the exact silent-empty-config
-failure this branch exists to avoid.
+find nothing, and fall through to system properties alone.
 
 This branch needs the `com.typesafe.config` dependency, which Picatinny would otherwise have
 brought in. The full substitution table is in
