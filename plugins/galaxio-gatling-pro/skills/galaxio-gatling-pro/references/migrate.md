@@ -16,7 +16,7 @@
 | 3.15 | `httpConcurrentRequests` added                                       | Concurrent requests without a parent request                                               |
 | 3.15 | `logActualValueInError` added                                        | Suppresses the actual value in a failing check message, to limit error cardinality         |
 
-A change applies from its line upwards: everything at or below a project's line is already in force, everything above is what an upgrade would face. Nothing stops on 3.12, so 3.11.x → 3.13.x still applies both of its rows.
+A change applies from its line upwards: everything at or below a project's line is already in force, everything above is what an upgrade would face. Nothing stops on 3.12, so 3.11.x → 3.13.x still applies all three of its rows.
 
 ## Procedure
 

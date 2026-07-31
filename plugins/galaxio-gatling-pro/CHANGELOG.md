@@ -10,23 +10,37 @@ All notable changes to this plugin are documented here. The format follows
 
 ### Added
 
-- **A key registry in `references/resource-files.md`.** Every default Picatinny parameter with
-  its type and the condition that makes it required, then the custom keys each protocol declares.
-  Required is defined by what actually happens: a getter over an undefined key throws at
-  class-initialization, before the first request. A JDBC-only project needs no `baseUrl`, and
-  Picatinny loads without it.
+- **A key registry in `references/resource-files.md`**, checked against Picatinny's own
+  `SimulationConfig` on the `0.x` and `1.x` lines. Every default parameter with its type and the
+  condition that makes it required, then the custom keys each protocol declares. Required means
+  the getter carries no default, and because every accessor is a `lazy val` the throw lands at
+  first access — which is why a project can leave out what it never reads.
+- **The two defaulted keys, named as traps.** `stagesNumber` defaults to `1`, so a staged profile
+  missing it runs one stage at full intensity and reports a complete breaking-point test that
+  never stepped. `testDuration` defaults to `(rampDuration + stageDuration) * stagesNumber` —
+  exactly the length `maxDuration` must exceed — so omitting it truncates the run, and it drags
+  `rampDuration` and `stageDuration` into the required set for any simulation that reads it.
+- **`intensity` is a string, not a double.** `IntensityConverter` takes at most one digit after
+  the decimal point, so `16.67` fails where `16.7` or `"1000 rpm"` works. `IntensityConverter`
+  itself reads no config.
+- **`baseUrl` is scoped by the holder, not the request.** Picatinny's accessor is lazy, but the
+  shared holder is not, so a JDBC-only simulation reaching into a holder that also builds an HTTP
+  protocol still forces the key.
 - **Every protocol reference names its own config keys.** `dbUrl`, `dbUser` and `dbPassword` for
   JDBC; `kafkaUrl` for Kafka; `amqpHost`, `amqpPort`, `amqpLogin` and `amqpPassword` for AMQP;
   `jmsUrl`, `jmsUser` and `jmsPassword` for JMS; `baseUrl` for HTTP. `users` and `pacing` are
   named where the closed model introduces them.
-- **The `-D` duration syntax, in `SKILL.md`.** A run-time override takes the compact form
-  (`-DrampDuration=30s`); the spaced form the file uses needs quoting.
+- **What a `-D` override can carry.** System properties do not go through the HOCON parser, so
+  every value arrives as a string: both duration spellings work, but a list- or object-valued key
+  cannot be overridden this way and fails at startup with a type error.
 
 ### Changed
 
 - **`${?VAR}` is stated as the rule that makes a variable mandatory**, not only as a secrets
   idiom: with no default line above it, an unset variable leaves the key undefined and the run
-  stops at class-initialization naming it.
+  stops on first read, naming it.
+- **`migrate.md` counted two 3.12 rows where the table has three.** An upgrade following the
+  count left `stopInjector` in place, which does not exist from 3.12.
 - **Duplication across dispatch axes removed.** The Session invariant no longer repeats in
   `lang-scala.md`, the `saveAs`-needs-a-passing-check rule no longer repeats in
   `protocol-http.md`, and the package-object trap is stated once in `lang-scala.md` rather than

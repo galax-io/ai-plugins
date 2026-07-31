@@ -2,7 +2,7 @@
 
 Scala uses `inject` for every model. Java and Kotlin split it into `injectOpen` for the open profiles and `injectClosed` for `rampConcurrentUsers` and `constantConcurrentUsers`; passing an open profile to `injectClosed` does not compile.
 
-The keys these profiles read — `intensity`, `stagesNumber`, `rampDuration`, `stageDuration`, `testDuration`, plus `users` for the closed model — are in [resource-files.md](resource-files.md).
+The keys these profiles read — `intensity`, `stagesNumber`, `rampDuration`, `stageDuration`, `testDuration`, plus `users` and `pacing` for the closed model — are in [resource-files.md](resource-files.md), which says which of them Picatinny defaults rather than demands. `stagesNumber` and `testDuration` are the two that default, and both defaults are traps.
 
 ## Open Model, Stable Load
 
@@ -63,7 +63,7 @@ class ClosedPacingSimulation extends Simulation {
 
 Do not write `intensity.toInt` here. `intensity` is a `Double` **arrival rate**: feeding it to a closed profile silently reinterprets a rate as a population — 50 arrivals/s becomes 50 concurrent users, which is anywhere from 5 to 5000 req/s depending on latency — and any rate below 1 truncates to zero, so `constantConcurrentUsers(0)` injects nobody and the run finishes green with no requests.
 
-The `pace` that makes this work sits inside the scenario, not here.
+The `pace` that makes this work sits inside the scenario, not here, and reads its own `pacing` key — neither `users` nor `pacing` is a Picatinny default, so both are declared by the project.
 
 ## Smoke And Debug
 

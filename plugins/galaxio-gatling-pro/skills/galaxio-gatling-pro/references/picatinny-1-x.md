@@ -12,18 +12,18 @@ Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suf
 
 `SimulationConfig` reads `simulation.conf` and lets JVM system properties override it. Which keys are required, and the file's own syntax, are in [resource-files.md](resource-files.md).
 
-| Parameter                                       | Type     | Meaning                     |
-| ----------------------------------------------- | -------- | --------------------------- |
-| `baseUrl`, `baseAuthUrl`, `wsBaseUrl`           | string   | environment endpoints       |
-| `intensity`                                     | double   | **arrival rate** in users/s |
-| `stagesNumber`                                  | int      | steps in a staged profile   |
-| `rampDuration`, `stageDuration`, `testDuration` | duration | profile timings             |
+| Parameter                                       | Type     | Meaning                                |
+| ----------------------------------------------- | -------- | -------------------------------------- |
+| `baseUrl`, `baseAuthUrl`, `wsBaseUrl`           | string   | environment endpoints                  |
+| `intensity`                                     | string   | **arrival rate**, converted to users/s |
+| `stagesNumber`                                  | int      | steps in a staged profile              |
+| `rampDuration`, `stageDuration`, `testDuration` | duration | profile timings                        |
 
 Custom parameters use `getStringParam`, `getIntParam`, `getDoubleParam`, `getDurationParam`, `getBooleanParam`, `getStringListParam` and `getConfigParam`, each with a `getOpt…` variant. Scala additionally has two-argument forms carrying a default; the facade does not — there, use `getOpt….orElse(…)`.
 
 **The last two and every `getOpt…` arrive at `1.2.0`.** `1.0.1` still carries the five-getter set of the `0.x` line — [picatinny-0-x.md](picatinny-0-x.md). This boundary is not where the Faker one sits.
 
-`intensity` traps twice over: feeding it to a closed profile silently reinterprets it as a population, and arrivals per second equal requests per second only when an iteration issues one request. `IntensityConverter` takes the business figure in `rps`/`rpm`/`rph` — dividing by the requests per iteration is still your job. See [workload-models.md](workload-models.md).
+`intensity` traps twice over: feeding it to a closed profile silently reinterprets it as a population, and arrivals per second equal requests per second only when an iteration issues one request. The key itself takes the business figure in `rps`/`rpm`/`rph` — dividing by the requests per iteration is still your job. See [workload-models.md](workload-models.md) and, for the value's grammar, [resource-files.md](resource-files.md).
 
 Every credential goes through a getter — see the Config And Secrets invariant in `SKILL.md`.
 

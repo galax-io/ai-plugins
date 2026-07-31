@@ -2,7 +2,7 @@
 
 `gatling-jdbc-plugin` from Galaxio, versioned by the project's Gatling line — [versions.md](versions.md). Its own `1.x` releases compile their `javaapi` facade for Java 17, whatever the upstream README says, so taking one means a Java 17 toolchain.
 
-Config keys: `dbUrl`, `dbUser` and `dbPassword` are required for this protocol, and a JDBC-only project needs no `baseUrl` — [resource-files.md](resource-files.md).
+Config keys: `dbUrl`, `dbUser` and `dbPassword` are required for this protocol. A JDBC-only project needs no `baseUrl` — but a holder that also builds an HTTP protocol forces it, even for a simulation that issues no HTTP request. [resource-files.md](resource-files.md).
 
 The entry points are `org.galaxio.gatling.jdbc` for Scala and `org.galaxio.gatling.javaapi.JdbcDsl` for the facade. Two types sit in their own packages and need imports of their own, which a static import of `JdbcDsl` does not reach: `org.galaxio.gatling.javaapi.check.simpleCheckType` and `org.galaxio.gatling.javaapi.protocol.JdbcProtocolBuilder`.
 
