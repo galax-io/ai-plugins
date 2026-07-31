@@ -9,8 +9,7 @@
 | Compile            | `./mvnw test-compile`                                  |
 | Run one simulation | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
 
-Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources
-nothing compiles.
+Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources nothing compiles.
 
 ## What To Add
 
@@ -34,24 +33,16 @@ Under `<build><plugins>`:
 | `io.gatling:gatling-maven-plugin`          | none                                                                                                                |
 | `org.jetbrains.kotlin:kotlin-maven-plugin` | an `<execution>` binding the `test-compile` goal, with `<sourceDirs>` listing `src/test/kotlin` and `src/test/java` |
 
-**The Kotlin execution is not optional.** `maven-compiler-plugin` handles only `.java`, and a
-plugin declared without `<executions>` never runs — so without it `./mvnw test-compile` succeeds
-having compiled nothing, and `gatling:test` then reports no simulation class.
+**The Kotlin execution is not optional.** `maven-compiler-plugin` handles only `.java`, and a plugin declared without `<executions>` never runs — so without it `./mvnw test-compile` succeeds having compiled nothing, and `gatling:test` then reports no simulation class.
 
-No all-open compiler plugin. Gatling instantiates a simulation reflectively through its
-no-argument constructor rather than extending it, so a final Kotlin class is fine.
+No all-open compiler plugin. Gatling instantiates a simulation reflectively through its no-argument constructor rather than extending it, so a final Kotlin class is fine.
 
 ## The `_2.13` Suffix
 
-Maven cannot append the Scala suffix, so every Galaxio artifact carries it explicitly. It names
-the artifact, not the language of your sources — each ships a Java facade that Kotlin consumes
-directly.
+Maven cannot append the Scala suffix, so every Galaxio artifact carries it explicitly. It names the artifact, not the language of your sources — each ships a Java facade that Kotlin consumes directly.
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM
-option 3.13 requires ([migrate.md](migrate.md)) on its own, so that is the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>`
-list containing that one flag.
+Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
 
-On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven
-version of its own — [versions.md](versions.md) names both.
+On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [versions.md](versions.md) names both.

@@ -11,11 +11,9 @@
 
 ## What To Add
 
-`enablePlugins(GatlingPlugin)`, and `ThisBuild / scalaVersion` set to the Scala version from
-the version file.
+`enablePlugins(GatlingPlugin)`, and `ThisBuild / scalaVersion` set to the Scala version from the version file.
 
-`libraryDependencies`, every one `% Test` — Picatinny included. Dropping the scope pulls the
-library onto the main classpath of a project that has no main sources to speak of:
+`libraryDependencies`, every one `% Test` — Picatinny included. Dropping the scope pulls the library onto the main classpath of a project that has no main sources to speak of:
 
 | Artifact                    | Written as                    | Notes                                                         |
 | --------------------------- | ----------------------------- | ------------------------------------------------------------- |
@@ -33,9 +31,6 @@ In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-sbt` past the floor in [versions.md](versions.md) and it adds the JVM option 3.13
-requires ([migrate.md](migrate.md)) for you, which is why that is the first fix. Only
-when it is pinned lower and cannot move, add the flag to `Gatling / javaOptions`.
+Raise `gatling-sbt` past the floor in [versions.md](versions.md) and it adds the JVM option 3.13 requires ([migrate.md](migrate.md)) for you — the first fix. Only when it is pinned lower and cannot move, add the flag to `Gatling / javaOptions`.
 
-On the 3.11 line the flag is unnecessary and there is no floor — follow what the repository
-already declares.
+On the 3.11 line the flag is unnecessary and there is no floor — follow what the repository declares.

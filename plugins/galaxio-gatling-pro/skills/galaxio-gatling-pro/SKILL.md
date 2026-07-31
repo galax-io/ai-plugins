@@ -206,7 +206,8 @@ undefined and the getter fails at class-initialization naming it. The same rule 
 nothing.
 
 `-Dparam=value` is not a substitute for a secret: it lands in `ps` output and in CI job logs.
-Use it for non-sensitive overrides.
+Use it for non-sensitive overrides. Which keys a run requires, and what a `-D` override can and
+cannot carry, are in [references/resource-files.md](references/resource-files.md).
 
 ### Checks
 

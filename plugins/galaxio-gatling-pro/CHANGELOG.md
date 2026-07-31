@@ -4,6 +4,49 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-31
+
+`simulation.conf` now answers which keys a run requires, per protocol.
+
+### Added
+
+- **A key registry in `references/resource-files.md`**, checked against Picatinny's own
+  `SimulationConfig` on the `0.x` and `1.x` lines. Every default parameter with its type and the
+  condition that makes it required, then the custom keys each protocol declares. Required means
+  the getter carries no default, and because every accessor is a `lazy val` the throw lands at
+  first access — which is why a project can leave out what it never reads.
+- **The two defaulted keys, named as traps.** `stagesNumber` defaults to `1`, so a staged profile
+  missing it runs one stage at full intensity and reports a complete breaking-point test that
+  never stepped. `testDuration` defaults to `(rampDuration + stageDuration) * stagesNumber` —
+  exactly the length `maxDuration` must exceed — so omitting it truncates the run, and it drags
+  `rampDuration` and `stageDuration` into the required set for any simulation that reads it.
+- **`intensity` is a string, not a double.** `IntensityConverter` takes at most one digit after
+  the decimal point, so `16.67` fails where `16.7` or `"1000 rpm"` works. `IntensityConverter`
+  itself reads no config.
+- **`baseUrl` is scoped by the holder, not the request.** Picatinny's accessor is lazy, but the
+  shared holder is not, so a JDBC-only simulation reaching into a holder that also builds an HTTP
+  protocol still forces the key.
+- **Every protocol reference names its own config keys.** `dbUrl`, `dbUser` and `dbPassword` for
+  JDBC; `kafkaUrl` for Kafka; `amqpHost`, `amqpPort`, `amqpLogin` and `amqpPassword` for AMQP;
+  `jmsUrl`, `jmsUser` and `jmsPassword` for JMS; `baseUrl` for HTTP. `users` and `pacing` are
+  named where the closed model introduces them.
+- **What a `-D` override can carry.** System properties do not go through the HOCON parser, so
+  every value arrives as a string: both duration spellings work, but a list- or object-valued key
+  cannot be overridden this way and fails at startup with a type error.
+
+### Changed
+
+- **`${?VAR}` is stated as the rule that makes a variable mandatory**, not only as a secrets
+  idiom: with no default line above it, an unset variable leaves the key undefined and the run
+  stops on first read, naming it.
+- **`migrate.md` counted two 3.12 rows where the table has three.** An upgrade following the
+  count left `stopInjector` in place, which does not exist from 3.12.
+- **Duplication across dispatch axes removed.** The Session invariant no longer repeats in
+  `lang-scala.md`, the `saveAs`-needs-a-passing-check rule no longer repeats in
+  `protocol-http.md`, and the package-object trap is stated once in `lang-scala.md` rather than
+  twice with `starter-tree.md`. Facts repeated between sibling files on the same axis are left
+  alone: an agent reads one language file and one build file, never two.
+
 ## [1.2.1] - 2026-07-31
 
 The skill reads 13% shorter with every rule, coordinate and command it had before.

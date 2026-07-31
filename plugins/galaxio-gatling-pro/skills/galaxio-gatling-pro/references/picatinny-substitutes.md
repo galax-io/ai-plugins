@@ -25,7 +25,8 @@ The config holder has to read `simulation.conf` as well as system properties —
 key the rest of the skill puts in that file is silently missing —
 and a missing key must fail loudly at class-initialization rather than hand `null` to a
 protocol builder. Declaration shapes are in [lang-java.md](lang-java.md) and
-[lang-kotlin.md](lang-kotlin.md).
+[lang-kotlin.md](lang-kotlin.md); the keys themselves, and which are required, in
+[resource-files.md](resource-files.md).
 
 What must not change: the layer boundaries, the config key names, and the rule that no
 environment data or credential appears in source.

@@ -7,9 +7,9 @@
 
 The AMQP version comes from the project's Gatling line — [versions.md](versions.md).
 
-The snippets below are Scala. Java and Kotlin write the same builders through the facades —
-`org.galaxio.gatling.amqp.javaapi.AmqpDsl` for AMQP, `io.gatling.javaapi.jms.JmsDsl` for JMS —
-with config through `org.galaxio.gatling.javaapi.SimulationConfig`.
+Config keys, both required for the transport that reads them — [resource-files.md](resource-files.md): AMQP takes `amqpHost`, `amqpPort`, `amqpLogin` and `amqpPassword`; JMS takes `jmsUrl`, `jmsUser` and `jmsPassword`.
+
+The snippets below are Scala. Java and Kotlin write the same builders through the facades — `org.galaxio.gatling.amqp.javaapi.AmqpDsl` for AMQP, `io.gatling.javaapi.jms.JmsDsl` for JMS — with config through `org.galaxio.gatling.javaapi.SimulationConfig`.
 
 ## AMQP
 
@@ -35,10 +35,7 @@ val amqpProtocol = amqp
   .usePersistentDeliveryMode
 ```
 
-`consumerThreadsCount` bounds how fast the test can drain replies; too low and reply latency
-grows for reasons that have nothing to do with the broker. `usePersistentDeliveryMode` makes
-the broker write to disk — leave it on only if production does the same, since it dominates the
-measurement.
+`consumerThreadsCount` bounds how fast the test can drain replies; too low and reply latency grows for reasons that have nothing to do with the broker. `usePersistentDeliveryMode` makes the broker write to disk — leave it on only if production does the same, since it dominates the measurement.
 
 Publish case:
 
@@ -51,8 +48,7 @@ object AmqpCases {
 }
 ```
 
-Publish, consume and request-reply are all supported; request-reply is what produces an
-end-to-end latency.
+Publish, consume and request-reply are all supported; request-reply is what produces an end-to-end latency.
 
 ## JMS
 
@@ -81,11 +77,8 @@ object JmsCases {
 }
 ```
 
-Since Gatling 3.13 the `jmsProperty` check asserts on a property of an inbound message, which
-is how a reply is validated without parsing its body.
+Since Gatling 3.13 the `jmsProperty` check asserts on a property of an inbound message, which is how a reply is validated without parsing its body.
 
 ### Package Boundary
 
-The package moves from `javax.jms` to `jakarta.jms` at 3.14 —
-[migrate.md](migrate.md). Pick the broker client to match the Gatling line, not the
-other way round.
+The package moves from `javax.jms` to `jakarta.jms` at 3.14 — [migrate.md](migrate.md). Pick the broker client to match the Gatling line, not the other way round.
