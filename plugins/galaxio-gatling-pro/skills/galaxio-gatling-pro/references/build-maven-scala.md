@@ -1,7 +1,6 @@
 # Maven + Scala
 
-Prefer sbt for Scala unless the repository is already committed to Maven —
-[build-sbt-scala.md](build-sbt-scala.md).
+Prefer sbt for Scala unless the repository is already committed to Maven — [build-sbt-scala.md](build-sbt-scala.md).
 
 ## Roots And Commands
 
@@ -12,8 +11,7 @@ Prefer sbt for Scala unless the repository is already committed to Maven —
 | Compile            | `./mvnw test-compile`                                  |
 | Run one simulation | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
 
-Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources
-nothing compiles.
+Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources nothing compiles.
 
 ## What To Add
 
@@ -36,22 +34,16 @@ Under `<build><plugins>`:
 | `io.gatling:gatling-maven-plugin`       | none                                            |
 | `net.alchim31.maven:scala-maven-plugin` | an `<execution>` binding the `testCompile` goal |
 
-**The `scala-maven-plugin` execution is not optional.** `gatling-maven-plugin` v4 and later do
-not compile Scala, so without it the simulations are silently never built.
+**The `scala-maven-plugin` execution is not optional.** `gatling-maven-plugin` v4 and later do not compile Scala, so without it the simulations are silently never built.
 
-`scala-maven-plugin` is not pinned by Galaxio; take the current release or match what the
-repository already declares.
+`scala-maven-plugin` is not pinned by Galaxio; take the current release or match what the repository declares.
 
 ## The `_2.13` Suffix
 
-Maven cannot append the Scala suffix even for a Scala project, so every Galaxio artifact
-carries it explicitly.
+Maven cannot append the Scala suffix even for a Scala project, so every Galaxio artifact carries it explicitly.
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM
-option 3.13 requires ([migrate.md](migrate.md)) on its own, so that is the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>`
-list containing that one flag.
+Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
 
-On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven
-version of its own — [versions.md](versions.md) names both.
+On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [versions.md](versions.md) names both.

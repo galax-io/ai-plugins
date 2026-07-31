@@ -1,8 +1,6 @@
 # Starter Tree
 
-The sources are Scala on sbt with Picatinny; Java and Kotlin use the same tree. The resource
-files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template — are in
-[resource-files.md](resource-files.md).
+The sources are Scala on sbt with Picatinny; Java and Kotlin use the same tree. The resource files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template — are in [resource-files.md](resource-files.md).
 
 Every import here is load-bearing.
 
@@ -22,15 +20,11 @@ src/test/resources/
   bodies/order.json
 ```
 
-Each directory under `performance/` is a real Scala package, so cross-directory references need
-an explicit import.
+Each directory under `performance/` is a real Scala package, so cross-directory references need an explicit import.
 
 ## performance.scala
 
-The package object **is** `org.galaxio.performance`, so its file declares the _parent_ package.
-Writing `package org.galaxio.performance` here produces `org.galaxio.performance.performance`,
-which compiles and then leaves `httpProtocol` invisible from the simulation — a silent scoping
-error found much later.
+The file declares the _parent_ package, and `io.gatling.core.Predef._` is load-bearing here even though nothing names it — both traps are in [lang-scala.md](lang-scala.md).
 
 ```scala
 package org.galaxio
@@ -49,10 +43,6 @@ package object performance {
 
 }
 ```
-
-`io.gatling.core.Predef._` is not decoration: `http` takes an implicit `GatlingConfiguration`
-and that implicit lives in the **core** Predef, not the http one. An import tidier, or a build
-that fails on unused imports, will delete it and break the compile.
 
 ## cases/HttpCases.scala
 
@@ -75,10 +65,7 @@ object HttpCases {
 }
 ```
 
-Take the status and the JSON path from the API, not from this example: a creating `POST`
-usually answers `201`, and `$.orderId` is a guess. Ask, or leave a marked TODO — a wrong path
-fails the check against a healthy service. `bodies/order.json` must exist before the run, or
-Gatling sends nothing and dies in the report generator.
+Take the status and the JSON path from the API, not from this example: a creating `POST` usually answers `201`, and `$.orderId` is a guess. Ask, or leave a marked TODO — a wrong path fails the check against a healthy service. `bodies/order.json` must exist before the run, or Gatling sends nothing and dies in the report generator.
 
 ## feeders/Feeders.scala
 
@@ -137,5 +124,4 @@ class StabilitySimulation extends Simulation {
 }
 ```
 
-`httpProtocol` resolves without an import because the simulation is in the same package as the
-package object.
+`httpProtocol` resolves without an import because the simulation is in the same package as the package object.

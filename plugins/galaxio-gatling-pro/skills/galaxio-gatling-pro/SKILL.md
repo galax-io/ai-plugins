@@ -206,7 +206,9 @@ undefined and the getter fails at class-initialization naming it. The same rule 
 nothing.
 
 `-Dparam=value` is not a substitute for a secret: it lands in `ps` output and in CI job logs.
-Use it for non-sensitive overrides.
+Use it for non-sensitive overrides, and write durations there in the compact form — `-DrampDuration=30s`,
+not the spaced `30 seconds` the file uses, which needs quoting. Which keys a run requires is in
+[references/resource-files.md](references/resource-files.md).
 
 ### Checks
 

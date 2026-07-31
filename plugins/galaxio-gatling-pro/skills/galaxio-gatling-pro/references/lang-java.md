@@ -102,7 +102,8 @@ With Picatinny on the classpath, use its Java facade, as the holder above does. 
 `simulation.conf` and lets system properties override it. The accessors are `baseUrl()`,
 `baseAuthUrl()`, `wsBaseUrl()`,
 `intensity()`, `stagesNumber()`, `rampDuration()`, `stageDuration()`, `testDuration()`, plus
-`getStringParam(...)` and its typed siblings. Details in the Picatinny file for your line.
+`getStringParam(...)` and its typed siblings. Details in the Picatinny file for your line; which
+keys a run requires is in [resource-files.md](resource-files.md).
 
 Only when the project cannot take the dependency, hand-roll a holder over the same key names.
 It has to read `simulation.conf` too, not just system properties, or every key the rest of the

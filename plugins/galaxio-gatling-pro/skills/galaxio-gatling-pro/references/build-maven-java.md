@@ -9,8 +9,7 @@
 | Compile            | `./mvnw test-compile`                                  |
 | Run one simulation | `./mvnw gatling:test -Dgatling.simulationClass=<fqcn>` |
 
-Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources
-nothing compiles.
+Not `src/gatling/*` — that is the Gradle convention, and under Maven it produces sources nothing compiles.
 
 ## What To Add
 
@@ -24,20 +23,14 @@ Under `<dependencies>`, all `test`-scoped:
 | `org.galaxio:gatling-kafka-plugin_2.13`           |                        | Kafka only                                                    |
 | `org.galaxio:gatling-amqp-plugin_2.13`            |                        | AMQP only                                                     |
 
-Under `<build><plugins>`: `io.gatling:gatling-maven-plugin`, no configuration.
-
-Nothing else. `maven-compiler-plugin` already compiles `.java` from `src/test/java`.
+Under `<build><plugins>`: `io.gatling:gatling-maven-plugin`, no configuration. Nothing else — `maven-compiler-plugin` already compiles `.java` from `src/test/java`.
 
 ## The `_2.13` Suffix
 
-Maven cannot append the Scala suffix, so every Galaxio artifact carries it explicitly. It names
-the artifact, not the language of your sources — each ships a Java facade.
+Maven cannot append the Scala suffix, so every Galaxio artifact carries it explicitly. It names the artifact, not the language of your sources — each ships a Java facade.
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM
-option 3.13 requires ([migrate.md](migrate.md)) on its own, so that is the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>`
-list containing that one flag.
+Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
 
-On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven
-version of its own — [versions.md](versions.md) names both.
+On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [versions.md](versions.md) names both.

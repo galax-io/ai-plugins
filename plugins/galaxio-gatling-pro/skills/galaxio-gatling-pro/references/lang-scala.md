@@ -1,7 +1,6 @@
 # Scala DSL
 
-Do not use Scala 3. Every Galaxio artifact is published for `_2.13` and will not resolve
-against a Scala 3 project.
+Do not use Scala 3. Every Galaxio artifact is published for `_2.13` and will not resolve against a Scala 3 project.
 
 ## Imports
 
@@ -14,8 +13,7 @@ import io.gatling.http.Predef._
 import org.galaxio.gatling.config.SimulationConfig._
 ```
 
-`ScenarioBuilder` needs its own import — `io.gatling.core.Predef` aliases only `Session`,
-`Status`, `Simulation`, `Assertion` and `Node`.
+`ScenarioBuilder` needs its own import — `io.gatling.core.Predef` aliases only `Session`, `Status`, `Simulation`, `Assertion` and `Node`.
 
 Picatinny helpers, when the project has the dependency:
 
@@ -25,19 +23,11 @@ import org.galaxio.gatling.feeders.faker._
 import org.galaxio.gatling.utils.IntensityConverter._
 ```
 
-Both faker imports are needed: `Predef` carries only the implicit conversions, while `Faker`
-and `GeneratedFeeder` are siblings in the same package. The older `RandomUUIDFeeder`-style
-objects live in `org.galaxio.gatling.feeders` and are deprecated from the release named in
-[picatinny-1-x.md](picatinny-1-x.md). Below it the faker package does not exist and those
-objects are the current API. The boundary is the Picatinny pin, not the Gatling version; see
-[picatinny-1-x.md](picatinny-1-x.md) and [picatinny-0-x.md](picatinny-0-x.md).
+Both faker imports are needed: `Predef` carries only the implicit conversions, while `Faker` and `GeneratedFeeder` are siblings in the same package. The older `RandomUUIDFeeder`-style objects live in `org.galaxio.gatling.feeders` and are deprecated from the release named in [picatinny-1-x.md](picatinny-1-x.md). Below it the faker package does not exist and those objects are the current API. The boundary is the Picatinny pin, not the Gatling version; see [picatinny-1-x.md](picatinny-1-x.md) and [picatinny-0-x.md](picatinny-0-x.md).
 
-Protocol imports belong with their protocol — see the `protocol-*` references. Assertion
-imports are added only when the user asks for NFR gates.
+Protocol imports belong with their protocol — see the `protocol-*` references. Assertion imports are added only when the user asks for NFR gates.
 
-`cases/`, `feeders/` and `scenarios/` are real Scala packages, so every reference across those
-directories needs an explicit import. The snippets below omit them;
-[starter-tree.md](starter-tree.md) spells them out.
+`cases/`, `feeders/` and `scenarios/` are real Scala packages, so every reference across those directories needs an explicit import. The snippets below omit them; [starter-tree.md](starter-tree.md) spells them out.
 
 Duration literals need:
 
@@ -59,11 +49,9 @@ package object performance {
 }
 ```
 
-The package clause names the **parent**: the object itself is `org.galaxio.performance`, so
-declaring `package org.galaxio.performance` here yields `…performance.performance` and the
-protocol goes silently invisible to the simulation. `io.gatling.core.Predef._` must be in scope
-even though nothing in the block names it — `http` takes an implicit `GatlingConfiguration`
-that lives there.
+The package clause names the **parent**: the object itself is `org.galaxio.performance`, so declaring `package org.galaxio.performance` here yields `…performance.performance` and the protocol goes silently invisible to the simulation.
+
+`io.gatling.core.Predef._` must be in scope even though nothing in the block names it — `http` takes an implicit `GatlingConfiguration` that lives in the **core** Predef, not the http one. An import tidier, or a build that fails on unused imports, will delete it and break the compile.
 
 ## Case
 
@@ -118,8 +106,7 @@ class ClosedPacingScenario {
 }
 ```
 
-`pacing` is not one of Picatinny's default parameters — add it to `simulation.conf` alongside
-the `users` count the closed profile needs.
+`pacing` is not one of Picatinny's default parameters — add it to `simulation.conf` alongside the `users` count the closed profile needs, and it is required for any scenario written this way ([resource-files.md](resource-files.md)).
 
 ## Simulation
 
@@ -132,23 +119,8 @@ class DebugSimulation extends Simulation {
 }
 ```
 
-Scala uses `inject` for both open and closed models; the profile itself decides which one it
-is. Injection profiles are in [workload-models.md](workload-models.md).
-
-## Session Access
-
-Inside the DSL, expression-language strings resolve on their own. Plain Scala functions need an
-explicit read:
-
-```scala
-exec { session =>
-  myFunction(session("id").as[String])
-  session
-}
-```
+Scala uses `inject` for both open and closed models; the profile itself decides which one it is. Injection profiles are in [workload-models.md](workload-models.md).
 
 ## Formatting
 
-If the project has a formatter, run it before handing code back — under sbt that is
-`sbt scalafmtAll scalafmtSbt`. Do not add a `.scalafmt.conf` to a repository that has none, and
-do not change one that exists.
+If the project has a formatter, run it before handing code back — under sbt that is `sbt scalafmtAll scalafmtSbt`. Do not add a `.scalafmt.conf` to a repository that has none, and do not change one that exists.

@@ -4,6 +4,35 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-31
+
+`simulation.conf` now answers which keys a run requires, per protocol.
+
+### Added
+
+- **A key registry in `references/resource-files.md`.** Every default Picatinny parameter with
+  its type and the condition that makes it required, then the custom keys each protocol declares.
+  Required is defined by what actually happens: a getter over an undefined key throws at
+  class-initialization, before the first request. A JDBC-only project needs no `baseUrl`, and
+  Picatinny loads without it.
+- **Every protocol reference names its own config keys.** `dbUrl`, `dbUser` and `dbPassword` for
+  JDBC; `kafkaUrl` for Kafka; `amqpHost`, `amqpPort`, `amqpLogin` and `amqpPassword` for AMQP;
+  `jmsUrl`, `jmsUser` and `jmsPassword` for JMS; `baseUrl` for HTTP. `users` and `pacing` are
+  named where the closed model introduces them.
+- **The `-D` duration syntax, in `SKILL.md`.** A run-time override takes the compact form
+  (`-DrampDuration=30s`); the spaced form the file uses needs quoting.
+
+### Changed
+
+- **`${?VAR}` is stated as the rule that makes a variable mandatory**, not only as a secrets
+  idiom: with no default line above it, an unset variable leaves the key undefined and the run
+  stops at class-initialization naming it.
+- **Duplication across dispatch axes removed.** The Session invariant no longer repeats in
+  `lang-scala.md`, the `saveAs`-needs-a-passing-check rule no longer repeats in
+  `protocol-http.md`, and the package-object trap is stated once in `lang-scala.md` rather than
+  twice with `starter-tree.md`. Facts repeated between sibling files on the same axis are left
+  alone: an agent reads one language file and one build file, never two.
+
 ## [1.2.1] - 2026-07-31
 
 The skill reads 13% shorter with every rule, coordinate and command it had before.

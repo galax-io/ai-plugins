@@ -87,7 +87,8 @@ With Picatinny on the classpath, use its facade, as the holder above does — it
 `simulation.conf` and lets system properties override it. Accessors are `baseUrl()`,
 `baseAuthUrl()`, `wsBaseUrl()`, `intensity()`, `stagesNumber()`, `rampDuration()`,
 `stageDuration()`, `testDuration()`, plus `getStringParam(...)` and its typed siblings — see
-the Picatinny file for your line.
+the Picatinny file for your line, and [resource-files.md](resource-files.md) for which keys a run
+requires.
 
 Only when the project cannot take the dependency, hand-roll a holder over the same key names.
 It must read `simulation.conf` too, not just system properties. Do not assign
