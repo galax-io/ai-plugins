@@ -1,8 +1,7 @@
 # Kafka
 
-`gatling-kafka-plugin` from Galaxio. The version comes from the project's Gatling line, not from
-here — the column for that line in [versions.md](versions.md) names it. Usable from all three languages: Scala takes
-the Scala DSL, Java and Kotlin take the `KafkaDsl` facade.
+`gatling-kafka-plugin` from Galaxio, versioned by the project's Gatling line —
+[versions.md](versions.md). Scala takes the Scala DSL, Java and Kotlin the `KafkaDsl` facade.
 
 It supports produce, consume and request-reply, with Avro, Protobuf and Schema Registry.
 
@@ -19,8 +18,7 @@ import org.galaxio.gatling.config.SimulationConfig._
 import scala.concurrent.duration.DurationInt
 ```
 
-The facade entry point for Java and Kotlin is
-`org.galaxio.gatling.kafka.javaapi.KafkaDsl`; the import spelling is in your language file.
+The facade entry point for Java and Kotlin is `org.galaxio.gatling.kafka.javaapi.KafkaDsl`.
 
 ## Protocol
 
@@ -57,8 +55,7 @@ object KafkaCases {
 
 Request-reply pairs a produced message with the response consumed from the reply topic, so the
 report carries an end-to-end latency. Use it whenever the system under test answers on a second
-topic — and it is the only shape in which the protocol's `timeout` and `consumeSettings` mean
-anything.
+topic.
 
 ## Sizing
 

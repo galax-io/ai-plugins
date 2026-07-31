@@ -1,8 +1,5 @@
 # Gradle + Scala
 
-What to add to an existing `build.gradle`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
-
 ## Roots And Commands
 
 | Concern            | Path or command                            |
@@ -12,9 +9,9 @@ What to add to an existing `build.gradle`. For a whole project see
 | Compile            | `./gradlew gatlingClasses`                 |
 | Run one simulation | `./gradlew gatlingRun --simulation <fqcn>` |
 
-`io.gatling.gradle` creates a `gatling` source set and simulations go there, not in
-`src/test/*`. Compile with `gatlingClasses`, that source set's lifecycle task — `testClasses`
-compiles `src/test/*`, which is empty here, and reports BUILD SUCCESSFUL having built nothing.
+`io.gatling.gradle` creates a `gatling` source set and simulations go there, not in `src/test/*`.
+`testClasses` compiles `src/test/*`, which is empty here, and reports BUILD SUCCESSFUL having
+built nothing.
 
 ## What To Add
 
@@ -29,7 +26,7 @@ Give the Scala compiler a larger stack — `tasks.withType(ScalaCompile)` with
 `scalaCompileOptions.forkOptions.jvmArgs = ['-Xss100m']`. Deeply chained DSL builders overflow
 the default.
 
-`dependencies` — the configuration matters more than the coordinate:
+`dependencies`:
 
 | Configuration           | Use for                                                |
 | ----------------------- | ------------------------------------------------------ |
@@ -37,12 +34,16 @@ the default.
 | `gatlingImplementation` | protocol plugins                                       |
 | `gatlingRuntimeOnly`    | JDBC drivers and other runtime-only artifacts          |
 
-Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation`
-is missing at run time — which is how a JDBC driver goes absent; see
+Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is
+missing at run time — which is how a JDBC driver goes absent; see
 [protocol-jdbc.md](protocol-jdbc.md).
 
 Every Galaxio artifact needs the explicit `_2.13` even in a Scala project; Gradle cannot append
-it. This is where Gradle and sbt differ in spelling — sbt writes `%%` and no suffix.
+it.
+
+A Gradle project usually keeps the version literal in `gradle/libs.versions.toml`,
+`gradle.properties` or `settings.gradle[.kts]`. Bump it there; a second literal in
+`build.gradle` is the one that goes stale.
 
 ## Plugin Floor, The JVM Option, And Gradle 9
 

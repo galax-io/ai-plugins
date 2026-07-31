@@ -5,121 +5,69 @@ description: 'Use when creating, reviewing, refactoring or upgrading Gatling JVM
 
 # Galaxio Gatling Pro
 
-This file carries the rules that hold on every stack, plus the index. Everything that varies by
-Gatling version, build tool, language or protocol lives in `references/`, so only the part
-matching the target project is loaded.
-
 ## How To Use This Skill
 
-1. Run the detection below.
-2. From the dispatch tables, read **one** language file, then **one** build file for that
-   language, then `versions.md` — plus only the protocol files the project actually uses.
-3. Apply the invariants at the end of this file. They are here rather than in `references/`
-   because they are needed on every task, and a file needed on every task is body, not
-   reference.
+1. Run the detection below. Reviews take the same route as writing.
+2. From dispatch read **one** language file, **one** build file for it, `versions.md`, and only
+   the protocol files used. Never two build files: they contradict on purpose.
+3. Apply the invariants below; on a review they are the checklist.
 
-A typical task loads four to eight files out of twenty-three. Do not read `references/` in bulk:
-each build file describes one language and they contradict each other on purpose, so reading two
-produces advice that matches no real project. The split is for correctness per stack, not for
-token count.
+Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, Picatinny per
+[version-lookup.md](references/version-lookup.md).
 
-**Writing and reviewing take the same route.** The skill produces the boilerplate and the
-minimal working project; for a review, the same detection and dispatch identify what the code
-should have been, and the invariants below are the checklist — layer boundaries, feeder choice,
-config and secrets, checks, session handling, the injection model, and the `Do Not` list. A
-review that skips detection compares the code against the wrong version's rules.
-
-Nothing detected — a new project with no build file yet? Use the greenfield default: Gatling
-`3.13.x`, Scala `2.13`, Java 17, sbt, and Picatinny at whatever is published for that line.
-`3.13.x` because it is the newest line every Galaxio library publishes for, not because the skill
-stops there — [references/version-lookup.md](references/version-lookup.md) is how to find the
-Picatinny version, and a number written here instead is how the skill goes stale.
-
-**An existing repository outranks this skill.** When the project already has a layout, naming,
-config keys, formatting or a Gatling version, follow it and add to it. Everything here
-describes what to do when there is nothing to follow — it is not a mandate to restructure
-working code.
+**An existing repository outranks this skill.** Follow its conventions and version; add, never
+restructure.
 
 ## Detect The Target
 
-Dispatch narrows in this order: **language, then build tool, then Gatling version.** Language is
-the widest filter — it decides the DSL you write and already rules out combinations, since sbt
-serves Scala only. Detection gathers the evidence in a different order, because the version
-literal lives in the build file; that is a fact about where to look, not about what to decide
-first.
+Run these from the directory holding the build file. **A non-zero exit means nothing** — read the
+output, not the status. Silence everywhere means greenfield.
 
-Run these from the directory holding the build file. Most of them name paths that will not all
-exist, so **a non-zero exit here means nothing** — read the output, not the status. Silence
-across every step means greenfield, not failure.
-
-Find the language and source root — the directory holding `*Simulation.*` wins any ambiguity:
+Language and source root; `*Simulation.*` wins any ambiguity:
 
 ```bash
 ls -d src/test/scala src/test/java src/test/kotlin src/gatling/scala src/gatling/java src/gatling/kotlin 2>/dev/null
 find src -name '*Simulation.*' 2>/dev/null
 ```
 
-Find the build file:
+Build file:
 
 ```bash
 ls -d build.sbt project pom.xml build.gradle build.gradle.kts settings.gradle settings.gradle.kts 2>/dev/null
 ```
 
-Read the Gatling version. Restrict the search to authored build inputs — a recursive walk of
-`project/` picks up sbt's own build output, where a stale resolution-cache report will name a
-version the build no longer uses:
+Gatling version — authored build inputs only, or a recursive walk of `project/` picks up sbt's
+own stale resolution-cache report:
 
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
   --include='*.toml' --include='*.properties' 'gatling|picatinny' . 2>/dev/null
 ```
 
-That covers `gradle/libs.versions.toml`, `settings.gradle[.kts]` and `gradle.properties`, where
-a Gradle project usually keeps the literal. If it still comes back empty, look in `buildSrc/`
-and in a Maven parent POM before concluding greenfield.
+Empty? Try `buildSrc/` and a Maven parent POM before concluding greenfield.
 
-Two different numbering schemes come back, so read the artifact, not just the number:
+Two numbering schemes come back; read the artifact, not the number:
 
-- `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, or a
-  `${gatling.version}` property — **this is the Gatling line.**
-- `gatling-maven-plugin` (4.x) and `gatling-sbt` (4.x) are build-plugin versions on their own
-  numbering. They say nothing about the Gatling line.
-- `io.gatling.gradle` is the exception: its leading major.minor **is** the Gatling line.
-- A Gradle project often names no Gatling version at all and takes the plugin's default. When
-  nothing above appears, treat the `io.gatling.gradle` version as the line, and say so.
+- `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` —
+  **the Gatling line.**
+- `gatling-maven-plugin` and `gatling-sbt` (both 4.x) — build-plugin numbering, saying nothing
+  about the Gatling line.
+- `io.gatling.gradle` — its leading major.minor **is** the Gatling line. A Gradle project often
+  names nothing else and takes the plugin default; treat that as the line and say so.
 
-Check for Galaxio libraries:
+Galaxio libraries:
 
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
   --include='*.toml' --include='*.properties' 'org\.galaxio' . 2>/dev/null
 ```
 
-Three rules decide the rest:
-
-- **A Galaxio version does not tell you the Gatling line — check it against the line instead.**
-  Every Galaxio artifact declares `gatling-core` at `provided` scope, so it never carries a
-  Gatling version into the project; the project's own pin is authoritative. Version order does
-  not tell you the line either: a `-latest` suffix jumps it, and one release is mis-published out
-  of sequence. Read the POM — [references/version-lookup.md](references/version-lookup.md) has
-  the command, and [references/versions.md](references/versions.md) has the coordinates.
-- **Language does not gate the Galaxio libraries.** Picatinny and the JDBC, Kafka and AMQP
-  plugins ship Java facades under `org.galaxio.gatling…javaapi`, so Java and Kotlin use them
-  directly. The substitutions in
-  [references/picatinny-substitutes.md](references/picatinny-substitutes.md) are for a project
-  that cannot take the dependency — one that simply does not have it yet should add it.
-- **A protocol plugin on an older line is a version choice, not an upgrade.** Adding JDBC, Kafka
-  or AMQP means taking that library's release for the line the project is already on. Only a
-  request that genuinely needs a higher line makes it an upgrade, and that is a decision to put
-  to the user before changing the build — [references/migrate.md](references/migrate.md). Never
-  hand-roll a substitute for a protocol plugin.
+**A Galaxio version does not tell you the Gatling line.** Every Galaxio artifact declares
+`gatling-core` at `provided` scope, so the project's own pin is authoritative. Nor does version
+order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM
+with [version-lookup.md](references/version-lookup.md).
 
 ## Dispatch
-
-These four tables are the whole reference index. Each axis owns one kind of fact: language files
-own DSL syntax and declaration shapes, build files own source roots, run commands and build-file
-shape, `versions.md` owns **every version number in the skill**, and `migrate.md` owns what
-changed at each line. A fact appears once; everything else links to it.
 
 **1. By language** — read one:
 
@@ -129,8 +77,7 @@ changed at each line. A fact appears once; everything else links to it.
 | `*/java`   | [references/lang-java.md](references/lang-java.md)     |
 | `*/kotlin` | [references/lang-kotlin.md](references/lang-kotlin.md) |
 
-**2. By build tool, within that language** — read one. Each cell is its own file, so nothing
-here mixes languages:
+**2. By build tool, within that language** — read one:
 
 | Language | `build.sbt`                                         | `pom.xml`                                                 | `build.gradle[.kts]`                                        |
 | -------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
@@ -138,8 +85,7 @@ here mixes languages:
 | Java     | not supported — sbt serves Scala only               | [build-maven-java.md](references/build-maven-java.md)     | [build-gradle-java.md](references/build-gradle-java.md)     |
 | Kotlin   | not supported                                       | [build-maven-kotlin.md](references/build-maven-kotlin.md) | [build-gradle-kotlin.md](references/build-gradle-kotlin.md) |
 
-**3. By Gatling version** — one file, one column. It holds every version number in the skill, so
-nothing below repeats one:
+**3. By Gatling version** — `versions.md` holds the coordinate for every artifact on every line:
 
 | Detected                                             | Read                                                         |
 | ---------------------------------------------------- | ------------------------------------------------------------ |
@@ -148,12 +94,9 @@ nothing below repeats one:
 | What is published right now                          | [references/version-lookup.md](references/version-lookup.md) |
 
 `versions.md` has a column per line: 3.9.x, 3.11.x, 3.13.x, and 3.14.x/3.15.x together. **3.10.x
-and 3.12.x are not profiled and the skill carries no coordinates for them.** Say so in the answer
-and read the artifact's own POM — [references/version-lookup.md](references/version-lookup.md) has
-the command. Do not interpolate from the adjacent columns: each of those lines holds a single
-release of some libraries and none of others, and `gatling-picatinny` has no 3.12 release at all.
-Everything outside the coordinates — the DSL, the invariants, the line deltas — applies as it does
-on the nearest profiled line below.
+and 3.12.x have no column** — `versions.md` says what to do instead. Everything outside the
+coordinates — the DSL, the invariants, the line deltas — applies as on the nearest line below
+that has one.
 
 **4. By protocol and library** — read only what the task uses:
 
@@ -169,6 +112,17 @@ on the nearest profiled line below.
 | Picatinny pinned `0.x` — a materially different API                       | [references/picatinny-0-x.md](references/picatinny-0-x.md)                 |
 | A project that cannot take Picatinny                                      | [references/picatinny-substitutes.md](references/picatinny-substitutes.md) |
 | Writing or changing a simulation                                          | [references/workload-models.md](references/workload-models.md)             |
+
+**Language does not gate the Galaxio libraries.** Picatinny and the JDBC, Kafka and AMQP plugins
+ship Java facades under `org.galaxio.gatling…javaapi`, so Java and Kotlin use them directly.
+[picatinny-substitutes.md](references/picatinny-substitutes.md) is for a project that cannot take
+the dependency, or is on a line Picatinny does not publish for; one that simply does not have it
+yet should add it.
+
+**Adding a protocol plugin is a version choice, not an upgrade.** Take that library's release for
+the line the project is already on. Raising the line is a decision to put to the user before the
+build changes — [migrate.md](references/migrate.md). Never hand-roll a substitute for a protocol
+plugin.
 
 ## Invariants
 

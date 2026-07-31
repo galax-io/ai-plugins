@@ -1,9 +1,5 @@
 # Moving Between Gatling Lines
 
-Every API and behaviour change between the lines, and the procedure for crossing them. Coordinates
-are not here — [versions.md](versions.md) has all of them, and its columns are where each library
-crosses.
-
 | Line | Change                                                               | Effect                                                                                     |
 | ---- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | 3.11 | `${}` removed                                                        | `#{}` is the only expression language; on 3.9.x and 3.10.x both still compile              |
@@ -42,12 +38,11 @@ optional and not silent: crossing a line is proposed and confirmed, never done o
 ## What Opens Up
 
 Not the Galaxio protocol plugins — they have releases on the older lines too, so adding one is
-never a reason to move. Coming off 3.11.x, what the upgrade buys is continued releases: 3.13.x is
-the line the Galaxio libraries are still publishing for and 3.11.x is closed, plus the two 3.13
-additions above.
+never a reason to move. Coming off 3.11.x, what the upgrade buys is continued releases — 3.13.x is
+the line the Galaxio libraries are still publishing for and 3.11.x is closed — plus the two 3.13
+additions in the table above.
 
 ## Where This Ends
 
-At 3.13.x whenever the project keeps a Galaxio dependency — [versions.md](versions.md) says why,
-and is the only place that says it. Without such a dependency the higher lines are an ordinary
-target, not an overshoot.
+At 3.13.x whenever the project keeps a Galaxio dependency — [versions.md](versions.md) says why.
+Without such a dependency the higher lines are an ordinary target, not an overshoot.

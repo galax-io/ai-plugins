@@ -4,6 +4,37 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-07-31
+
+The skill reads 13% shorter with every rule, coordinate and command it had before.
+
+### Changed
+
+- **`SKILL.md` stack detection is half its former size.** All five shell commands are unchanged,
+  and so is the table that reads a Gatling line out of an artifact name —
+  `gatling-charts-highcharts` against `gatling-maven-plugin` against `io.gatling.gradle`, plus
+  the `-latest` trap. What went was the dispatch-ordering rationale, which the numbered dispatch
+  tables already are, and the framing around the rules rather than the rules.
+- **The opening section is now the three steps, the greenfield default and one rule.** "An
+  existing repository outranks this skill" survives, as does the greenfield stack — Gatling
+  3.13.x, Scala 2.13, Java 17, sbt.
+- **Two rules moved from detection to dispatch**, where the choice they govern is actually made:
+  that the Galaxio libraries ship Java facades and so are not gated by language, and that adding
+  a protocol plugin means taking its release for the line you are on rather than raising the
+  line.
+- **3.10.x and 3.12.x are described accurately.** The skill said it carried no coordinates for
+  them while `picatinny-0-x.md` supplied one for 3.10.x. The claim now names what is true: the
+  version matrix has no column for either line.
+
+### Removed
+
+- **Prose explaining the skill's own construction**, in `SKILL.md` and across all 23 reference
+  files — why the reference tree is split, which file owns which fact, what a typical task
+  loads. None of it changed what the skill does, and it was read on every activation. The
+  design rationale now lives in the repository's `AGENTS.md`, where authors read it.
+- **Restatements of the adjacent code, table or command**, and the pointers that duplicated an
+  invariant already loaded from `SKILL.md`.
+
 ## [1.2.0] - 2026-07-30
 
 Four Gatling lines are covered — 3.9.x, 3.11.x, 3.13.x, 3.15.x — and every version number now lives in one file.

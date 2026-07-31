@@ -1,21 +1,15 @@
 # AMQP And JMS
 
-Two transports with different provenance: AMQP comes from the Galaxio plugin, JMS is Gatling
-core.
-
 | Transport | Dependency                         | Languages           |
 | --------- | ---------------------------------- | ------------------- |
 | AMQP      | `gatling-amqp-plugin` from Galaxio | Scala, Java, Kotlin |
 | JMS       | `gatling-jms` from Gatling         | Scala, Java, Kotlin |
 
-The AMQP version comes from the project's Gatling line, not from here — the column for that line
-in [versions.md](versions.md) names it.
+The AMQP version comes from the project's Gatling line — [versions.md](versions.md).
 
 The snippets below are Scala. Java and Kotlin write the same builders through the facades —
 `org.galaxio.gatling.amqp.javaapi.AmqpDsl` for AMQP, `io.gatling.javaapi.jms.JmsDsl` for JMS —
-with the declaration shapes from [lang-java.md](lang-java.md) and
-[lang-kotlin.md](lang-kotlin.md), and config through
-`org.galaxio.gatling.javaapi.SimulationConfig`.
+with config through `org.galaxio.gatling.javaapi.SimulationConfig`.
 
 ## AMQP
 
@@ -23,9 +17,6 @@ with the declaration shapes from [lang-java.md](lang-java.md) and
 import org.galaxio.gatling.amqp.Predef._
 import org.galaxio.gatling.config.SimulationConfig._
 ```
-
-The facade entry point for Java and Kotlin is `org.galaxio.gatling.amqp.javaapi.AmqpDsl`, and
-for JMS `io.gatling.javaapi.jms.JmsDsl`; the import spelling is in your language file.
 
 Protocol, with a RabbitMQ connection factory:
 

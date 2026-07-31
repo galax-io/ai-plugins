@@ -3,8 +3,7 @@
 Gatling core, so available on every line and from every language with no extra dependency.
 
 The builder names below are identical in the Scala, Java and Kotlin DSLs — only the syntax
-differs. Code shapes for the protocol holder and the case live with their language:
-[lang-scala.md](lang-scala.md), [lang-java.md](lang-java.md), [lang-kotlin.md](lang-kotlin.md).
+differs.
 
 ## Where It Lives
 
@@ -35,8 +34,7 @@ case hides which of them was slow.
 
 ## Checks
 
-The general rule — technical and business validation together — is in
-the Checks invariant in `SKILL.md`. Two HTTP specifics:
+Two HTTP specifics:
 
 - A body carrying `{"error": "..."}` under HTTP 200 is a failure `status` cannot see. Add a
   `jsonPath` check on the business field whenever the API answers that way.

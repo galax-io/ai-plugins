@@ -1,10 +1,5 @@
 # sbt + Scala
 
-sbt serves Scala only; Java and Kotlin Gatling projects use Maven or Gradle.
-
-What to add to an existing `build.sbt`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
-
 ## Roots And Commands
 
 | Concern            | Path or command                                                                  |
@@ -32,9 +27,7 @@ library onto the main classpath of a project that has no main sources to speak o
 | `gatling-kafka-plugin`      | `"org.galaxio" %% …`          | Kafka only                                                    |
 | `gatling-amqp-plugin`       | `"org.galaxio" %% …`          | AMQP only                                                     |
 
-`%%` is the difference that matters. It appends the `_2.13` suffix for the Galaxio artifacts —
-never write the suffix by hand here; that is the Maven and Gradle spelling. Gatling's own
-artifacts take a single `%` because they are plain Java.
+`%%` appends the `_2.13` suffix for the Galaxio artifacts — never write the suffix by hand here.
 
 In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version>")`.
 

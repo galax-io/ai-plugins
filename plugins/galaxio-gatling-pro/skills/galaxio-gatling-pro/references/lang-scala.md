@@ -1,9 +1,5 @@
 # Scala DSL
 
-The native Gatling DSL. Picatinny and the Galaxio protocol plugins are written in Scala, so
-Scala consumes their DSL without a facade — Java and Kotlin go through
-`org.galaxio.gatling.javaapi` instead.
-
 Do not use Scala 3. Every Galaxio artifact is published for `_2.13` and will not resolve
 against a Scala 3 project.
 
@@ -40,7 +36,7 @@ Protocol imports belong with their protocol — see the `protocol-*` references.
 imports are added only when the user asks for NFR gates.
 
 `cases/`, `feeders/` and `scenarios/` are real Scala packages, so every reference across those
-directories needs an explicit import. The snippets below omit them for brevity;
+directories needs an explicit import. The snippets below omit them;
 [starter-tree.md](starter-tree.md) spells them out.
 
 Duration literals need:
@@ -67,8 +63,7 @@ The package clause names the **parent**: the object itself is `org.galaxio.perfo
 declaring `package org.galaxio.performance` here yields `…performance.performance` and the
 protocol goes silently invisible to the simulation. `io.gatling.core.Predef._` must be in scope
 even though nothing in the block names it — `http` takes an implicit `GatlingConfiguration`
-that lives there. The whole file, with every import and every sibling, is in
-[starter-tree.md](starter-tree.md).
+that lives there.
 
 ## Case
 
@@ -155,6 +150,5 @@ exec { session =>
 ## Formatting
 
 If the project has a formatter, run it before handing code back — under sbt that is
-`sbt scalafmtAll scalafmtSbt`. Formatting configuration belongs to the project, not to this
-skill: do not add a `.scalafmt.conf` to a repository that has none, and do not change one that
-exists.
+`sbt scalafmtAll scalafmtSbt`. Do not add a `.scalafmt.conf` to a repository that has none, and
+do not change one that exists.

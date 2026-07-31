@@ -1,8 +1,5 @@
 # Maven + Kotlin
 
-What to add to an existing `pom.xml`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
-
 ## Roots And Commands
 
 | Concern            | Path or command                                        |
@@ -42,8 +39,7 @@ plugin declared without `<executions>` never runs — so without it `./mvnw test
 having compiled nothing, and `gatling:test` then reports no simulation class.
 
 No all-open compiler plugin. Gatling instantiates a simulation reflectively through its
-no-argument constructor rather than extending it, so a final Kotlin class is fine; the Galaxio
-`kotlin-maven` template declares none.
+no-argument constructor rather than extending it, so a final Kotlin class is fine.
 
 ## The `_2.13` Suffix
 

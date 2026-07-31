@@ -1,8 +1,8 @@
 # Gatling Lines And Coordinates
 
-Every version this skill names. Read the column for the project's line.
+Read the column for the project's line.
 
-Four notations. A **range** is a closed line, both ends fixed. **`+`** is an open line: floor
+A **range** is a closed line, both ends fixed. **`+`** is an open line: floor
 fixed, top looked up, [version-lookup.md](version-lookup.md). A **bare version** is the only
 release on that line. **none** means no release targets that line at all — not that the number is
 unknown. A cell naming no number at all sets no floor: match what the repository declares, or look
@@ -25,7 +25,7 @@ it up.
   released together — one patch serves all three.
 - Test-scoped, `_2.13` suffix on every Galaxio artifact outside sbt, any `2.13.x` patch. Nothing
   outside this table is a hard pin.
-- **3.10.x and 3.12.x have no column, and this file carries no coordinates for them.** Say so and
+- **3.10.x and 3.12.x have no column.** Say so and
   read the artifact's POM — [version-lookup.md](version-lookup.md). Do not interpolate from the
   columns either side: each line holds a single release of some libraries and none of others, and
   `gatling-picatinny` has no 3.12 release at all.
@@ -35,21 +35,19 @@ it up.
   and `gatling-jdbc-plugin 0.10.3`. So Java 8 runs a Scala 3.9.x project and nothing else; a Java
   or Kotlin one needs 17 on every line.
 - **`gatling-gradle` is bounded on every line, never open.** Its leading major.minor _is_ the
-  Gatling line, so "or later" moves the project off the line — the same reason the detection
-  section reads the line off this plugin. Maven and sbt number independently, so `+` is safe
-  there.
+  Gatling line, so "or later" moves the project off the line. Maven and sbt number independently,
+  so `+` is safe there.
 - `gatling-maven-plugin 4.8.0` needs **Maven 3.6.3 or newer**; that is a floor on the Maven
   binary, not on the plugin.
 - **Version order does not tell you the line.** `gatling-jdbc-plugin 0.17.1` is a 3.11 release and
   `0.17.1-latest` is not; `0.13.0` is a mis-publish on 3.13.1 sitting between two 3.11 releases;
   there is no `gatling-gradle` `3.11.0`, and the upstream guide's `3.14.01` does not exist. Read
   the POM.
-- **3.14.x and 3.15.x have no Galaxio release** — the skill's single statement of that absence, so
-  confirm it with [version-lookup.md](version-lookup.md) before relying on it. A project keeping
-  any of the four **stays on 3.13.x**: raising Gatling alone resolves and then fails at run time on
-  missing classes, green build and all. That is the dependency's constraint, not the skill's —
-  without those libraries the lines are an ordinary target, Picatinny replaced by
-  [picatinny-substitutes.md](picatinny-substitutes.md).
+- **3.14.x and 3.15.x have no Galaxio release** — confirm with
+  [version-lookup.md](version-lookup.md) before relying on it. A project keeping any of the four
+  **stays on 3.13.x**: raising Gatling alone resolves and then fails at run time on missing
+  classes, green build and all. Without those libraries the lines are an ordinary target,
+  Picatinny replaced by [picatinny-substitutes.md](picatinny-substitutes.md).
 
 Line-to-line changes and the upgrade procedure: [migrate.md](migrate.md). Picatinny's own API:
 [picatinny-0-x.md](picatinny-0-x.md), [picatinny-1-x.md](picatinny-1-x.md).

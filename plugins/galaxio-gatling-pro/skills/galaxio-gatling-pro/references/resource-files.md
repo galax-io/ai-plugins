@@ -1,16 +1,11 @@
 # Resource Files
 
-The four files under the resource root. The layout demands them and no other reference
-specifies their contents, so this is where they live. Identical in every language and build
-tool — only the root moves: `src/test/resources` under sbt and Maven, `src/gatling/resources`
-under Gradle.
-
-For the source tree that consumes them, see [starter-tree.md](starter-tree.md).
+The four files under the resource root. Identical in every language and build tool — only the
+root moves: `src/test/resources` under sbt and Maven, `src/gatling/resources` under Gradle.
 
 ## simulation.conf
 
-Keys are **flat**, not nested under a root object, and durations are HOCON duration strings.
-This is the file every simulation depends on and the one most often written wrong:
+Keys are **flat**, not nested under a root object, and durations are HOCON duration strings:
 
 ```hocon
 // No default: the run must be told which environment to hit.
@@ -37,18 +32,15 @@ Only the keys a simulation actually reads are required. A JDBC-only project need
 When `VAR` is unset the whole assignment is discarded:
 
 - With no preceding default, the key stays undefined and the getter throws at
-  class-initialization — before the first request, with the key named. This is the mandatory
-  shape, and the only one to use for an endpoint or a credential.
-- With a default on the line above, the default survives silently. This is the optional-override
-  shape. Never use it for `baseUrl`: an unexported variable then aims the whole run at
-  `localhost`, and since the skill adds no assertions by default the report comes back green
-  having measured nothing.
+  class-initialization, naming it. The mandatory shape for an endpoint or a credential.
+- With a default on the line above, the default survives silently. The optional-override shape,
+  never for `baseUrl`.
 
-A key that must come from the environment therefore gets no default line. Say so when handing
-the project over: a clone-and-run without the environment exported stops immediately, by design.
+A key that must come from the environment therefore gets no default line. Say so when handing the
+project over: a clone-and-run without the environment exported stops immediately, by design.
 
 Overriding at run time uses system properties. They go through the same parser as the file, so
-both duration spellings work — the only catch is quoting the space:
+both duration spellings work — quote the space:
 
 ```bash
 -DbaseUrl=https://test.example.org -DrampDuration=30s -DstageDuration="2 minutes"
@@ -72,9 +64,8 @@ gatling {
 
 ## logback.xml
 
-Root at `WARN`. The commented logger is the one that leaks: at `DEBUG` it writes every body and
-every header, `Authorization` included, into the log — a debugging aid for one smoke run, never
-a committed default.
+Root at `WARN`. The commented logger leaks: at `DEBUG` it writes every body and every header,
+`Authorization` included, into the log.
 
 ```xml
 <configuration>

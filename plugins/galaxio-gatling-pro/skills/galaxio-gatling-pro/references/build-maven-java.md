@@ -1,8 +1,5 @@
 # Maven + Java
 
-What to add to an existing `pom.xml`. For a whole project see
-[starter-tree.md](starter-tree.md); the numbers are in [versions.md](versions.md).
-
 ## Roots And Commands
 
 | Concern            | Path or command                                        |
@@ -29,8 +26,7 @@ Under `<dependencies>`, all `test`-scoped:
 
 Under `<build><plugins>`: `io.gatling:gatling-maven-plugin`, no configuration.
 
-Nothing else. `maven-compiler-plugin` already compiles `.java` from `src/test/java`, which is
-why Java is the only combination that needs no compiler plugin of its own.
+Nothing else. `maven-compiler-plugin` already compiles `.java` from `src/test/java`.
 
 ## The `_2.13` Suffix
 
