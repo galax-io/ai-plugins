@@ -42,7 +42,7 @@ A Gradle project usually keeps the version literal in `gradle/libs.versions.toml
 
 ## Plugin Floor, The JVM Option, And Gradle 9
 
-Raise `gatling-gradle` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own; only when pinned lower, set `jvmArgs` in the `gatling` block to a list containing that flag.
+Raise `gatling-gradle` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it sets the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, on its own; only when pinned lower, set `jvmArgs` in the `gatling` block to a list containing that flag.
 
 Check the Gradle version before promising `gatlingRun`. `io.gatling.gradle` `3.13.1` fails to register the task on Gradle 9 (`Could not get unknown property 'reportsDir'`) and works on 8.10.2. Repositories without a wrapper have no `./gradlew`; use the `gradle` on PATH and say which version you used.
 

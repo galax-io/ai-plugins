@@ -31,6 +31,6 @@ In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-sbt` past the floor in [versions.md](versions.md) and it adds the JVM option 3.13 requires ([migrate.md](migrate.md)) for you — the first fix. Only when it is pinned lower and cannot move, add the flag to `Gatling / javaOptions`.
+Raise `gatling-sbt` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it adds the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, for you — the first fix. Only when it is pinned lower and cannot move, add the flag to `Gatling / javaOptions`.
 
 On the 3.11 line the flag is unnecessary and there is no floor — follow what the repository declares.

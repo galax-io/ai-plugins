@@ -8,7 +8,7 @@ The `org.galaxio.gatling.javaapi` facade exists on this line too.
 
 ## Coordinates
 
-Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suffix with `%%`; Maven and Gradle need `gatling-picatinny_2.13`. **The `0.x` line spans three Gatling lines**, so the version comes from the project's line: `0.14.x` on 3.9.x, `0.15.0` on 3.10.x, `0.16.0` and up on 3.11.x. See [versions.md](versions.md).
+Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suffix with `%%`; Maven and Gradle need `gatling-picatinny_2.13`. **The `0.x` line spans three Gatling lines**, so the version comes from the project's line: `0.14.x` on 3.9.x, `0.15.0` on 3.10.x, `0.16.0` and up on 3.11.x. See [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md).
 
 **Raising a `0.x` pin can move the Gatling line without changing a single import.**
 
@@ -46,4 +46,4 @@ Every credential goes through a getter — see the Config And Secrets invariant 
 
 ## Raising The Pin
 
-Moving `0.x` to `1.x` is a real API change. From a 3.11 project it is **not** also a Gatling upgrade — most of `1.x` sits on 3.11.x too, so the whole `1.x` API is available without touching the Gatling version. From a 3.9 or 3.10 project it **is** one, because the `0.x` line itself crosses. Check the column in [versions.md](versions.md) before calling it an API upgrade. Crossing onto 3.13.x moves the line from 3.11.x too, and that is [migrate.md](migrate.md) — a decision to confirm with the user rather than a step to take quietly.
+Moving `0.x` to `1.x` is a real API change. From a 3.11 project it is **not** also a Gatling upgrade — most of `1.x` sits on 3.11.x too, so the whole `1.x` API is available without touching the Gatling version. From a 3.9 or 3.10 project it **is** one, because the `0.x` line itself crosses. Check the column in [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md) before calling it an API upgrade. Crossing onto 3.13.x moves the line from 3.11.x too, which makes it a Gatling upgrade — a decision to confirm with the user rather than a step to take quietly. A `0.x` pin left behind on 3.13 resolves and compiles; it fails at run time, and only on the APIs that bind Gatling internals. `startTransaction` throws `NoSuchMethodError` on `CoreComponents.actorSystem()`, the method that left with Akka at 3.12, while a plain `Random*Feeder` keeps working — so a green build proves nothing here.

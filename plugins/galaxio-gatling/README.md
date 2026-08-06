@@ -54,7 +54,8 @@ Then, in the session:
 codex plugin marketplace add galax-io/ai-plugins
 ```
 
-Then `/plugins` to enable it. Invoke the skill with `$galaxio-gatling-pro`.
+Then `/plugins` to enable it. Invoke a skill with `$galaxio-gatling-pro`, `$gatling-migration` or
+`$gatling-versions` — though naming one is rarely needed, since their descriptions do not overlap.
 
 ### Cursor
 
@@ -223,10 +224,10 @@ line a project is on — every one of them declares `gatling-core` at `provided`
 your own Gatling pin decides and the library version is checked against it.
 
 Each library crosses onto a new line at its own release, and the four do not cross together. The
-skill knows where every crossing is and checks a pin against the detected line before touching it;
+skills know where every crossing is and check a pin against the detected line before touching it;
 the numbers live in one place,
-[references/versions.md](skills/galaxio-gatling-pro/references/versions.md), rather than being
-restated here where they could quietly disagree.
+[references/galaxio-artifacts.md](skills/gatling-versions/references/galaxio-artifacts.md), rather
+than being restated here where they could quietly disagree.
 
 ### Picatinny API
 
@@ -272,14 +273,24 @@ Three things worth knowing, because they change what you get:
 ## Layout
 
 ```text
-skills/galaxio-gatling-pro/
+skills/galaxio-gatling-pro/     writing, reviewing and refactoring
   SKILL.md              detection, dispatch, and the invariants every task needs
-  references/           one file per version, build tool, language and protocol
+  references/           one file per build tool, language and protocol
   agents/openai.yaml    Codex UI sidecar
+skills/gatling-versions/        every number, for all three skills
+  SKILL.md              how to read a project's line off its build file
+  references/           Gatling lines, Galaxio artifacts, what is published now
+skills/gatling-migration/       moving between Gatling lines, 3.9.x to 3.15.x
+  SKILL.md              the line deltas and the upgrade procedure
+  references/           the branch for a build that carries Galaxio libraries
 ```
 
-`SKILL.md` lists every reference with the condition that selects it. That dispatch table is
+Each `SKILL.md` lists every reference with the condition that selects it. That dispatch table is
 the one place the tree is enumerated, so adding a reference means editing one file, not two.
+
+`gatling-versions` owns the numbers and the other two link to it, so a coordinate is written once
+and no skill restates a version it does not own. Migration is separate because an upgrade loads
+almost nothing the writing skill needs, and the writing skill loads none of the line deltas.
 
 ## License
 
