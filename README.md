@@ -1,4 +1,4 @@
-# Galaxio Performance Kit
+# Galaxio
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![Plugin Marketplace](https://img.shields.io/badge/type-plugin--marketplace-orange.svg)
@@ -18,9 +18,9 @@ Cursor, Claude Code and Codex manifests from one source file.
 
 ## Plugins
 
-| Plugin                                              | What it does                                                                                                                                                    |
-| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [galaxio-gatling-pro](plugins/galaxio-gatling-pro/) | Gatling JVM performance testing in Galaxio style — Gatling 3.9.x through 3.15.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny, HTTP/JDBC/JMS/Kafka/AMQP |
+| Plugin                                      | What it does                                                                                                                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [galaxio-gatling](plugins/galaxio-gatling/) | Gatling JVM performance testing in Galaxio style — Gatling 3.9.x through 3.15.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny, HTTP/JDBC/JMS/Kafka/AMQP |
 
 ## Install
 
@@ -41,7 +41,7 @@ marketplace — Dashboard → **Plugins** → **Add Marketplace** → **Import f
 install from the UI, or copy a plugin directory into `~/.cursor/plugins/local` and run
 **Developer: Reload Window**.
 
-Then install a plugin by name, for example `galaxio-gatling-pro@galaxio-performance-kit`.
+Then install a plugin by name, for example `galaxio-gatling@galaxio`.
 
 ## Update
 
@@ -50,18 +50,18 @@ reports the plugin as already installed and keeps serving the cached build, howe
 releases have shipped since. Update it explicitly:
 
 ```bash
-claude plugin marketplace update galaxio-performance-kit
+claude plugin marketplace update galaxio
 ```
 
 ```bash
-claude plugin update galaxio-gatling-pro@galaxio-performance-kit
+claude plugin update galaxio-gatling@galaxio
 ```
 
 The first refreshes the catalog, the second replaces the installed copy. It prints
 `Restart to apply changes` — until you restart, the session keeps serving the old skill.
 
-Codex has no `plugin update`: run `codex plugin marketplace upgrade galaxio-performance-kit`
-to refresh the snapshot, then `codex plugin remove` and `codex plugin add` the plugin.
+Codex has no `plugin update`: run `codex plugin marketplace upgrade galaxio` to refresh
+the snapshot, then `codex plugin remove` and `codex plugin add` the plugin.
 Cursor updates a team install from the Plugins UI; a local install is the directory you
 copied into `~/.cursor/plugins/local`, so re-copy it and run **Developer: Reload Window**.
 

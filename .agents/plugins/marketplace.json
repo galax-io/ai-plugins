@@ -1,14 +1,14 @@
 {
-  "name": "galaxio-performance-kit",
+  "name": "galaxio",
   "interface": {
-    "displayName": "Galaxio Performance Kit"
+    "displayName": "Galaxio"
   },
   "plugins": [
     {
-      "name": "galaxio-gatling-pro",
+      "name": "galaxio-gatling",
       "source": {
         "source": "local",
-        "path": "./plugins/galaxio-gatling-pro"
+        "path": "./plugins/galaxio-gatling"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -1,4 +1,4 @@
-# Contributing to Galaxio Performance Kit
+# Contributing to Galaxio
 
 ## 1. What belongs here
 
@@ -130,7 +130,7 @@ claude plugin validate ./plugins/<name> --strict
 
 Then install the plugin in at least one agent and exercise the skill for real:
 
-- Claude Code — `/plugin marketplace add /abs/path/ai-plugins`, then `/plugin install <name>@galaxio-performance-kit`
+- Claude Code — `/plugin marketplace add /abs/path/ai-plugins`, then `/plugin install <name>@galaxio`
 - Cursor — copy `plugins/<name>` into `~/.cursor/plugins/local` (the `.cursor-plugin/plugin.json` manifest must sit at the plugin root), run **Developer: Reload Window**, check the Customize panel
 - Codex — `codex plugin marketplace add /abs/path/ai-plugins`, then `/plugins`, invoke with `$<skill-name>`
 
@@ -140,11 +140,11 @@ nothing, so a reinstall exercises the code you had before your change. Moving it
 both commands, then a restart:
 
 ```bash
-claude plugin marketplace update galaxio-performance-kit
+claude plugin marketplace update galaxio
 ```
 
 ```bash
-claude plugin update <name>@galaxio-performance-kit
+claude plugin update <name>@galaxio
 ```
 
 `marketplace update` refreshes the catalog only. `plugin update` replaces the installed

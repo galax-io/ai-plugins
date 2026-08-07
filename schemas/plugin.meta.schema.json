@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/galax-io/ai-plugins/schemas/plugin.meta.schema.json",
-  "title": "Galaxio Performance Kit plugin source manifest",
+  "title": "Galaxio plugin source manifest",
   "description": "Single authored source of truth for one plugin. The Cursor, Claude Code and Codex manifests are generated from this file by scripts/sync-manifests.mjs.",
   "type": "object",
   "additionalProperties": false,

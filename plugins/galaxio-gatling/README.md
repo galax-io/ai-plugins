@@ -1,4 +1,4 @@
-# Galaxio Gatling Pro
+# Galaxio Gatling
 
 An agent skill for writing, reviewing and upgrading Gatling JVM performance tests in Galaxio
 style. Works unchanged in **Cursor**, **Claude Code** and **Codex**.
@@ -45,7 +45,7 @@ claude plugin marketplace add galax-io/ai-plugins
 Then, in the session:
 
 ```text
-/plugin install galaxio-gatling-pro@galaxio-performance-kit
+/plugin install galaxio-gatling@galaxio
 ```
 
 ### Codex
@@ -62,7 +62,7 @@ Cursor has no CLI for third-party marketplaces. Two supported paths:
 
 - **Team marketplace** — Dashboard → **Plugins** → **Add Marketplace** → **Import from
   Repo**, pointed at `galax-io/ai-plugins`. Members install from the marketplace UI.
-- **Local** — copy `plugins/galaxio-gatling-pro` into `~/.cursor/plugins/local/`, keeping
+- **Local** — copy `plugins/galaxio-gatling` into `~/.cursor/plugins/local/`, keeping
   `.cursor-plugin/plugin.json` at the plugin root, then **Developer: Reload Window**.
 
 ## How it works
