@@ -12,12 +12,14 @@
  *
  * Everything here exists to stop a false green:
  *
- *   - `--bare` skips plugin sync and CLAUDE.md auto-discovery, and the work
- *     tree is outside this repository. Both matter: an installed copy of the
- *     skill would shadow the staged one, and AGENTS.md states which skill
+ *   - The work tree is outside this repository, and user-scope settings are
+ *     not loaded. Both matter: `enabledPlugins` there can enable a published
+ *     copy of the very skill under test, and AGENTS.md states which skill
  *     owns the version matrix — the routing answer would be in the system
- *     prompt before the agent read anything. `--bare` takes ANTHROPIC_API_KEY
- *     or apiKeyHelper, not an OAuth session.
+ *     prompt before the agent read anything. With ANTHROPIC_API_KEY set this
+ *     uses `--bare`, which also skips plugin sync and hooks; on an OAuth
+ *     session `--bare` cannot authenticate, so it falls back to
+ *     `--setting-sources project`, which leaves the user scope unread.
  *   - A nonzero exit from `claude` fails the run. Otherwise a case whose
  *     assertions are satisfied by the fixture scores green with no agent.
  *   - Grep and Glob are withheld. Grep in content mode reads a skill body
@@ -47,6 +49,13 @@ const RUNS = Number(process.env.EVAL_RUNS || 3);
 const REGISTRY = process.env.EVAL_REGISTRY;
 const ONLY = process.argv[2];
 
+// `--bare` is the stronger isolation but authenticates only with an API key.
+// `--setting-sources project` is what an OAuth session can use: the fixture
+// has no project settings, so nothing from the user scope is read.
+const ISOLATION = process.env.ANTHROPIC_API_KEY
+  ? ['--bare']
+  : ['--setting-sources', 'project'];
+
 /** All three skills go into every fixture. The negative assertions are the
  *  reason: "the router did not load" cannot be asserted against a tree where
  *  the router is absent. */
@@ -65,7 +74,7 @@ function askAgent(dir, prompt) {
       [
         '-p',
         prompt,
-        '--bare',
+        ...ISOLATION,
         '--output-format',
         'stream-json',
         '--verbose',
@@ -214,5 +223,5 @@ for (const testCase of cases) {
   }
 }
 
-console.log(`\nwork tree: ${WORK}`);
+console.log(`\nisolation: ${ISOLATION.join(' ')}   work tree: ${WORK}`);
 process.exit(worst === 1 ? 0 : 1);
