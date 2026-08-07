@@ -17,14 +17,14 @@ Read the column for the line the project is on — [gatling-lines.md](gatling-li
 
 Every artifact declares `gatling-core` at `provided` scope, so a pin from a lower column resolves cleanly against whatever Gatling the project declares, and the simulation **compiles**. The failure is at run time, and only on the APIs that bind Gatling internals.
 
-Measured with Picatinny `0.18.2` — a 3.11 release — on Gatling `3.13.5`:
+Picatinny `0.18.2`, a 3.11 release, on Gatling `3.13.5`:
 
 | API                                                                           | Result                                                                                               |
 | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `RandomUUIDFeeder` and the rest of `org.galaxio.gatling.feeders`              | runs                                                                                                 |
 | `startTransaction` / `endTransaction` from `org.galaxio.gatling.transactions` | `java.lang.NoSuchMethodError: 'akka.actor.ActorSystem io.gatling.core.CoreComponents.actorSystem()'` |
 
-That method left with Akka at 3.12, which is exactly what makes a `0.x` pin unusable above it. So a green build proves nothing: a feeder-only project can sit on a wrong pin indefinitely and break the day someone adds a transaction. Read the column, do not infer it from a passing compile.
+That method left with Akka at 3.12. A feeder-only project can sit on a wrong pin indefinitely and break the day someone adds a transaction, so read the column rather than infer it from a passing compile.
 
 ## Which Line A Version Targets
 

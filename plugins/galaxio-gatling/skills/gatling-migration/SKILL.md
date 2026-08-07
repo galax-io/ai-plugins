@@ -5,7 +5,7 @@ description: 'Use when upgrading a Gatling JVM performance project from one Gatl
 
 # Gatling Migration
 
-Moves a project between Gatling lines, anywhere from 3.9.x to 3.15.x. Everything below is Gatling and applies to every project. A build that declares additional libraries against Gatling has a second decision on top, and one branch file covers it.
+Moves a project between Gatling lines, anywhere from 3.9.x to 3.15.x.
 
 ## Establish The Line
 
@@ -22,7 +22,7 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 **Default to 3.13.x.** Say so, and say the higher lines are available on request — it is a default, not a ceiling. Two things override it:
 
-- **Gradle 9.** The plugin cannot register `gatlingRun` below `gatling-gradle 3.14.3.1`. Propose `3.14.3.1`+ instead, or say plainly that the project stays below and drives Gatling by hand — `gatlingClasses` still compiles, and the project's build reference has the command. Do not present that as a free swap: it costs `-rf`, the `--add-opens` flag and both source roots on the classpath, all of which the plugin was supplying.
+- **Gradle 9.** The plugin cannot register `gatlingRun` below `gatling-gradle 3.14.3.1`. Propose `3.14.3.1`+ instead, or say the project stays below and drives Gatling by hand — the build reference has the command, and it is not a free swap: `-rf`, the `--add-opens` flag and both source roots become the caller's.
 - **An `org.galaxio` dependency.** Read the branch file before naming any target.
 
 ## What Each Line Changed
@@ -53,8 +53,6 @@ A change applies from its line upwards: everything at or below the project's lin
 2. **Raise the build plugin.** Maven and sbt: past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md), which is where the `--add-opens` flag starts being passed for you. Gradle: already done by step 1 — and stopping at the table's low end pins the project to `3.13.1` with no way forward, so read that entry as a target.
 3. **Galaxio libraries**, if the build has any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
 4. **Apply every row above the old line and at or below the new one.**
-5. **Compile, then run one smoke simulation** before touching anything else. A compile alone proves nothing — a dependency left on the wrong line still resolves and still compiles, and only the run finds it.
+5. **Compile, then run one smoke simulation** before touching anything else. A dependency left on the wrong line still resolves and still compiles; only the run finds it.
 
-## Do Not Overshoot
-
-The target is the line that was agreed, not the newest one published. Each line above the target brings renames the project did not ask for, and the smoke run is the only thing that catches what the table does not list.
+Stop at the line that was agreed, not the newest one published — every line above it brings renames the project did not ask for.
