@@ -9,6 +9,8 @@
 | Compile            | `./gradlew gatlingClasses`                 |
 | Run one simulation | `./gradlew gatlingRun --simulation <fqcn>` |
 
+**`--simulation` arrives with the 3.11 plugin line.** On `gatling-gradle` 3.9.x the task takes no options, so `gatlingRun` runs every simulation; narrow it with the `simulations` filter in the `gatling` block instead.
+
 `io.gatling.gradle` creates a `gatling` source set and simulations go there, not in `src/test/*`. `testClasses` compiles `src/test/*`, which is empty here, and reports BUILD SUCCESSFUL having built nothing.
 
 ## What To Add
