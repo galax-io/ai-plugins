@@ -4,6 +4,43 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-07
+
+The plugin and the marketplace are both renamed. An install does not follow a rename, so an
+existing one has to be removed and re-added. Nothing else about the plugin moved.
+
+### Changed
+
+- **The plugin is `galaxio-gatling`**, dropping the `-pro`. It carried the name of the single
+  skill inside it, inherited from the standalone repository it was migrated from rather than
+  chosen, and `-pro` marked a tier that does not exist. A plugin is the unit of installation
+  and of always-on context cost, so it is named for its domain — otherwise the split that
+  turns one skill into several leaves the container named after one of its own parts.
+- **The marketplace is `galaxio`**, dropping `-performance-kit`. It named a domain where it
+  should have named a publisher, and the first plugin that is not about performance would have
+  made it wrong — the same failure one level up. An install now reads `galaxio-gatling@galaxio`.
+- **The skill is untouched.** It is still `galaxio-gatling-pro`, so `$galaxio-gatling-pro` in
+  Codex and anything referencing it by name keep working. It is renamed when the split reaches
+  it.
+
+### Migration
+
+Claude Code — uninstall, drop the old marketplace, add the new one:
+
+```bash
+claude plugin uninstall galaxio-gatling-pro@galaxio-performance-kit
+claude plugin marketplace remove galaxio-performance-kit
+claude plugin marketplace add galax-io/ai-plugins
+claude plugin install galaxio-gatling@galaxio
+```
+
+Codex — `codex plugin remove galaxio-gatling-pro`, then `codex plugin marketplace add
+galax-io/ai-plugins` and `codex plugin add galaxio-gatling`.
+
+Cursor — a team install picks the rename up from the Plugins UI. A local install is the
+directory you copied, so delete `~/.cursor/plugins/local/galaxio-gatling-pro`, copy
+`plugins/galaxio-gatling` in its place, and run **Developer: Reload Window**.
+
 ## [1.3.0] - 2026-07-31
 
 `simulation.conf` now answers which keys a run requires, per protocol.

@@ -4,10 +4,12 @@ Guidance for coding agents working in this repository — Claude Code, Cursor, C
 
 ## What this repository is
 
-Galaxio Performance Kit: a plugin marketplace whose plugins install into **Cursor**, **Claude Code** and **Codex** unchanged. A plugin is authored once, in one `plugin.meta.json` plus a `skills/` tree; the six agent-specific manifests are generated. The tooling in `scripts/` exists to keep that single-source promise enforceable.
+Galaxio: a plugin marketplace whose plugins install into **Cursor**, **Claude Code** and **Codex** unchanged. A plugin is authored once, in one `plugin.meta.json` plus a `skills/` tree; the six agent-specific manifests are generated. The tooling in `scripts/` exists to keep that single-source promise enforceable.
 
-`plugins/galaxio-gatling-pro` is the first plugin, migrated from the standalone repository
-`galax-io/galaxio-gatling-pro` (now deprecated and archived).
+`plugins/galaxio-gatling` is the first plugin, migrated from the standalone repository
+`galax-io/galaxio-gatling-pro` (now deprecated and archived). The plugin is the container and
+is named for its domain; its skills are named for their tasks, which is why the skill inside it
+is still `galaxio-gatling-pro` until the split renames it.
 
 ## Commands
 

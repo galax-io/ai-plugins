@@ -1,9 +1,9 @@
 {
-  "name": "galaxio-performance-kit",
+  "name": "galaxio",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Galaxio Performance Kit — plugin marketplace for Cursor, Claude Code and Codex",
+  "description": "Galaxio — plugin marketplace for Cursor, Claude Code and Codex",
   "license": "Apache-2.0",
   "repository": "https://github.com/galax-io/ai-plugins",
   "engines": {

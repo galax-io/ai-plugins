@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/galax-io/ai-plugins/schemas/marketplace.meta.schema.json",
-  "title": "Galaxio Performance Kit marketplace source manifest",
+  "title": "Galaxio marketplace source manifest",
   "description": "Single authored source of truth for the marketplace itself. The three per-agent catalogs are generated from this file by scripts/sync-manifests.mjs.",
   "type": "object",
   "additionalProperties": false,

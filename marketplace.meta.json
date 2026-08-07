@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/marketplace.meta.schema.json",
-  "name": "galaxio-performance-kit",
-  "displayName": "Galaxio Performance Kit",
+  "name": "galaxio",
+  "displayName": "Galaxio",
   "description": "Galaxio engineering workflows packaged as portable agent plugins for Cursor, Claude Code and Codex",
   "owner": {
     "name": "Galaxio Team",
