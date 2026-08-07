@@ -7,21 +7,22 @@ description: 'Use when choosing or checking a version coordinate for a Gatling J
 
 ## Establish The Line First
 
-The project's own Gatling pin is authoritative. Authored build inputs only — a recursive walk of `project/` picks up sbt's stale resolution-cache report:
-
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
   --include='*.toml' --include='*.properties' 'gatling|picatinny' . 2>/dev/null
 ```
 
-Empty? Try `buildSrc/` and a Maven parent POM before concluding there is no project.
+Authored build inputs only — a recursive walk of `project/` picks up sbt's stale resolution-cache report. Empty? Try `buildSrc/` and a Maven parent POM.
 
 **Read the artifact, not the number.**
 
-- `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` — **the Gatling line.**
-- `gatling-maven-plugin` and `gatling-sbt`, both 4.x — build-plugin numbering, saying nothing about the line.
-- `io.gatling.gradle` — the **default** Gatling version, its leading three numbers. `gatling { gatlingVersion = '…' }` overrides it and wins, so read that first and fall back to the plugin only when the block is absent.
-- Any `org.galaxio` artifact — says nothing. Each declares `gatling-core` at `provided` scope, so the project's own pin wins.
+| Found                                                                                      | Means                                      |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` | the line                                   |
+| `gatling { gatlingVersion = '…' }`                                                         | the line, and it wins on Gradle            |
+| `io.gatling.gradle`                                                                        | the line only if no `gatlingVersion` block |
+| `gatling-maven-plugin`, `gatling-sbt`, both 4.x                                            | nothing — independent numbering            |
+| any `org.galaxio` artifact                                                                 | nothing — `gatling-core` is `provided`     |
 
 ## Then Read One File
 
@@ -31,6 +32,6 @@ Empty? Try `buildSrc/` and a Maven parent POM before concluding there is no proj
 | `gatling-picatinny`, `gatling-jdbc-plugin`, `gatling-kafka-plugin`, `gatling-amqp-plugin` | [references/galaxio-artifacts.md](references/galaxio-artifacts.md) |
 | What is published right now                                                               | [references/version-lookup.md](references/version-lookup.md)       |
 
-A project with no `org.galaxio` in its build never needs the second one.
+A project with no `org.galaxio` never needs the second.
 
-A newer release **on the line the project is already on** is a version choice. One that moves the line is an upgrade: put it to the user and follow the migration procedure rather than editing the number.
+A newer release **on the project's own line** is a version choice. One that moves the line is an upgrade: put it to the user and follow the migration procedure.

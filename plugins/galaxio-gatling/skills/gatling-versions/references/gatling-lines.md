@@ -1,6 +1,6 @@
 # Gatling Lines And Build Plugins
 
-Read the column for the project's line. A **range** is closed, both ends fixed. **`+`** is open: floor fixed, top looked up, [version-lookup.md](version-lookup.md). A cell naming no number sets no floor: match what the repository declares, or look it up.
+**range** — closed. **`+`** — floor fixed, top looked up, [version-lookup.md](version-lookup.md). No number — match the repository.
 
 | Artifact               | 3.9.x             | 3.11.x            | 3.13.x            | 3.14.x, 3.15.x                   |
 | ---------------------- | ----------------- | ----------------- | ----------------- | -------------------------------- |
@@ -11,37 +11,28 @@ Read the column for the project's line. A **range** is closed, both ends fixed. 
 | `gatling-gradle`       | `3.9.x`           | `3.11.1`–`3.11.x` | `3.13.1`–`3.13.x` | `3.14.0.2`–`3.14.x`, or `3.15.x` |
 | `gatling-sbt`          | follow the repo   | 4.x               | `4.10.2`+         | above the 3.13 floor, look it up |
 
-- **Gatling itself** is `gatling-charts-highcharts`, `gatling-test-framework` and `gatling-app`, released together — one patch serves all three. `gatling-jms` comes with them; JMS needs no extra dependency.
-- The Scala patch is free: 2.13 is binary-compatible across patches, so any `2.13.x` works.
-- **3.10.x and 3.12.x have no column.** Say so and read the artifact's POM — [version-lookup.md](version-lookup.md). Do not interpolate from the columns either side.
+- **Gatling itself** = `gatling-charts-highcharts` + `gatling-test-framework` + `gatling-app`, one patch for all three. `gatling-jms` ships with them.
+- Any `2.13.x` works — 2.13 is binary-compatible across patches.
+- **3.10.x and 3.12.x have no column.** Read the POM; do not interpolate from either side.
+- No `gatling-gradle` `3.11.0` exists, nor the upstream guide's `3.14.01`.
 
-## The Build Plugin Is Not The Same Kind Of Number On Every Tool
+## Where The Gatling Version Comes From
 
-Every entry is a **floor**: raise past it and pin whatever patch you want. The three tools differ only in where the Gatling version comes from when the project does not say.
+| Tool       | Gatling version                                                             |
+| ---------- | --------------------------------------------------------------------------- |
+| Maven, sbt | the project's own pin; the plugin number says nothing                       |
+| Gradle     | `gatling { gatlingVersion = '…' }`, else the plugin's leading three numbers |
 
-- **Maven and sbt** — the plugin version says nothing about the line, and the project pins Gatling itself.
-- **Gradle** — `gatling { gatlingVersion = '…' }` pins it, and `gatling { scalaVersion = '…' }` the Scala patch. Without that block the plugin's own leading three numbers are the default: `3.13.1` brings Gatling `3.13.1`, and a trailing fourth number is a plugin-only patch that leaves Gatling where it was.
+Read that block first. It wins even across lines — plugin `3.13.1` + `gatlingVersion = '3.15.1'` resolves `3.15.1`. `gatling { scalaVersion }` pins the Scala patch. A trailing fourth number on the plugin is plugin-only and leaves Gatling where it was.
 
-**So on Gradle read `gatlingVersion` first, and the plugin version only if it is absent.** The override wins even across lines — plugin `3.13.1` with `gatlingVersion = '3.15.1'` resolves `3.15.1` — which is how a project ends up running a Gatling its build plugin was never built against.
+## Floors
 
-## The `--add-opens` Floor
+| Floor                                          | On               | Below it                                                                                                                                                           |
+| ---------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| the 3.13 plugin entry above                    | all three        | `IllegalAccessException: module java.base does not open java.lang` — 3.13 needs `--add-opens=java.base/java.lang=ALL-UNNAMED`, and the plugin passes it from there |
+| Maven `3.6.3` for `gatling-maven-plugin 4.8.0` | the Maven binary | resolution fails                                                                                                                                                   |
+| sbt 1.x                                        | sbt              | nothing resolves — `gatling-sbt` is published only as `gatling-sbt_2.12_1.0`                                                                                       |
+| `gatling-gradle 3.14.3.1` under Gradle 9       | the plugin       | `Could not get unknown property 'reportsDir'` — all of 3.11, all of 3.13, 3.14 to `3.14.3`                                                                         |
+| `gatling-gradle 3.11.1` for `--simulation`     | the plugin       | 3.9.x `gatlingRun` takes no options; plain `gatlingRun` runs every simulation                                                                                      |
 
-3.13 needs `--add-opens=java.base/java.lang=ALL-UNNAMED` to generate its report. Raise the build plugin to the 3.13 figure above and it passes the flag itself. One patch below, the run dies on `java.lang.IllegalAccessException: module java.base does not open java.lang to unnamed module`.
-
-`gatling-maven-plugin 4.8.0` needs **Maven 3.6.3 or newer** — a floor on the Maven binary, not on the plugin.
-
-## sbt 1.x Only
-
-`gatling-sbt` is published as `gatling-sbt_2.12_1.0`, cross-built for sbt 1.0 and nothing else. No sbt 2.x artifact exists, so a project on sbt 2 cannot resolve the plugin at all. Pin sbt 1.x in `project/build.properties`.
-
-## Gradle 9 Starts At `gatling-gradle 3.14.3.1`
-
-Below it the plugin fails to register `gatlingRun` on Gradle 9 — `Could not get unknown property 'reportsDir' for root project`. That covers the whole 3.11 line, the whole 3.13 line including its latest patch, and 3.14 up to `3.14.3`.
-
-This is a floor on the **plugin**, not on Gatling. A Gradle 9 project stays on any line it likes by raising the plugin to `3.14.3.1`+ and pinning `gatling { gatlingVersion = '…' }` — plugin `3.14.3.1` with `gatlingVersion = '3.13.5'` runs on Gradle 9 and resolves `3.13.5`.
-
-Only when the plugin cannot move is the fallback needed: `gatlingClasses` still compiles, and the build reference for the project's language has the command to run Gatling by hand — it needs `-rf`, the `--add-opens` flag and both source roots, none of which the plugin is there to supply.
-
-## Version Order Does Not Tell You The Line
-
-There is no `gatling-gradle` `3.11.0`, and the upstream guide's `3.14.01` does not exist. Read the POM before trusting a number that merely looks next in sequence — [version-lookup.md](version-lookup.md).
+The Gradle 9 floor is on the plugin, not on Gatling: raise the plugin and pin `gatlingVersion` to stay on the line. Only when the plugin cannot move, run Gatling by hand — the build reference has the command.

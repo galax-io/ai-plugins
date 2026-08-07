@@ -7,50 +7,55 @@ description: 'Use when upgrading a Gatling JVM performance project from one Gatl
 
 ## Establish The Line
 
-Authored build inputs only — a recursive walk of `project/` picks up sbt's stale resolution-cache report:
-
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
   --include='*.toml' --include='*.properties' 'gatling' . 2>/dev/null
 ```
 
-`gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app` and `${gatling.version}` name the line. `gatling-maven-plugin` and `gatling-sbt` do not — they number independently. On Gradle, `gatling { gatlingVersion = '…' }` names it and wins; `io.gatling.gradle`'s own leading three numbers are only the default, used when that block is absent.
+Authored build inputs only — a recursive walk of `project/` picks up sbt's stale resolution-cache report.
+
+| Found                                                                                      | Means                                      |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` | the line                                   |
+| `gatling { gatlingVersion = '…' }`                                                         | the line, and it wins on Gradle            |
+| `io.gatling.gradle`                                                                        | the line only if no `gatlingVersion` block |
+| `gatling-maven-plugin`, `gatling-sbt`                                                      | nothing — they number independently        |
 
 ## Choose The Target
 
-**Default to 3.13.x**, and say it is a default, not a ceiling. Two overrides:
+**Default 3.13.x**, stated as a default and not a ceiling. Two overrides:
 
-- **Gradle 9** — `gatlingRun` will not register below `gatling-gradle 3.14.3.1`. That is a floor on the plugin, not on Gatling: raise the plugin and keep the line with `gatling { gatlingVersion = '…' }`. Only when the plugin cannot move does the project drive Gatling by hand, which the build reference spells out.
-- **An `org.galaxio` dependency** — read [references/galaxio-upgrade.md](references/galaxio-upgrade.md) before naming any target.
+- **Gradle 9** — `gatlingRun` will not register below `gatling-gradle 3.14.3.1`. Raise the plugin and keep the line with `gatlingVersion`; the floor is on the plugin, not on Gatling.
+- **`org.galaxio` in the build** — [references/galaxio-upgrade.md](references/galaxio-upgrade.md) before naming any target.
 
 ## What Each Line Changed
 
-| Line | Change                                           | Effect                                                                                                                                              |
-| ---- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3.11 | `${}` removed                                    | `#{}` is the only expression language; on 3.9.x and 3.10.x both still compile                                                                       |
-| 3.11 | `heavisideUsers` removed                         | Renamed to `stressPeakUsers`                                                                                                                        |
-| 3.11 | `WhiteList` / `BlackList` removed                | Renamed to `AllowList` / `DenyList`                                                                                                                 |
-| 3.12 | Akka dropped                                     | Remove the dependency; nothing in the DSL replaces it                                                                                               |
-| 3.12 | Graphite writer dropped                          | **Silently** — an unknown writer in `gatling.conf` is accepted, the run stays green, no data is exported. Remove it and route the metrics elsewhere |
-| 3.12 | `stopInjector` / `stopInjectorIf` renamed        | `stopLoadGenerator` / `stopLoadGeneratorIf`, same semantics. **No overlap**                                                                         |
-| 3.13 | Report generator needs `--add-opens`             | `--add-opens=java.base/java.lang=ALL-UNNAMED`; raise the build plugin and it is passed for you                                                      |
-| 3.13 | PROXY protocol emulation added                   | `proxyProtocolSourceIpV4Address` and `proxyProtocolSourceIpV6Address`                                                                               |
-| 3.13 | `jmsProperty` check added                        | Asserts on a property of an inbound JMS message                                                                                                     |
-| 3.14 | `javax.jms` → `jakarta.jms`                      | Import rewrite in JMS code, plus a broker client speaking the Jakarta API. **No overlap**                                                           |
-| 3.15 | Feeder loading modes `eager` and `batch` removed | Delete any explicit loading mode on a file-based feeder; the default is the only behaviour                                                          |
-| 3.15 | `httpConcurrentRequests` added                   | Concurrent requests without a parent request                                                                                                        |
-| 3.15 | `logActualValueInError` added                    | Suppresses the actual value in a failing check message, to limit error cardinality                                                                  |
+| Line | Change                                    | Effect                                                                                                                                              |
+| ---- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3.11 | `${}` removed                             | `#{}` only; on 3.9.x and 3.10.x both compile                                                                                                        |
+| 3.11 | `heavisideUsers` removed                  | → `stressPeakUsers`                                                                                                                                 |
+| 3.11 | `WhiteList` / `BlackList` removed         | → `AllowList` / `DenyList`                                                                                                                          |
+| 3.12 | Akka dropped                              | Remove the dependency; nothing replaces it                                                                                                          |
+| 3.12 | Graphite writer dropped                   | **Silently** — an unknown writer in `gatling.conf` is accepted, the run stays green, no data is exported. Remove it and route the metrics elsewhere |
+| 3.12 | `stopInjector` / `stopInjectorIf` renamed | → `stopLoadGenerator` / `stopLoadGeneratorIf`. **No overlap**                                                                                       |
+| 3.13 | Report generator needs `--add-opens`      | `--add-opens=java.base/java.lang=ALL-UNNAMED`; the build plugin passes it from its 3.13 floor                                                       |
+| 3.13 | PROXY emulation added                     | `proxyProtocolSourceIpV4Address`, `proxyProtocolSourceIpV6Address`                                                                                  |
+| 3.13 | `jmsProperty` check added                 | Asserts on a property of an inbound JMS message                                                                                                     |
+| 3.14 | `javax.jms` → `jakarta.jms`               | Import rewrite, plus a broker client on the Jakarta API. **No overlap**                                                                             |
+| 3.15 | Feeder modes `eager` and `batch` removed  | Delete any explicit loading mode on a file-based feeder                                                                                             |
+| 3.15 | `httpConcurrentRequests` added            | Concurrent requests with no parent request                                                                                                          |
+| 3.15 | `logActualValueInError` added             | Drops the actual value from a failing check message                                                                                                 |
 
-A change applies from its line upwards and nothing stops: 3.11.x → 3.13.x applies all three 3.12 rows.
+Changes apply from their line upwards and nothing stops: 3.11.x → 3.13.x applies all three 3.12 rows.
 
-**No overlap** means no version compiles both spellings, so that edit lands in the same commit as the version bump.
+**No overlap** — no version compiles both spellings, so that edit lands in the same commit as the version bump.
 
 ## Procedure
 
-1. **Raise Gatling onto the target line** — the project's own pin on Maven and sbt, `gatling { gatlingVersion = '…' }` on Gradle. A Gradle project with no such block takes the plugin's default, so add one rather than relying on the plugin number to carry the line.
-2. **Raise the build plugin** past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md), which is where `--add-opens` starts being passed for you. It is a floor on all three tools, and on Gradle it moves independently of step 1.
-3. **Galaxio libraries**, if the build has any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
-4. **Apply every row above the old line and at or below the new one.**
-5. **Compile, then run one smoke simulation.** A dependency left on the wrong line still resolves and still compiles; only the run finds it.
+1. Raise Gatling — the project's pin on Maven and sbt, `gatling { gatlingVersion = '…' }` on Gradle. Add the block rather than leaning on the plugin default.
+2. Raise the build plugin past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md). It moves independently of step 1 on all three tools.
+3. `org.galaxio` libraries, if any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
+4. Apply every row above the old line and at or below the new one.
+5. Compile, then run one smoke simulation. A dependency left on the wrong line still resolves and still compiles; only the run finds it.
 
-Stop at the line that was agreed, not the newest published — every line above it brings renames the project did not ask for.
+Stop at the agreed line, not the newest published.
