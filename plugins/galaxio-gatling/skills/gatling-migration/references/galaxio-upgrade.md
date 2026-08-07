@@ -7,22 +7,22 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
   --include='*.toml' --include='*.properties' 'org\.galaxio' . 2>/dev/null
 ```
 
-Four artifacts qualify: `gatling-picatinny`, `gatling-jdbc-plugin`, `gatling-kafka-plugin`, `gatling-amqp-plugin`. They version independently and do not cross a line together, so each is checked on its own.
+`gatling-picatinny`, `gatling-jdbc-plugin`, `gatling-kafka-plugin` and `gatling-amqp-plugin` version independently and do not cross a line together, so each is checked on its own.
 
 **Whether a release exists for the target line is looked up, not remembered** — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md) has the table and the query. A stored "no" expires the day the release lands.
 
 ## Three Outcomes
 
-**1 — Releases exist for the target line.** Name the version for each artifact and propose them together with the Gatling bump. Raise nothing before the user confirms: crossing a line is proposed, never done on the way past. If the Picatinny pin was `0.x` the API changes too, and that is a separate review.
+**1 — Releases exist for the target line.** Name the version for each artifact and propose them with the Gatling bump. Raise nothing before the user confirms. A `0.x` Picatinny pin also changes API, which is a separate review.
 
-**2 — No releases for the target line.** The project cannot follow. State the consequence, not the omission: raising Gatling alone leaves the Galaxio pin resolving cleanly — every artifact declares `gatling-core` at `provided` scope — and the simulation still **compiles**. It dies at run time, and only on the APIs that bind Gatling internals, so a green build is not evidence. Measured: Picatinny `0.18.2` on Gatling `3.13.5` runs a `RandomUUIDFeeder` fine and throws `NoSuchMethodError` on `CoreComponents.actorSystem()` the moment a transaction is used.
+**2 — No releases for the target line.** Raising Gatling alone leaves the Galaxio pin resolving cleanly — every artifact declares `gatling-core` at `provided` scope — and the simulation still **compiles**. It dies at run time, and only on the APIs binding Gatling internals: Picatinny `0.18.2` on Gatling `3.13.5` feeds fine and throws `NoSuchMethodError` on `CoreComponents.actorSystem()` at the first transaction.
 
-So the sentence is not "Galaxio was left alone" but **"Galaxio was left alone, and in this state the project will fail at run time — possibly not on the first simulation."** Then hand the decision back: stop at the last line the libraries support, or go on knowingly and drop them.
+Say **"Galaxio was left alone, and the project will fail at run time — possibly not on the first simulation"**, not "Galaxio was left alone". Then hand the decision back: stop at the last supported line, or go on knowingly and drop the libraries.
 
-**3 — Gradle 9, and the build carries Galaxio.** There is no working line. 3.13 is where the Galaxio libraries stop, and `gatling-gradle` cannot register `gatlingRun` on Gradle 9 below `3.14.3.1` — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). Say that both directions are closed before proposing anything, then offer the three real options: drop to Gradle 8 and take 3.13, drop the Galaxio libraries and take 3.14.3.1+, or stay on 3.13 under Gradle 9 and drive Gatling by hand, which the project's build reference spells out and which costs `-rf`, the `--add-opens` flag and both source roots on the classpath.
+**3 — Gradle 9 and Galaxio together.** No line works: 3.13 is where the libraries stop, and `gatlingRun` will not register below `gatling-gradle 3.14.3.1` — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). Say both directions are closed, then offer the three options — Gradle 8 with 3.13, drop the libraries and take 3.14.3.1+, or stay on 3.13 and drive Gatling by hand as the build reference spells out.
 
 ## After The Bump
 
-Each artifact moves at its own release, so step 3 of the procedure is per artifact, not one edit. Outside sbt every one of them carries the explicit `_2.13` suffix; sbt appends it with `%%`.
+Each artifact moves at its own release, so step 3 is per artifact. Outside sbt each carries the explicit `_2.13`; sbt appends it with `%%`.
 
-The smoke run is what proves this branch, because everything it warns about survives compilation.
+The smoke run is what proves this branch — everything above survives compilation.

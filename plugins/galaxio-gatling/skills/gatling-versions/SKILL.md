@@ -5,11 +5,9 @@ description: 'Use when choosing or checking a version coordinate for a Gatling J
 
 # Gatling Versions
 
-Every number for a Gatling project lives here. Build files carry shape, not versions.
-
 ## Establish The Line First
 
-The project's own Gatling pin is authoritative. Read it out of the authored build inputs — a recursive walk of `project/` picks up sbt's own stale resolution-cache report:
+The project's own Gatling pin is authoritative. Authored build inputs only — a recursive walk of `project/` picks up sbt's stale resolution-cache report:
 
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
@@ -18,11 +16,11 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 Empty? Try `buildSrc/` and a Maven parent POM before concluding there is no project.
 
-**Read the artifact, not the number.** Three numbering schemes come back and only one of them names the line:
+**Read the artifact, not the number.**
 
 - `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` — **the Gatling line.**
 - `gatling-maven-plugin` and `gatling-sbt`, both 4.x — build-plugin numbering, saying nothing about the line.
-- `io.gatling.gradle` — its leading three numbers **are** the Gatling version. A Gradle project often names nothing else and takes what the plugin brings; treat that as the line and say so.
+- `io.gatling.gradle` — its leading three numbers **are** the Gatling version. A Gradle project often names nothing else; treat that as the line and say so.
 - Any `org.galaxio` artifact — says nothing. Each declares `gatling-core` at `provided` scope, so the project's own pin wins.
 
 ## Then Read One File
@@ -35,6 +33,4 @@ Empty? Try `buildSrc/` and a Maven parent POM before concluding there is no proj
 
 A project with no `org.galaxio` in its build never needs the second one.
 
-## Crossing A Line Is Not A Version Choice
-
-Taking a newer release **on the line the project is already on** is a version choice. Taking one that moves the line is an upgrade, with renames and removals attached — put it to the user first, and follow the migration procedure rather than editing the number.
+A newer release **on the line the project is already on** is a version choice. One that moves the line is an upgrade: put it to the user and follow the migration procedure rather than editing the number.
