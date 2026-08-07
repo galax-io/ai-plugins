@@ -15,4 +15,4 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 **The wording for the second row matters.** Not "Galaxio was left alone" but **"Galaxio was left alone, and the project will fail at run time — possibly not on the first simulation."** Raising Gatling alone leaves the pin resolving cleanly and the simulation compiling; it dies only on APIs binding Gatling internals — Picatinny `0.18.2` on Gatling `3.13.5` feeds fine and throws `NoSuchMethodError` on `CoreComponents.actorSystem()` at the first transaction.
 
-Step 3 of the procedure is per artifact. Outside sbt each carries the explicit `_2.13`; sbt appends it with `%%`. The smoke run is what proves this branch — everything above survives compilation.
+Outside sbt each carries the explicit `_2.13`; sbt appends it with `%%`. The smoke run is what proves this branch.

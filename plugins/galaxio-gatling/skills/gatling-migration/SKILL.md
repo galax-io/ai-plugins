@@ -23,9 +23,9 @@ Authored build inputs only — a recursive walk of `project/` picks up sbt's sta
 
 ## Choose The Target
 
-**Default 3.13.x**, stated as a default and not a ceiling. Two overrides:
+**Default 3.13.x**, not a ceiling. Two overrides:
 
-- **Gradle 9** — `gatlingRun` will not register below `gatling-gradle 3.14.3.1`. Raise the plugin and keep the line with `gatlingVersion`; the floor is on the plugin, not on Gatling.
+- **Gradle 9** — `gatlingRun` throws below `gatling-gradle 3.14.3.1`. Raise the plugin and keep the line with `gatlingVersion`; the floor is on the plugin, not on Gatling.
 - **`org.galaxio` in the build** — [references/galaxio-upgrade.md](references/galaxio-upgrade.md) before naming any target.
 
 ## What Each Line Changed
@@ -38,7 +38,7 @@ Authored build inputs only — a recursive walk of `project/` picks up sbt's sta
 | 3.12 | Akka dropped                              | Remove the dependency; nothing replaces it                                                                                                          |
 | 3.12 | Graphite writer dropped                   | **Silently** — an unknown writer in `gatling.conf` is accepted, the run stays green, no data is exported. Remove it and route the metrics elsewhere |
 | 3.12 | `stopInjector` / `stopInjectorIf` renamed | → `stopLoadGenerator` / `stopLoadGeneratorIf`. **No overlap**                                                                                       |
-| 3.13 | Report generator needs `--add-opens`      | `--add-opens=java.base/java.lang=ALL-UNNAMED`; the build plugin passes it from its 3.13 floor                                                       |
+| 3.13 | Report generator needs `--add-opens`      | `--add-opens=java.base/java.lang=ALL-UNNAMED`; the build plugin passes it from its 3.13 entry                                                       |
 | 3.13 | PROXY emulation added                     | `proxyProtocolSourceIpV4Address`, `proxyProtocolSourceIpV6Address`                                                                                  |
 | 3.13 | `jmsProperty` check added                 | Asserts on a property of an inbound JMS message                                                                                                     |
 | 3.14 | `javax.jms` → `jakarta.jms`               | Import rewrite, plus a broker client on the Jakarta API. **No overlap**                                                                             |
@@ -53,7 +53,7 @@ Changes apply from their line upwards and nothing stops: 3.11.x → 3.13.x appli
 ## Procedure
 
 1. Raise Gatling — the project's pin on Maven and sbt, `gatling { gatlingVersion = '…' }` on Gradle. Add the block rather than leaning on the plugin default.
-2. Raise the build plugin past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md). It moves independently of step 1 on all three tools.
+2. Raise the build plugin past the **target line's** entry in [gatling-lines.md](../gatling-versions/references/gatling-lines.md), not the 3.13 one unless 3.13 is the target. It moves independently of step 1, so on Gradle do not let a higher plugin drag the line with it.
 3. `org.galaxio` libraries, if any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
 4. Apply every row above the old line and at or below the new one.
 5. Compile, then run one smoke simulation. A dependency left on the wrong line still resolves and still compiles; only the run finds it.

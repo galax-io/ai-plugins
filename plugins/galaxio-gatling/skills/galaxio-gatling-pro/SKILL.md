@@ -17,8 +17,8 @@ for Gatling, Scala, Java and the build plugins,
 [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for the four Galaxio
 libraries. Moving a project from one Gatling line to another is a migration, not a version choice.
 
-Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, Picatinny per
-[version-lookup.md](../gatling-versions/references/version-lookup.md).
+Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, and the 3.13
+column of [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for Picatinny.
 
 **An existing repository outranks this skill.** Follow its conventions and version; add, never
 restructure.
@@ -70,8 +70,8 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 **A Galaxio version does not tell you the Gatling line.** Every Galaxio artifact declares
 `gatling-core` at `provided` scope, so the project's own pin is authoritative. Nor does version
-order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM
-with [version-lookup.md](../gatling-versions/references/version-lookup.md).
+order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM —
+the query is in [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md).
 
 ## Dispatch
 

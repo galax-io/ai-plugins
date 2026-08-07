@@ -48,14 +48,20 @@ Raise `gatling-gradle` past the floor in [gatling-lines.md](../../gatling-versio
 
 **The plugin version is not the Gatling version.** `gatling { gatlingVersion = '…' }` pins Gatling and wins; the plugin's own number is only the default when that block is absent, and it moves independently. That is what lets a project take a newer plugin for its Gradle support while staying on the line its libraries need.
 
-Check the Gradle version before promising `gatlingRun`. On Gradle 9 `io.gatling.gradle` fails to register the task below `3.14.3.1` — the whole 3.11 and 3.13 lines, latest patches included — with `Could not get unknown property 'reportsDir'`. Everything works on 8.10.2. Repositories without a wrapper have no `./gradlew`; use the `gradle` on PATH and say which version you used.
+Check the Gradle version before promising `gatlingRun`. On Gradle 9 `io.gatling.gradle` below `3.14.3.1` throws `Could not get unknown property 'reportsDir'` when the run task is realized — the whole 3.11 and 3.13 lines, latest patches included. Everything works on 8.10.2. The floor is on the plugin, not on Gatling: raise it and pin `gatling { gatlingVersion }` to stay on the line.
 
-`gatlingClasses` still compiles there, because the plugin only breaks when the run task is realized. Running the simulation by hand then means supplying the three things the plugin used to:
+`gatlingClasses` still compiles below the floor, so a project that cannot raise the plugin runs the simulation by hand. Add the task — no stock project has one — then use the path it prints:
+
+```groovy
+tasks.register('gatlingCp') {
+  def cp = configurations.gatlingRuntimeClasspath
+  doLast { println cp.asPath }
+}
+```
 
 ```bash
-gradle -q gatlingCp        # a task printing configurations.gatlingRuntimeClasspath.asPath
 java --add-opens=java.base/java.lang=ALL-UNNAMED \
-  -cp "build/classes/kotlin/gatling:src/gatling/resources:<that classpath>" \
+  -cp "build/classes/kotlin/gatling:src/gatling/resources:$(gradle -q gatlingCp)" \
   io.gatling.app.Gatling -s <fqcn> -rf build/reports/gatling
 ```
 

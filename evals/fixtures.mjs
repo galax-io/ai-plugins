@@ -58,10 +58,12 @@ export function render(line, dest, registry = REGISTRY) {
       `GatlingPicatinnyVersion=${picatinny}`,
       '-q',
     ],
-    { stdio: 'ignore' },
+    { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' },
   );
 
-  chmodSync(path.join(dest, 'gradlew'), 0o755);
+  const wrapper = path.join(dest, 'gradlew');
+  if (!existsSync(wrapper)) throw new Error(`render produced no gradlew in ${dest}`);
+  chmodSync(wrapper, 0o755);
 
   for (const proto of ['Amqp', 'Jdbc', 'Kafka']) {
     rmSync(path.join(dest, PKG, `cases/${proto}Actions.scala`), { force: true });
@@ -154,11 +156,9 @@ class Legacy extends Simulation {
 }
 `,
     );
-    edit(
-      path.join(dest, 'src/gatling/resources/gatling.conf'),
-      (t) =>
-        `${t}\ngatling {\n  data {\n    writers = [console, file, graphite]\n    graphite { host = "localhost", port = 2003 }\n  }\n}\n`,
-    );
+    // No graphite seed: the stock gatling.conf already enables the writer and
+    // ships the block, on every line. Appending a second copy would give the
+    // agent two edit sites for one row and prove nothing extra.
   }
 }
 

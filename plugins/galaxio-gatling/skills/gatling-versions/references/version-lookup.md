@@ -12,7 +12,7 @@ curl -s https://repo1.maven.org/maven2/io/gatling/gatling-maven-plugin/maven-met
 curl -s https://repo1.maven.org/maven2/io/gatling/gatling-sbt_2.12_1.0/maven-metadata.xml
 ```
 
-Gatling's own artifacts sit under `io/gatling` — `gatling-core`, `gatling-test-framework`, `gatling-app`, and `io/gatling/highcharts/gatling-charts-highcharts`. `io/gatling/gatling-maven-plugin` is plain; the sbt plugin is cross-built at `io/gatling/gatling-sbt_2.12_1.0`. `io.gatling.gradle` is a plugin marker rather than a library, so it sits on the Gradle plugin portal:
+`gatling-core`, `gatling-test-framework` and `gatling-app` sit under `io/gatling` too. `io.gatling.gradle` is a plugin marker, not a library, so it sits on the Gradle plugin portal:
 
 ```bash
 curl -s https://plugins.gradle.org/m2/io/gatling/gradle/io.gatling.gradle.gradle.plugin/maven-metadata.xml

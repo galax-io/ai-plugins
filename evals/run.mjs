@@ -10,17 +10,23 @@
  * rather than scored — otherwise a template regression reads as a skill
  * regression.
  *
- * Model output is not deterministic, so a case is a rate over N runs. The
- * negative assertions are the point: "read what it needed" is pleasant,
- * "read nothing else" is the measured saving, and a description that
- * overlaps its siblings fails only there.
+ * Everything here exists to stop a false green:
  *
- * Bash is withheld, so the agent edits and does not build. The build is
- * ours, before and after, which keeps a wrong verdict from hiding behind a
- * green run the agent narrated but never performed.
+ *   - `--bare` skips plugin sync and CLAUDE.md auto-discovery, and the work
+ *     tree is outside this repository. Both matter: an installed copy of the
+ *     skill would shadow the staged one, and AGENTS.md states which skill
+ *     owns the version matrix — the routing answer would be in the system
+ *     prompt before the agent read anything. `--bare` takes ANTHROPIC_API_KEY
+ *     or apiKeyHelper, not an OAuth session.
+ *   - A nonzero exit from `claude` fails the run. Otherwise a case whose
+ *     assertions are satisfied by the fixture scores green with no agent.
+ *   - Grep and Glob are withheld. Grep in content mode reads a skill body
+ *     without naming a file, which would make every `readsNone` vacuous.
+ *   - Bash is withheld, so the agent edits and does not build. The build is
+ *     ours, before and after.
+ *   - An unmatched case filter is an error, not an empty green run.
  *
- * Not wired into CI — it costs money and it flickers. Run it by hand before
- * a merge, and after touching any `description`.
+ * Model output is not deterministic, so a case is a rate over N runs.
  *
  *   node evals/run.mjs                 all cases, 3 runs each
  *   node evals/run.mjs from-311        one case
@@ -28,7 +34,8 @@
  *   EVAL_REGISTRY=local:/path          a template registry other than the default
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compiles, render } from './fixtures.mjs';
@@ -36,7 +43,6 @@ import { compiles, render } from './fixtures.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
 const SKILLS = path.join(ROOT, 'plugins/galaxio-gatling/skills');
-const WORK = path.join(HERE, '.work');
 const RUNS = Number(process.env.EVAL_RUNS || 3);
 const REGISTRY = process.env.EVAL_REGISTRY;
 const ONLY = process.argv[2];
@@ -51,18 +57,20 @@ function stageSkills(dir) {
 }
 
 function askAgent(dir, prompt) {
-  let raw;
+  let raw = '';
+  let crashed = null;
   try {
     raw = execFileSync(
       'claude',
       [
         '-p',
         prompt,
+        '--bare',
         '--output-format',
         'stream-json',
         '--verbose',
         '--allowedTools',
-        'Read Glob Grep Skill Edit Write',
+        'Read Skill Edit Write',
         '--permission-mode',
         'acceptEdits',
       ],
@@ -70,10 +78,13 @@ function askAgent(dir, prompt) {
     );
   } catch (error) {
     raw = `${error.stdout || ''}${error.stderr || ''}`;
+    // A plain-text CLI failure never reaches the stream-json parser below, so
+    // record it here or the run scores on a fixture no agent ever touched.
+    crashed = (raw.trim().split('\n').pop() || `claude exited ${error.status}`).slice(0, 160);
   }
 
   const opened = [];
-  let failed = null;
+  let failed = crashed;
   for (const line of raw.split('\n')) {
     if (!line.trim()) continue;
     let event;
@@ -85,12 +96,16 @@ function askAgent(dir, prompt) {
     if (event.type === 'assistant') {
       for (const block of event.message?.content || []) {
         if (block.type !== 'tool_use') continue;
-        // Read names a path; Skill names a skill. Both are "the agent opened this".
-        const target = block.input?.file_path || block.input?.skill;
-        if (target) opened.push(String(target));
+        // Read names a path, Skill names a skill. Both go in unnormalized and
+        // the expectations are bare skill names, so either form matches.
+        for (const key of ['file_path', 'skill', 'path']) {
+          if (block.input?.[key]) opened.push(String(block.input[key]));
+        }
       }
     }
-    if (event.type === 'result' && event.is_error) failed = (event.result || 'error').slice(0, 120);
+    if (event.type === 'result' && event.is_error) {
+      failed = failed || (event.result || 'error').slice(0, 160);
+    }
   }
   return { opened, failed };
 }
@@ -116,20 +131,25 @@ function checkFiles(dir, expectations) {
     }
     const text = readFileSync(full, 'utf8');
     for (const pattern of matches) {
-      if (!new RegExp(pattern).test(text)) problems.push(`${file} lacks /${pattern}/`);
+      if (!new RegExp(pattern, 'm').test(text)) problems.push(`${file} lacks /${pattern}/`);
     }
     for (const pattern of notMatches) {
-      if (new RegExp(pattern).test(text)) problems.push(`${file} still has /${pattern}/`);
+      if (new RegExp(pattern, 'm').test(text)) problems.push(`${file} still has /${pattern}/`);
     }
   }
   return problems;
 }
 
-const cases = JSON.parse(readFileSync(path.join(HERE, 'cases.json'), 'utf8')).filter(
-  (c) => !ONLY || c.id === ONLY,
-);
+const all = JSON.parse(readFileSync(path.join(HERE, 'cases.json'), 'utf8'));
+const cases = ONLY ? all.filter((c) => c.id === ONLY) : all;
+if (cases.length === 0) {
+  console.error(`no case named "${ONLY}" — have: ${all.map((c) => c.id).join(', ')}`);
+  process.exit(2);
+}
 
-rmSync(WORK, { recursive: true, force: true });
+// Outside the repository on purpose: a work tree inside it puts this repo's
+// CLAUDE.md, and through it AGENTS.md, into the agent's context.
+const WORK = mkdtempSync(path.join(os.tmpdir(), 'gatling-eval-'));
 let worst = 1;
 
 for (const testCase of cases) {
@@ -139,7 +159,13 @@ for (const testCase of cases) {
 
   for (let i = 0; i < RUNS && !broken; i++) {
     const dir = path.join(WORK, `${testCase.id}-${i + 1}`);
-    render(testCase.line, dir, REGISTRY);
+    try {
+      render(testCase.line, dir, REGISTRY);
+    } catch (error) {
+      console.log(`BROKEN ${testCase.id.padEnd(12)} render failed: ${error.message.slice(0, 120)}`);
+      broken = true;
+      break;
+    }
 
     if (!compiles(dir)) {
       console.log(`BROKEN ${testCase.id.padEnd(12)} fixture does not compile before the agent runs`);
@@ -162,9 +188,12 @@ for (const testCase of cases) {
       ...Object.keys(before)
         .filter((f) => before[f] !== after[f])
         .map((f) => `${f} was edited and should not have been`),
+      ...(testCase.reads || [])
+        .filter((s) => !opened.some((o) => o.includes(s)))
+        .map((s) => `never opened ${s}`),
       ...(testCase.readsNone || [])
-        .filter((f) => opened.some((o) => o.includes(f)))
-        .map((f) => `opened ${f}`),
+        .filter((s) => opened.some((o) => o.includes(s)))
+        .map((s) => `opened ${s}`),
     ];
     if (problems.length === 0) passes++;
     else failures.push(`run ${i + 1}: ${problems.join('; ')}`);
@@ -185,4 +214,5 @@ for (const testCase of cases) {
   }
 }
 
+console.log(`\nwork tree: ${WORK}`);
 process.exit(worst === 1 ? 0 : 1);

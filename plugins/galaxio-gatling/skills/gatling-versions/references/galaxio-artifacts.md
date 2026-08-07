@@ -2,12 +2,15 @@
 
 **range** — closed. **`+`** — top looked up. **bare version** — the only release on that line. **none** — no release targets it.
 
-| Artifact               | 3.9.x             | 3.11.x            | 3.13.x    | 3.14.x, 3.15.x |
-| ---------------------- | ----------------- | ----------------- | --------- | -------------- |
-| `gatling-picatinny`    | `0.14.0`–`0.14.1` | `0.16.0`–`1.10.4` | `1.12.0`+ | **none**       |
-| `gatling-jdbc-plugin`  | `0.10.3`          | `0.12.0`–`0.17.2` | `0.19.0`+ | **none**       |
-| `gatling-kafka-plugin` | `0.12.0`          | `0.14.0`–`0.20.5` | `0.22.0`+ | **none**       |
-| `gatling-amqp-plugin`  | `0.10.3`          | `0.12.0`–`1.0.4`  | `1.2.0`+  | **none**       |
+| Artifact            | 3.9.x             | 3.11.x            | 3.13.x    | 3.14.x, 3.15.x |
+| ------------------- | ----------------- | ----------------- | --------- | -------------- |
+| `gatling-picatinny` | `0.14.0`–`0.14.1` | `0.16.0`–`1.10.4` | `1.12.0`+ | **none**       |
+
+`gatling-picatinny 0.15.0` targets 3.10.x, which has no column of its own — the only Galaxio release on that line.
+
+| `gatling-jdbc-plugin` | `0.10.3` | `0.12.0`–`0.17.2`, not `0.13.0` | `0.19.0`+ | **none** |
+| `gatling-kafka-plugin` | `0.12.0` | `0.14.0`–`0.20.5` | `0.22.0`+ | **none** |
+| `gatling-amqp-plugin` | `0.10.3` | `0.12.0`–`1.0.4` | `1.2.0`+ | **none** |
 
 - Test-scoped, `_2.13` outside sbt, any `2.13.x` patch.
 - **Java 8 on 3.9.x is Scala-only.** The Scala classes are major 52; the `org.galaxio.gatling.javaapi` facade in the same jars is major 61. Java and Kotlin need 17 on every line.
@@ -22,7 +25,7 @@
 | `org.galaxio.gatling.feeders`      | runs                                                                                                 |
 | `org.galaxio.gatling.transactions` | `java.lang.NoSuchMethodError: 'akka.actor.ActorSystem io.gatling.core.CoreComponents.actorSystem()'` |
 
-That method left with Akka at 3.12. Read the column; a passing compile proves nothing.
+That method left with Akka at 3.12. Read the column.
 
 ## Which Line A Version Targets
 
