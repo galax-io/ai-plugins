@@ -1,6 +1,6 @@
 # JDBC
 
-`gatling-jdbc-plugin` from Galaxio, versioned by the project's Gatling line — [versions.md](versions.md). Its own `1.x` releases compile their `javaapi` facade for Java 17, whatever the upstream README says, so taking one means a Java 17 toolchain.
+`gatling-jdbc-plugin` from Galaxio, versioned by the project's Gatling line — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md). Its own `1.x` releases compile their `javaapi` facade for Java 17, whatever the upstream README says, so taking one means a Java 17 toolchain.
 
 Config keys: `dbUrl`, `dbUser` and `dbPassword` are required for this protocol. A JDBC-only project needs no `baseUrl` — but a holder that also builds an HTTP protocol forces it, even for a simulation that issues no HTTP request. [resource-files.md](resource-files.md).
 

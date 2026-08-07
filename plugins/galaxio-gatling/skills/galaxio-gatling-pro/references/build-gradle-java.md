@@ -9,6 +9,8 @@
 | Compile            | `./gradlew gatlingClasses`                 |
 | Run one simulation | `./gradlew gatlingRun --simulation <fqcn>` |
 
+**`--simulation` arrives with the 3.11 plugin line.** On `gatling-gradle` 3.9.x the task takes no options, so `gatlingRun` runs every simulation; narrow it with the `simulations` filter in the `gatling` block instead.
+
 `io.gatling.gradle` creates a `gatling` source set and simulations go there, not in `src/test/*`. `testClasses` compiles `src/test/*`, which is empty here, and reports BUILD SUCCESSFUL having built nothing.
 
 ## What To Add
@@ -33,8 +35,27 @@ A Gradle project usually keeps the version literal in `gradle/libs.versions.toml
 
 ## Plugin Floor, The JVM Option, And Gradle 9
 
-Raise `gatling-gradle` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own; only when pinned lower, set `jvmArgs` in the `gatling` block to a list containing that flag.
+Raise `gatling-gradle` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it sets the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, on its own; only when pinned lower, set `jvmArgs` in the `gatling` block to a list containing that flag.
 
-Check the Gradle version before promising `gatlingRun`. `io.gatling.gradle` `3.13.1` fails to register the task on Gradle 9 (`Could not get unknown property 'reportsDir'`) and works on 8.10.2. When it will not register, `gatlingClasses` still compiles and the simulation can be run off the `gatlingRuntimeClasspath` with `io.gatling.app.Gatling -s <fqcn>`.
+**The plugin version is not the Gatling version.** `gatling { gatlingVersion = '…' }` pins Gatling and wins; the plugin's own number is only the default when that block is absent, and it moves independently. That is what lets a project take a newer plugin for its Gradle support while staying on the line its libraries need.
+
+Check the Gradle version before promising `gatlingRun`. On Gradle 9 `io.gatling.gradle` below `3.14.3.1` throws `Could not get unknown property 'reportsDir'` when the run task is realized — the whole 3.11 and 3.13 lines, latest patches included. Everything works on 8.10.2. The floor is on the plugin, not on Gatling: raise it and pin `gatling { gatlingVersion }` to stay on the line.
+
+`gatlingClasses` still compiles below the floor, so a project that cannot raise the plugin runs the simulation by hand. Add the task — no stock project has one — then use the path it prints:
+
+```groovy
+tasks.register('gatlingCp') {
+  def cp = configurations.gatlingRuntimeClasspath
+  doLast { println cp.asPath }
+}
+```
+
+```bash
+java --add-opens=java.base/java.lang=ALL-UNNAMED \
+  -cp "build/classes/java/gatling:src/gatling/resources:$(gradle -q gatlingCp)" \
+  io.gatling.app.Gatling -s <fqcn> -rf build/reports/gatling
+```
+
+Drop `-rf` and the run dies on `Can't use the file DataWriter without setting the results directory`. Drop the flag and it dies on `IllegalAccessException` — nothing passes it for you here. And `gatlingRuntimeClasspath` carries neither the compiled simulation nor the resources, so both source roots go on the front.
 
 On the 3.11 line the flag is unnecessary and the floor is `3.11.1`.

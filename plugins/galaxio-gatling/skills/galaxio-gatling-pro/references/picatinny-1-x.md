@@ -1,12 +1,12 @@
 # Picatinny 1.x
 
-The `1.x` line of `gatling-picatinny`. **It spans two Gatling lines**, so the API is decided by the Picatinny version, not the Gatling version — [versions.md](versions.md). A `0.x` pin is a materially different API, [picatinny-0-x.md](picatinny-0-x.md); a project without the dependency, [picatinny-substitutes.md](picatinny-substitutes.md).
+The `1.x` line of `gatling-picatinny`. **It spans two Gatling lines**, so the API is decided by the Picatinny version, not the Gatling version — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md). A `0.x` pin is a materially different API, [picatinny-0-x.md](picatinny-0-x.md); a project without the dependency, [picatinny-substitutes.md](picatinny-substitutes.md).
 
 Written in Scala, with a Java and Kotlin facade under `org.galaxio.gatling.javaapi` in the same artifact. Source: [galax-io/gatling-picatinny](https://github.com/galax-io/gatling-picatinny).
 
 ## Coordinates
 
-Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suffix with `%%`; Maven and Gradle need `gatling-picatinny_2.13` written out. Which version pairs with which Gatling line is in [versions.md](versions.md).
+Artifact `org.galaxio:gatling-picatinny`, test-scoped. sbt appends the Scala suffix with `%%`; Maven and Gradle need `gatling-picatinny_2.13` written out. Which version pairs with which Gatling line is in [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md).
 
 ## Config
 

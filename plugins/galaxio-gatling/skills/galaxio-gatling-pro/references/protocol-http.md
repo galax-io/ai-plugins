@@ -10,13 +10,14 @@ The protocol builder belongs in the shared holder — `performance.scala`, `Perf
 
 ## Protocol Options
 
-| Option                              | Why                                                                                                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `baseUrl`                           | The only place the environment appears. Read it from config, never a literal                                                                     |
-| `acceptHeader`, `contentTypeHeader` | Set once, so no case has to repeat them                                                                                                          |
-| `disableFollowRedirect`             | The Galaxio default. A silently followed redirect hides the response the test was meant to measure, and turns one request into two in the report |
-| `shareConnections`                  | Changes what is measured. Leave it at the Gatling default unless the real client pools connections the same way                                  |
-| `userAgentHeader`                   | Set it when the server behaves differently per client                                                                                            |
+| Option                                                             | Why                                                                                                                                              |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `baseUrl`                                                          | The only place the environment appears. Read it from config, never a literal                                                                     |
+| `acceptHeader`, `contentTypeHeader`                                | Set once, so no case has to repeat them                                                                                                          |
+| `disableFollowRedirect`                                            | The Galaxio default. A silently followed redirect hides the response the test was meant to measure, and turns one request into two in the report |
+| `shareConnections`                                                 | Changes what is measured. Leave it at the Gatling default unless the real client pools connections the same way                                  |
+| `userAgentHeader`                                                  | Set it when the server behaves differently per client                                                                                            |
+| `proxyProtocolSourceIpV4Address`, `proxyProtocolSourceIpV6Address` | Present the generator's traffic as proxied, so the server reads the source address you name instead of the generator's. From 3.13                |
 
 Anything the server needs on every request goes on the protocol. Anything that varies per request belongs to the case.
 
@@ -30,10 +31,12 @@ One case is one atomic action: a single request with its checks. Chaining two re
 
 An API that answers `{"error": "..."}` under HTTP 200 carries a failure `status` cannot see: add a `jsonPath` check on the business field.
 
+A check on a value that differs per user writes a distinct error message per failure, and the report degenerates into thousands of one-off rows. `logActualValueInError(false)`, from 3.15, keeps the message and drops the value.
+
 ## Bodies
 
 Keep payloads out of the case once they grow: `ElFileBody("bodies/order.json")` reads the template from the resource root and still interpolates `#{}` expressions. `StringBody` is for one-liners only.
 
 ## Resources And Concurrency
 
-`resources(...)` fetches a request's dependencies as children of that request. `httpConcurrentRequests` covers concurrent requests without a parent, and it arrives at 3.15 — [migrate.md](migrate.md).
+`resources(...)` fetches a request's dependencies as children of that request. `httpConcurrentRequests`, from 3.15, covers concurrent requests that have no parent.

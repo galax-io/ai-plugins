@@ -44,6 +44,6 @@ Maven cannot append the Scala suffix even for a Scala project, so every Galaxio 
 
 ## Plugin Floor And The JVM Option
 
-Raise `gatling-maven-plugin` past the floor in [versions.md](versions.md) and it sets the JVM option 3.13 requires ([migrate.md](migrate.md)) on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
+Raise `gatling-maven-plugin` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it sets the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
 
-On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [versions.md](versions.md) names both.
+On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) names both.

@@ -1,6 +1,6 @@
 ---
 name: galaxio-gatling-pro
-description: 'Use when creating, reviewing, refactoring or upgrading Gatling JVM performance tests in Galaxio style: Gatling 3.9.x through 3.15.x, Scala, Java or Kotlin on sbt, Maven or Gradle, gatling-picatinny plus the Galaxio gatling-jdbc-plugin, gatling-kafka-plugin and gatling-amqp-plugin, HTTP, JDBC, Kafka, AMQP and JMS protocols, open and closed workload models, smoke and debug simulations, the cases/feeders/scenarios/simulations layout, and migrating between Gatling versions.'
+description: 'Use when creating, reviewing or refactoring Gatling JVM performance tests in Galaxio style: Gatling 3.9.x through 3.15.x, Scala, Java or Kotlin on sbt, Maven or Gradle, gatling-picatinny plus the Galaxio gatling-jdbc-plugin, gatling-kafka-plugin and gatling-amqp-plugin, HTTP, JDBC, Kafka, AMQP and JMS protocols, open and closed workload models, smoke and debug simulations, and the cases/feeders/scenarios/simulations layout.'
 ---
 
 # Galaxio Gatling Pro
@@ -8,12 +8,17 @@ description: 'Use when creating, reviewing, refactoring or upgrading Gatling JVM
 ## How To Use This Skill
 
 1. Run the detection below. Reviews take the same route as writing.
-2. From dispatch read **one** language file, **one** build file for it, `versions.md`, and only
-   the protocol files used. Never two build files: they contradict on purpose.
+2. From dispatch read **one** language file, **one** build file for it, and only the protocol
+   files used. Never two build files: they contradict on purpose.
 3. Apply the invariants below; on a review they are the checklist.
 
-Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, Picatinny per
-[version-lookup.md](references/version-lookup.md).
+Every version number is owned elsewhere — [gatling-lines.md](../gatling-versions/references/gatling-lines.md)
+for Gatling, Scala, Java and the build plugins,
+[galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for the four Galaxio
+libraries. Moving a project from one Gatling line to another is a migration, not a version choice.
+
+Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, and the 3.13
+column of [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for Picatinny.
 
 **An existing repository outranks this skill.** Follow its conventions and version; add, never
 restructure.
@@ -52,8 +57,9 @@ Two numbering schemes come back; read the artifact, not the number:
   **the Gatling line.**
 - `gatling-maven-plugin` and `gatling-sbt` (both 4.x) — build-plugin numbering, saying nothing
   about the Gatling line.
-- `io.gatling.gradle` — its leading major.minor **is** the Gatling line. A Gradle project often
-  names nothing else and takes the plugin default; treat that as the line and say so.
+- `io.gatling.gradle` — only the **default** Gatling version. `gatling { gatlingVersion = '…' }`
+  overrides it and wins, so read that block first and fall back to the plugin number when it is
+  absent.
 
 Galaxio libraries:
 
@@ -64,8 +70,8 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 **A Galaxio version does not tell you the Gatling line.** Every Galaxio artifact declares
 `gatling-core` at `provided` scope, so the project's own pin is authoritative. Nor does version
-order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM
-with [version-lookup.md](references/version-lookup.md).
+order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM —
+the query is in [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md).
 
 ## Dispatch
 
@@ -85,18 +91,20 @@ with [version-lookup.md](references/version-lookup.md).
 | Java     | not supported — sbt serves Scala only               | [build-maven-java.md](references/build-maven-java.md)     | [build-gradle-java.md](references/build-gradle-java.md)     |
 | Kotlin   | not supported                                       | [build-maven-kotlin.md](references/build-maven-kotlin.md) | [build-gradle-kotlin.md](references/build-gradle-kotlin.md) |
 
-**3. By Gatling version** — `versions.md` holds the coordinate for every artifact on every line:
+**3. By Gatling version** — every number lives in `gatling-versions`, read one:
 
-| Detected                                             | Read                                                         |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
-| Any line, or nothing detected                        | [references/versions.md](references/versions.md)             |
-| Moving between lines, or what arrived or left at one | [references/migrate.md](references/migrate.md)               |
-| What is published right now                          | [references/version-lookup.md](references/version-lookup.md) |
+| Detected                                         | Read                                                                        |
+| ------------------------------------------------ | --------------------------------------------------------------------------- |
+| Gatling, Scala, Java or a build plugin           | [gatling-lines.md](../gatling-versions/references/gatling-lines.md)         |
+| `gatling-picatinny` or a Galaxio protocol plugin | [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) |
+| What is published right now                      | [version-lookup.md](../gatling-versions/references/version-lookup.md)       |
 
-`versions.md` has a column per line: 3.9.x, 3.11.x, 3.13.x, and 3.14.x/3.15.x together. **3.10.x
-and 3.12.x have no column** — `versions.md` says what to do instead. Everything outside the
-coordinates — the DSL, the invariants, the line deltas — applies as on the nearest line below
-that has one.
+Both tables have a column per line: 3.9.x, 3.11.x, 3.13.x, and 3.14.x/3.15.x together. **3.10.x
+and 3.12.x have no column** — they say what to do instead. Everything outside the coordinates —
+the DSL, the invariants — applies as on the nearest line below that has one.
+
+**Moving a project onto a different line is not dispatched here.** It is an upgrade, with renames
+and removals attached, and it has its own skill.
 
 **4. By protocol and library** — read only what the task uses:
 
@@ -121,8 +129,7 @@ yet should add it.
 
 **Adding a protocol plugin is a version choice, not an upgrade.** Take that library's release for
 the line the project is already on. Raising the line is a decision to put to the user before the
-build changes — [migrate.md](references/migrate.md). Never hand-roll a substitute for a protocol
-plugin.
+build changes. Never hand-roll a substitute for a protocol plugin.
 
 ## Invariants
 
@@ -299,4 +306,4 @@ Picatinny's YAML form is in the Picatinny file for your line.
 - Do not add NFR gates unless asked.
 - Do not use Scala 3: every Galaxio artifact is published for `_2.13` only.
 - Do not mix a Gatling line with a Galaxio plugin line — see
-  [references/versions.md](references/versions.md).
+  [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md).
