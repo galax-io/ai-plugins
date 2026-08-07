@@ -57,8 +57,9 @@ Two numbering schemes come back; read the artifact, not the number:
   **the Gatling line.**
 - `gatling-maven-plugin` and `gatling-sbt` (both 4.x) — build-plugin numbering, saying nothing
   about the Gatling line.
-- `io.gatling.gradle` — its leading three numbers **are** the Gatling version. A Gradle project
-  often names nothing else and takes what the plugin brings; treat that as the line and say so.
+- `io.gatling.gradle` — only the **default** Gatling version. `gatling { gatlingVersion = '…' }`
+  overrides it and wins, so read that block first and fall back to the plugin number when it is
+  absent.
 
 Galaxio libraries:
 

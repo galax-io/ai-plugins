@@ -17,8 +17,12 @@ Read the column for the project's line. A **range** is closed, both ends fixed. 
 
 ## The Build Plugin Is Not The Same Kind Of Number On Every Tool
 
-- **Maven and sbt number independently.** The plugin version says nothing about the Gatling line, and the project pins Gatling itself. So the table entry is a **floor**: raise past it and pin whatever `3.13.x` you want.
-- **`gatling-gradle`'s leading three numbers _are_ the Gatling version.** `3.13.1` brings Gatling `3.13.1`, `3.13.5` brings `3.13.5`; a trailing fourth number is a plugin-only patch and leaves Gatling where it was. So on Gradle the entry is a **target, not a floor** — stopping at the floor pins the project to `3.13.1` with no way forward, and "or later" moves it off the line entirely.
+Every entry is a **floor**: raise past it and pin whatever patch you want. The three tools differ only in where the Gatling version comes from when the project does not say.
+
+- **Maven and sbt** — the plugin version says nothing about the line, and the project pins Gatling itself.
+- **Gradle** — `gatling { gatlingVersion = '…' }` pins it, and `gatling { scalaVersion = '…' }` the Scala patch. Without that block the plugin's own leading three numbers are the default: `3.13.1` brings Gatling `3.13.1`, and a trailing fourth number is a plugin-only patch that leaves Gatling where it was.
+
+**So on Gradle read `gatlingVersion` first, and the plugin version only if it is absent.** The override wins even across lines — plugin `3.13.1` with `gatlingVersion = '3.15.1'` resolves `3.15.1` — which is how a project ends up running a Gatling its build plugin was never built against.
 
 ## The `--add-opens` Floor
 
@@ -34,7 +38,9 @@ Read the column for the project's line. A **range** is closed, both ends fixed. 
 
 Below it the plugin fails to register `gatlingRun` on Gradle 9 — `Could not get unknown property 'reportsDir' for root project`. That covers the whole 3.11 line, the whole 3.13 line including its latest patch, and 3.14 up to `3.14.3`.
 
-So a Gradle 9 project cannot run on 3.13 through the plugin. Either take `3.14.3.1`+, or stay below and drive Gatling by hand — `gatlingClasses` still compiles. The build reference for the project's language has the command; it needs `-rf`, the `--add-opens` flag and both source roots, none of which the plugin is there to supply.
+This is a floor on the **plugin**, not on Gatling. A Gradle 9 project stays on any line it likes by raising the plugin to `3.14.3.1`+ and pinning `gatling { gatlingVersion = '…' }` — plugin `3.14.3.1` with `gatlingVersion = '3.13.5'` runs on Gradle 9 and resolves `3.13.5`.
+
+Only when the plugin cannot move is the fallback needed: `gatlingClasses` still compiles, and the build reference for the project's language has the command to run Gatling by hand — it needs `-rf`, the `--add-opens` flag and both source roots, none of which the plugin is there to supply.
 
 ## Version Order Does Not Tell You The Line
 

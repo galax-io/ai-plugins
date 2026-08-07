@@ -35,6 +35,8 @@ A Gradle project usually keeps the version literal in `gradle/libs.versions.toml
 
 Raise `gatling-gradle` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it sets the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, on its own; only when pinned lower, set `jvmArgs` in the `gatling` block to a list containing that flag.
 
+**The plugin version is not the Gatling version.** `gatling { gatlingVersion = '…' }` pins Gatling and wins; the plugin's own number is only the default when that block is absent, and it moves independently. That is what lets a project take a newer plugin for its Gradle support while staying on the line its libraries need.
+
 Check the Gradle version before promising `gatlingRun`. On Gradle 9 `io.gatling.gradle` fails to register the task below `3.14.3.1` — the whole 3.11 and 3.13 lines, latest patches included — with `Could not get unknown property 'reportsDir'`. Everything works on 8.10.2.
 
 `gatlingClasses` still compiles there, because the plugin only breaks when the run task is realized. Running the simulation by hand then means supplying the three things the plugin used to:

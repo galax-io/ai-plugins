@@ -19,7 +19,7 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 Say **"Galaxio was left alone, and the project will fail at run time — possibly not on the first simulation"**, not "Galaxio was left alone". Then hand the decision back: stop at the last supported line, or go on knowingly and drop the libraries.
 
-**3 — Gradle 9 and Galaxio together.** No line works: 3.13 is where the libraries stop, and `gatlingRun` will not register below `gatling-gradle 3.14.3.1` — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). Say both directions are closed, then offer the three options — Gradle 8 with 3.13, drop the libraries and take 3.14.3.1+, or stay on 3.13 and drive Gatling by hand as the build reference spells out.
+**3 — Gradle 9 and Galaxio together.** Both constraints hold at once and both are satisfiable: raise `gatling-gradle` to `3.14.3.1`+ so the task registers on Gradle 9, and pin `gatling { gatlingVersion = '3.13.x' }` so the libraries keep their line — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). The plugin number and the Gatling line move independently here, which is the whole reason this is not a dead end.
 
 ## After The Bump
 

@@ -30,16 +30,18 @@ that breaks.
   which mixed both and could not be linked from a Galaxio-free context.
 - **The Gradle 9 boundary.** `gatling-gradle` cannot register `gatlingRun` below `3.14.3.1` —
   `Could not get unknown property 'reportsDir'` — which covers the whole 3.11 and 3.13 lines and
-  3.14 up to `3.14.3`. A Gradle 9 project therefore cannot reach 3.13 through the plugin, and one
-  that also carries Galaxio has no working line at all. Both are branches the skills state.
+  3.14 up to `3.14.3`. It is a floor on the plugin only: raise the plugin and pin
+  `gatling { gatlingVersion = '3.13.5' }` and a Gradle 9 project runs 3.13 fine, Galaxio libraries
+  included.
 - **sbt 1.x named explicitly.** `gatling-sbt` is cross-built for sbt 1.0 only; no sbt 2.x artifact
   exists, so a project on sbt 2 cannot resolve the plugin.
 
 ### Changed
 
-- **`gatling-gradle`'s entry is a target, not a floor.** Its leading three numbers are the Gatling
-  version, so stopping at the table's low end pinned a project to `3.13.1` with no way forward.
-  Maven and sbt number independently and keep floor semantics.
+- **On Gradle the Gatling version is `gatling { gatlingVersion = '…' }`, not the plugin number.**
+  The plugin's own leading three numbers are only the default, used when that block is absent, and
+  the override wins even across lines. So the table entry is a floor on all three build tools, and
+  the detection rule is to read the block first. No reference named `gatlingVersion` before.
 - **`gatling-maven-plugin`'s 3.13 floor is `4.10.2`**, not `4.11.0`. Measured: `4.10.1` fails with
   `IllegalAccessException: module java.base does not open java.lang`, `4.10.2` runs.
 - **A wrong-column Galaxio pin fails late, not early.** It resolves, it compiles, and it dies at

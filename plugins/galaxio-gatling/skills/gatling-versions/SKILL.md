@@ -20,7 +20,7 @@ Empty? Try `buildSrc/` and a Maven parent POM before concluding there is no proj
 
 - `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` — **the Gatling line.**
 - `gatling-maven-plugin` and `gatling-sbt`, both 4.x — build-plugin numbering, saying nothing about the line.
-- `io.gatling.gradle` — its leading three numbers **are** the Gatling version. A Gradle project often names nothing else; treat that as the line and say so.
+- `io.gatling.gradle` — the **default** Gatling version, its leading three numbers. `gatling { gatlingVersion = '…' }` overrides it and wins, so read that first and fall back to the plugin only when the block is absent.
 - Any `org.galaxio` artifact — says nothing. Each declares `gatling-core` at `provided` scope, so the project's own pin wins.
 
 ## Then Read One File

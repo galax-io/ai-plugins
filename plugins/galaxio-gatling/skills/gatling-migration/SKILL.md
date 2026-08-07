@@ -14,13 +14,13 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
   --include='*.toml' --include='*.properties' 'gatling' . 2>/dev/null
 ```
 
-`gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app` and `${gatling.version}` name the line. `gatling-maven-plugin` and `gatling-sbt` do not — they number independently. `io.gatling.gradle`'s leading three numbers **are** the line, and a Gradle project often names nothing else.
+`gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app` and `${gatling.version}` name the line. `gatling-maven-plugin` and `gatling-sbt` do not — they number independently. On Gradle, `gatling { gatlingVersion = '…' }` names it and wins; `io.gatling.gradle`'s own leading three numbers are only the default, used when that block is absent.
 
 ## Choose The Target
 
 **Default to 3.13.x**, and say it is a default, not a ceiling. Two overrides:
 
-- **Gradle 9** — `gatlingRun` will not register below `gatling-gradle 3.14.3.1`. Propose `3.14.3.1`+, or say the project stays below and drives Gatling by hand: the build reference has the command, and `-rf`, the `--add-opens` flag and both source roots become the caller's.
+- **Gradle 9** — `gatlingRun` will not register below `gatling-gradle 3.14.3.1`. That is a floor on the plugin, not on Gatling: raise the plugin and keep the line with `gatling { gatlingVersion = '…' }`. Only when the plugin cannot move does the project drive Gatling by hand, which the build reference spells out.
 - **An `org.galaxio` dependency** — read [references/galaxio-upgrade.md](references/galaxio-upgrade.md) before naming any target.
 
 ## What Each Line Changed
@@ -47,8 +47,8 @@ A change applies from its line upwards and nothing stops: 3.11.x → 3.13.x appl
 
 ## Procedure
 
-1. **Raise Gatling onto the target line** — the project's own pin on Maven and sbt, the plugin version on Gradle.
-2. **Raise the build plugin** past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md), which is where `--add-opens` starts being passed for you. On Gradle step 1 already did it, and that entry is a target: stopping at its low end pins the project to `3.13.1`.
+1. **Raise Gatling onto the target line** — the project's own pin on Maven and sbt, `gatling { gatlingVersion = '…' }` on Gradle. A Gradle project with no such block takes the plugin's default, so add one rather than relying on the plugin number to carry the line.
+2. **Raise the build plugin** past the 3.13 floor in [gatling-lines.md](../gatling-versions/references/gatling-lines.md), which is where `--add-opens` starts being passed for you. It is a floor on all three tools, and on Gradle it moves independently of step 1.
 3. **Galaxio libraries**, if the build has any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
 4. **Apply every row above the old line and at or below the new one.**
 5. **Compile, then run one smoke simulation.** A dependency left on the wrong line still resolves and still compiles; only the run finds it.
