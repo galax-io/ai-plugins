@@ -1,0 +1,80 @@
+[
+  {
+    "id": "from-39",
+    "line": "3.9",
+    "prompt": "Update my Gatling project to a current version.",
+    "readsNone": ["galaxio-gatling-pro/SKILL.md"],
+    "expect": [
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/Legacy.scala",
+        "matches": ["stressPeakUsers", "AllowList"],
+        "notMatches": ["heavisideUsers", "WhiteList"]
+      },
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala",
+        "notMatches": ["\\$\\{"]
+      },
+      {
+        "file": "build.gradle",
+        "matches": ["gatlingVersion = '3\\.13"]
+      }
+    ],
+    "why": "A 3.9 crossing applies the 3.11 rows and the 3.12 rows. Missing either leaves code that will not compile."
+  },
+  {
+    "id": "from-311",
+    "line": "3.11",
+    "prompt": "Update my Gatling project to a current version.",
+    "readsNone": ["galaxio-gatling-pro/SKILL.md"],
+    "expect": [
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/Legacy.scala",
+        "matches": ["stopLoadGenerator"],
+        "notMatches": ["stopInjector"]
+      },
+      {
+        "file": "src/gatling/resources/gatling.conf",
+        "notMatches": ["graphite"]
+      },
+      {
+        "file": "build.gradle",
+        "matches": ["gatlingVersion = '3\\.13"]
+      }
+    ],
+    "why": "From 3.11 only the 3.12 and 3.13 rows apply, and the Graphite writer goes silent rather than loud."
+  },
+  {
+    "id": "on-313",
+    "line": "3.13",
+    "prompt": "Update my Gatling project to a current version.",
+    "expect": [
+      {
+        "file": "build.gradle",
+        "matches": ["gatlingVersion = '3\\.13"]
+      }
+    ],
+    "why": "The project is already on the default target. Inventing a crossing is the failure. Nothing in the build or the sources should move.",
+    "unchanged": [
+      "build.gradle",
+      "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
+      "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala"
+    ]
+  },
+  {
+    "id": "on-315",
+    "line": "3.15",
+    "prompt": "Update my Gatling project to a current version.",
+    "expect": [
+      {
+        "file": "build.gradle",
+        "matches": ["gatlingVersion = '3\\.15"]
+      }
+    ],
+    "why": "3.13 is a default for a project below it, not a ceiling to drag 3.15 back to. Nothing in the build or the sources should move.",
+    "unchanged": [
+      "build.gradle",
+      "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
+      "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala"
+    ]
+  }
+]
