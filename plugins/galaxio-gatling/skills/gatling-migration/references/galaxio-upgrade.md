@@ -19,7 +19,7 @@ Four artifacts qualify: `gatling-picatinny`, `gatling-jdbc-plugin`, `gatling-kaf
 
 So the sentence is not "Galaxio was left alone" but **"Galaxio was left alone, and in this state the project will fail at run time — possibly not on the first simulation."** Then hand the decision back: stop at the last line the libraries support, or go on knowingly and drop them.
 
-**3 — Gradle 9, and the build carries Galaxio.** There is no working line. 3.13 is where the Galaxio libraries stop, and `gatling-gradle` cannot register `gatlingRun` on Gradle 9 below `3.14.3.1` — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). Say that both directions are closed before proposing anything, then offer the three real options: drop to Gradle 8 and take 3.13, drop the Galaxio libraries and take 3.14.3.1+, or stay on 3.13 under Gradle 9 and run simulations off `gatlingRuntimeClasspath` with `io.gatling.app.Gatling -s <fqcn>`.
+**3 — Gradle 9, and the build carries Galaxio.** There is no working line. 3.13 is where the Galaxio libraries stop, and `gatling-gradle` cannot register `gatlingRun` on Gradle 9 below `3.14.3.1` — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md). Say that both directions are closed before proposing anything, then offer the three real options: drop to Gradle 8 and take 3.13, drop the Galaxio libraries and take 3.14.3.1+, or stay on 3.13 under Gradle 9 and drive Gatling by hand, which the project's build reference spells out and which costs `-rf`, the `--add-opens` flag and both source roots on the classpath.
 
 ## After The Bump
 

@@ -22,7 +22,7 @@ grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='po
 
 **Default to 3.13.x.** Say so, and say the higher lines are available on request — it is a default, not a ceiling. Two things override it:
 
-- **Gradle 9.** The plugin cannot register `gatlingRun` below `gatling-gradle 3.14.3.1`. Propose `3.14.3.1`+ instead, or say plainly that the project stays below and runs simulations off `gatlingRuntimeClasspath` with `io.gatling.app.Gatling -s <fqcn>`.
+- **Gradle 9.** The plugin cannot register `gatlingRun` below `gatling-gradle 3.14.3.1`. Propose `3.14.3.1`+ instead, or say plainly that the project stays below and drives Gatling by hand — `gatlingClasses` still compiles, and the project's build reference has the command. Do not present that as a free swap: it costs `-rf`, the `--add-opens` flag and both source roots on the classpath, all of which the plugin was supplying.
 - **An `org.galaxio` dependency.** Read the branch file before naming any target.
 
 ## What Each Line Changed

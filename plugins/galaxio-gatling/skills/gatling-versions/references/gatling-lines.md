@@ -34,7 +34,7 @@ Read the column for the project's line. A **range** is closed, both ends fixed. 
 
 Below it the plugin fails to register `gatlingRun` on Gradle 9 — `Could not get unknown property 'reportsDir' for root project`. That covers the whole 3.11 line, the whole 3.13 line including its latest patch, and 3.14 up to `3.14.3`. Measured by bisection.
 
-So a Gradle 9 project cannot run on 3.13 through the plugin. Either take `3.14.3.1`+, or stay below and run the simulation off `gatlingRuntimeClasspath` with `io.gatling.app.Gatling -s <fqcn>` — `gatlingClasses` still compiles.
+So a Gradle 9 project cannot run on 3.13 through the plugin. Either take `3.14.3.1`+, or stay below and drive Gatling by hand — `gatlingClasses` still compiles, because the plugin only breaks when the run task is realized. The build reference for the project's language has the exact command; it needs `-rf`, the `--add-opens` flag and both source roots, none of which the plugin is there to supply.
 
 ## Version Order Does Not Tell You The Line
 

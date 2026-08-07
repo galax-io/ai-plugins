@@ -4,16 +4,17 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2026-08-07
+## [2.1.0] - 2026-08-07
 
 Migration and version coordinates leave the router and become skills of their own. An upgrade task
 loaded 444 lines and now loads 101, because the 302-line writing skill no longer activates for it.
 
-**Major because a skill's answers moved.** Nothing about installing changes — the three skills ship
-in the one plugin and arrive together — but `galaxio-gatling-pro` no longer answers an upgrade
-question, having given up the verbs that reach it, and `references/versions.md`,
-`references/migrate.md` and `references/version-lookup.md` are gone from it. Anything pointing at
-those paths, or at that skill by name for a migration, has to point somewhere else.
+**Minor, not major: nothing installed goes away.** No skill is renamed or removed, the three ship
+in the one plugin and arrive together, and every question the plugin answered it still answers.
+What moved is which skill answers an upgrade — `galaxio-gatling-pro` gave up the verbs that reach
+one, and `references/versions.md`, `references/migrate.md` and `references/version-lookup.md` left
+it for `gatling-versions`. A link written directly at one of those three paths is the one thing
+that breaks.
 
 ### Added
 
