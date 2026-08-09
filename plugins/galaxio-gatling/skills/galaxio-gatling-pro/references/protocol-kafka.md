@@ -1,6 +1,6 @@
 # Kafka
 
-`gatling-kafka-plugin` from Galaxio, versioned by the project's Gatling line — [versions.md](versions.md). Scala takes the Scala DSL, Java and Kotlin the `KafkaDsl` facade.
+`gatling-kafka-plugin` from Galaxio, versioned by the project's Gatling line — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md). Scala takes the Scala DSL, Java and Kotlin the `KafkaDsl` facade.
 
 It supports produce, consume and request-reply, with Avro, Protobuf and Schema Registry.
 

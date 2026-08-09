@@ -4,7 +4,7 @@ For a project that cannot take the dependency, or is on a Gatling line Picatinny
 for. Two reasons to be here:
 
 - **The project could take it and simply has not.** Add it instead of substituting — the column
-  for the project's line in [versions.md](versions.md) gives the version, and the API is
+  for the project's line in [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md) gives the version, and the API is
   [picatinny-1-x.md](picatinny-1-x.md) or [picatinny-0-x.md](picatinny-0-x.md) depending on which
   major that column names.
 - **The line has no release.** On 3.14.x and 3.15.x the column reads **none**.

@@ -120,6 +120,8 @@ Root at `WARN`. The commented logger leaks: at `DEBUG` it writes every body and 
 
 Both resolve against the resource root, and the CSV column names must match the `#{...}` placeholders exactly — the coupling is across two files in different directories and nothing checks it.
 
+A file-based feeder takes no explicit loading mode from 3.15: `eager` and `batch` were removed, and code carrying either no longer compiles. Below that line both still work, so this is a crossing to make, not a style to fix.
+
 `accounts.csv`:
 
 ```text

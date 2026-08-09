@@ -4,6 +4,64 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-08-07
+
+Migration and version coordinates leave the router and become skills of their own. An upgrade task
+loaded 444 lines and now loads 83, because the 309-line writing skill no longer activates for it.
+`gatling-migration` is standalone: 83 lines on its own, 123 when the build declares `org.galaxio`.
+
+**Minor, not major: nothing installed goes away.** No skill is renamed or removed, the three ship
+in the one plugin and arrive together, and every question the plugin answered it still answers.
+What moved is which skill answers an upgrade — `galaxio-gatling-pro` gave up the verbs that reach
+one, and `references/versions.md`, `references/migrate.md` and `references/version-lookup.md` left
+it for `gatling-versions`. A link written directly at one of those three paths is the one thing
+that breaks.
+
+### Added
+
+- **`gatling-migration`** — moving a project between Gatling lines, 3.9.x to 3.15.x. Carries the
+  line deltas, the upgrade procedure and one smoke run. The target defaults to 3.13.x and says so
+  rather than presenting a ceiling. Nothing in its body is Galaxio; a build that declares
+  `org.galaxio` takes `references/galaxio-upgrade.md`, which names the runtime failure rather than
+  reporting that the libraries were left alone.
+- **`gatling-versions`** — every number, for all three skills. `references/gatling-lines.md` holds
+  Gatling, Scala, Java and the three build plugins and mentions Galaxio nowhere;
+  `references/galaxio-artifacts.md` holds the four Galaxio libraries. A project without
+  `org.galaxio` never loads the second file. The two replace the single `references/versions.md`,
+  which mixed both and could not be linked from a Galaxio-free context.
+- **The Gradle 9 boundary.** `gatling-gradle` below `3.14.3.1` throws
+  `Could not get unknown property 'reportsDir'` when `gatlingRun` is realized, while
+  `gatlingClasses` still compiles — the whole 3.11 and 3.13 lines and 3.14 up to `3.14.3`. It is a floor on the plugin only: raise the plugin and pin
+  `gatling { gatlingVersion = '3.13.5' }` and a Gradle 9 project runs 3.13 fine, Galaxio libraries
+  included.
+- **sbt 1.x named explicitly.** `gatling-sbt` is cross-built for sbt 1.0 only; no sbt 2.x artifact
+  exists, so a project on sbt 2 cannot resolve the plugin.
+
+### Changed
+
+- **On Gradle the Gatling version is `gatling { gatlingVersion = '…' }`, not the plugin number.**
+  The plugin's own leading three numbers are only the default, used when that block is absent, and
+  the override wins even across lines. So the table entry is a floor on all three build tools, and
+  the detection rule is to read the block first. No reference named `gatlingVersion` before.
+- **`gatling-maven-plugin`'s 3.13 floor is `4.10.2`**, not `4.11.0`. Measured: `4.10.1` fails with
+  `IllegalAccessException: module java.base does not open java.lang`, `4.10.2` runs.
+- **A wrong-column Galaxio pin fails late, not early.** It resolves, it compiles, and it dies at
+  run time only on the APIs binding Gatling internals — Picatinny `0.18.2` on Gatling `3.13.5`
+  feeds fine and throws `NoSuchMethodError` on `CoreComponents.actorSystem()` at the first
+  transaction. The previous wording claimed it would not run at all.
+- **Dropping the Graphite writer is silent.** From 3.12 an unknown writer in `gatling.conf` is
+  accepted, the run stays green and no data is exported. The consequence is missing metrics, not a
+  failing build.
+- **The `stopInjector` and JMS renames have no overlap window.** Neither spelling compiles on the
+  other side of its line, so both edits land in the same commit as the version bump.
+- **Line-scoped API facts now sit where the task loads them.**
+  `proxyProtocolSourceIpV4Address`/`V6` and `logActualValueInError` moved into
+  `references/protocol-http.md`, and the removal of the `eager` and `batch` feeder modes into
+  `references/resource-files.md`. Each was reachable only from the migration material before, so a
+  review of a project already on that line never saw them.
+- **The `--add-opens` flag is written out in all seven build references** instead of being reached
+  through a link, since a build task never opens the migration material.
+
 ## [2.0.0] - 2026-08-07
 
 The plugin and the marketplace are both renamed. An install does not follow a rename, so an
