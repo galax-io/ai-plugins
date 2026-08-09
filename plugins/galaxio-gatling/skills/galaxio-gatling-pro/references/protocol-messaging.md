@@ -5,7 +5,7 @@
 | AMQP      | `gatling-amqp-plugin` from Galaxio | Scala, Java, Kotlin |
 | JMS       | `gatling-jms` from Gatling         | Scala, Java, Kotlin |
 
-The AMQP version comes from the project's Gatling line — [versions.md](versions.md).
+The AMQP version comes from the project's Gatling line — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md).
 
 Config keys, both required for the transport that reads them — [resource-files.md](resource-files.md): AMQP takes `amqpHost`, `amqpPort`, `amqpLogin` and `amqpPassword`; JMS takes `jmsUrl`, `jmsUser` and `jmsPassword`.
 
@@ -81,4 +81,4 @@ Since Gatling 3.13 the `jmsProperty` check asserts on a property of an inbound m
 
 ### Package Boundary
 
-The package moves from `javax.jms` to `jakarta.jms` at 3.14 — [migrate.md](migrate.md). Pick the broker client to match the Gatling line, not the other way round.
+The package moves from `javax.jms` to `jakarta.jms` at 3.14: the classpath carries `javax.jms-api` up to 3.13 and `jakarta.jms-api` from 3.14, and no line carries both. Neither spelling compiles on the other side, so the import rewrite happens at the crossing and cannot be staged ahead of it. Pick the broker client to match the Gatling line, not the other way round.
