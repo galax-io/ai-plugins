@@ -1,0 +1,87 @@
+[
+  {
+    "id": "from-39",
+    "line": "3.9",
+    "prompt": "Update my Gatling project to a current version.",
+    "reads": ["gatling-migration"],
+    "readsNone": ["galaxio-gatling-pro"],
+    "expect": [
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/Legacy.scala",
+        "matches": ["stressPeakUsers", "AllowList"],
+        "notMatches": ["heavisideUsers", "WhiteList"]
+      },
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala",
+        "matches": ["#\\{accountId\\}"],
+        "notMatches": ["\\$\\{accountId\\}"]
+      },
+      {
+        "file": "src/gatling/resources/gatling.conf",
+        "notMatches": ["^\\s*writers\\s*=\\s*\\[[^\\]]*graphite"]
+      },
+      {
+        "file": "build.gradle",
+        "matches": [
+          "gatlingVersion = '3\\.13",
+          "id 'io\\.gatling\\.gradle' version '3\\.(1[3-9]|[2-9][0-9])",
+          "gatling-picatinny_2\\.13:1\\.(1[2-9]|[2-9][0-9])"
+        ]
+      }
+    ],
+    "why": "A 3.9 crossing applies the 3.11 rows and the 3.12 rows. The plugin version and the Picatinny column both have to move, and neither failure shows up in a compile."
+  },
+  {
+    "id": "from-311",
+    "line": "3.11",
+    "prompt": "Update my Gatling project to a current version.",
+    "reads": ["gatling-migration"],
+    "readsNone": ["galaxio-gatling-pro"],
+    "expect": [
+      {
+        "file": "src/gatling/scala/org/galaxio/performance/myservice/Legacy.scala",
+        "matches": ["stopLoadGenerator"],
+        "notMatches": ["stopInjector"]
+      },
+      {
+        "file": "src/gatling/resources/gatling.conf",
+        "notMatches": ["^\\s*writers\\s*=\\s*\\[[^\\]]*graphite"]
+      },
+      {
+        "file": "build.gradle",
+        "matches": [
+          "gatlingVersion = '3\\.13",
+          "id 'io\\.gatling\\.gradle' version '3\\.(1[3-9]|[2-9][0-9])",
+          "gatling-picatinny_2\\.13:1\\.(1[2-9]|[2-9][0-9])"
+        ]
+      }
+    ],
+    "why": "From 3.11 only the 3.12 and 3.13 rows apply. The Graphite assertion is anchored inside the writers brackets, since the stock line carries a trailing comment that also names graphite."
+  },
+  {
+    "id": "on-313",
+    "line": "3.13",
+    "prompt": "Update my Gatling project to a current version.",
+    "reads": ["gatling-migration"],
+    "expect": [{ "file": "build.gradle", "matches": ["gatlingVersion = '3\\.13"] }],
+    "unchanged": [
+      "build.gradle",
+      "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
+      "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala"
+    ],
+    "why": "Already on the default target. Inventing a crossing is the failure, and `reads` is what separates a correct refusal from an agent that never ran."
+  },
+  {
+    "id": "on-315-galaxio",
+    "line": "3.15",
+    "prompt": "Update my Gatling project to a current version.",
+    "reads": ["gatling-migration", "galaxio-upgrade.md"],
+    "says": ["run.?time|NoSuchMethodError|3\\.13"],
+    "unchanged": [
+      "build.gradle",
+      "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
+      "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala"
+    ],
+    "why": "Above the default and carrying a Picatinny that targets 3.13 — the wrong-column pin that resolves, compiles and dies at the first transaction. The skill must say so and hand the decision back, not silently downgrade the build or edit the simulations."
+  }
+]
