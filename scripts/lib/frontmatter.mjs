@@ -8,9 +8,10 @@
  *
  * Being more permissive than YAML is the point — a reader that threw could not
  * report anything — but it is also a hazard: a line this accepts and a real
- * parser rejects ships a skill that installs with empty metadata. Every accepted
- * value is therefore checked back against the constructs a parser would choke
- * on, and reported in `invalid`.
+ * parser rejects ships a skill that installs with empty metadata. So the reader
+ * does not scan for known-bad patterns; it reads the scalar the way a parser
+ * would and reports every line where the two answers differ, in `invalid`.
+ * `fields` then holds the decoded value, which is what actually loads.
  */
 
 const DELIMITER = /^---\s*$/;
@@ -25,22 +26,53 @@ const BLOCK_SCALAR = /^[|>][+-]?\d*[+-]?$/;
  */
 const DROPS_EVERYTHING = 'the whole block fails to parse and the skill loads with no metadata';
 
-/** A quoted scalar closed on its own line. Anything else stops short of the line's end. */
-const QUOTED = { "'": /^'(?:[^']|'')*'$/, '"': /^"(?:[^"\\]|\\.)*"$/ };
+/** A quoted scalar, up to its closing quote. Trailing text is the caller's problem. */
+const QUOTED = { "'": /^'(?:[^']|'')*'/, '"': /^"(?:[^"\\]|\\.)*"/ };
 
 /**
- * Indicators a plain (unquoted) scalar may not open with. `-` and `?` count only
- * when whitespace follows — `- x` starts a sequence, `-x` is just a string. A
- * bare `|`/`>` never reaches here; that is a block scalar, reported above.
- *
- * Only characters both yaml@2 and js-yaml throw on. The rest of YAML's indicator
- * set is deliberately absent: `[`/`{` open a flow collection that is perfectly
- * legal once closed (`allowed-tools: [Read, Grep]`), parsers disagree about a
- * leading `,`/`]`/`}`, and `#`/`&`/`!` mangle the value rather than reject it.
- * Each of those already fails the capital-letter rule, and a message claiming a
- * parse failure has to be true of every parser that will read the file.
+ * The same double-quoted scalar, accepting only the escapes YAML defines. A
+ * backslash outside this set throws in both parsers, so `"C:\Users\me"` and
+ * `"matches \d+"` are broken values rather than literal backslashes — and both
+ * are what an author reaches for after being told to quote the value.
  */
-const PLAIN_FIRST = /^(?:[*%@`|>]|[-?](?=\s|$))/;
+// cspell:ignore abtnvfre — a character class of escape letters, not a word.
+const DQ_ESCAPED =
+  /^"(?:[^"\\]|\\(?:[0abtnvfre"/\\N_LP \t]|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))*"/;
+
+/** Everything YAML allows after a closed quoted scalar: blanks, then a comment. */
+const AFTER_QUOTED = /^\s*(?:#.*)?$/;
+
+/** What each escape stands for, so `fields` carries the string that loads. */
+const UNESCAPE = {
+  '0': '\0', a: '\x07', b: '\b', t: '\t', n: '\n', v: '\v', f: '\f', r: '\r',
+  e: '\x1b', '"': '"', '/': '/', '\\': '\\', N: '\u0085', _: '\u00a0',
+  L: '\u2028', P: '\u2029',
+};
+
+/**
+ * A plain (unquoted) scalar may not open with a YAML indicator. Three groups,
+ * because they fail in three different ways and a message has to be true of the
+ * parser the reader will meet. `-`, `?` and `:` count only when whitespace
+ * follows — `- x` starts a sequence, `-x` is just a string. A bare `|`/`>` never
+ * reaches here; that is a block scalar, reported as unsupported above.
+ */
+const FATAL_FIRST = /^(?:[*%@`|>]|[-?:](?=\s|$))/;
+
+/** Parses, but into something that is not the text on the line. */
+const READS_AS = {
+  '[': 'a list, not as text',
+  '{': 'a map, not as text',
+  '#': 'a comment, so the value is empty',
+  '&': 'an anchor, which is stripped from the value',
+  '!': 'a tag: yaml strips it and js-yaml rejects the block',
+};
+
+/**
+ * `yaml` throws on these, `js-yaml` keeps them as text. Reported rather than
+ * excused: a check answering "does this load in all three agents" has to reject
+ * what any parser rejects, or it is fail-open by construction.
+ */
+const DISPUTED_FIRST = /^[,\]}]/;
 
 export function parseFrontmatter(source) {
   const lines = source.split(/\r?\n/);
@@ -81,46 +113,87 @@ export function parseFrontmatter(source) {
       unsupported.push({ line: i + 1, text: line.trim(), reason: 'block or empty value' });
       continue;
     }
-    const problem = valueProblem(value);
+    // Both parsers reject a repeated key and drop the block with it, so the
+    // second line is not an override — it is the whole file failing to load.
+    if (Object.hasOwn(fields, key)) {
+      invalid.push({ ...fatal(`"${key}" is set twice`).problem, line: i + 1, key });
+    }
+    const { text, problem } = readScalar(value);
     // Recorded, not dropped. The field is gone at runtime, but withholding it
     // here would fire "frontmatter is missing name" on top of the real cause.
-    if (problem) invalid.push({ line: i + 1, key, reason: problem });
-    fields[key] = unquote(value);
+    if (problem) invalid.push({ ...problem, line: i + 1, key });
+    fields[key] = text ?? value;
   }
 
   return { found: true, fields, unsupported, invalid, bodyLines: lines.length - end - 1 };
 }
 
 /**
- * Why a real YAML parser reads this value as something other than the text on
- * the line, or null when it reads it verbatim. Every one of these is fixed by
- * quoting, which is why the caller can offer one fix for all of them.
+ * The string a YAML parser reads from one value, or why it reads something the
+ * author did not write. Every problem is fixed by quoting, which is why the
+ * caller can offer one fix for all of them.
  *
- * Deliberately not a YAML parser: `scripts/lib/` is dependency-free, and the
- * portable core is two flat scalars, so the whole surface is one line's value.
- * The rules are checked against yaml@2 and js-yaml in tests/checks.test.mjs —
- * over-rejecting here would block a legitimate description, so both directions
- * are pinned there.
+ * Deliberately not a YAML parser: `scripts/lib/` is dependency-free and the
+ * `manifests` CI job runs with no `npm install`, so nothing can be imported
+ * here. The portable core is two flat scalars, so the whole surface is one
+ * line's value. `tests/checks.test.mjs` runs every case in both directions
+ * against `yaml` and `js-yaml` when they are installed — over-rejecting would
+ * block a legitimate description, so that direction is pinned too.
  */
-function valueProblem(value) {
-  const closed = QUOTED[value[0]];
-  if (closed) {
-    // Covers the unterminated string and the fix-gone-wrong: quoting a value to
-    // survive its colon, when the value also carries an apostrophe.
-    return closed.test(value)
-      ? null
-      : `the quoted value closes before the end of the line (an apostrophe inside single quotes must be doubled) — ${DROPS_EVERYTHING}`;
+function readScalar(value) {
+  const scan = QUOTED[value[0]];
+  if (scan) {
+    const quote = value[0];
+    const found = scan.exec(value);
+    if (!found) return fatal(`the ${quote}-quoted value is never closed`);
+    if (!AFTER_QUOTED.test(value.slice(found[0].length))) {
+      // Where the fix for a colon lands when the value also holds an apostrophe:
+      // YAML closes the string at that apostrophe and chokes on the remainder.
+      return fatal(`text follows the closing ${quote}, so the value ends early`);
+    }
+    if (quote === '"' && !DQ_ESCAPED.test(found[0])) {
+      return fatal('a backslash here does not open a YAML escape');
+    }
+    const body = found[0].slice(1, -1);
+    return { text: quote === "'" ? body.replaceAll("''", "'") : unescape(body) };
   }
-  const [indicator] = PLAIN_FIRST.exec(value) ?? [];
-  if (indicator) return `an unquoted value cannot start with "${indicator}" — ${DROPS_EVERYTHING}`;
+
+  const [indicator] = FATAL_FIRST.exec(value) ?? [];
+  if (indicator) return fatal(`an unquoted value cannot start with "${indicator}"`);
+
+  const reads = READS_AS[value[0]];
+  if (reads) return lossy(`an unquoted value opening with "${value[0]}" reads as ${reads}`);
+
+  const [disputed] = DISPUTED_FIRST.exec(value) ?? [];
+  if (disputed) {
+    // yaml throws where js-yaml keeps the text, so at least one agent loads nothing.
+    return fatal(
+      `an unquoted value cannot start with "${disputed}" — yaml rejects it and js-yaml keeps it, so what loads depends on the agent, and`,
+    );
+  }
+
   // Mid-value ": " is the mapping indicator, and a trailing ":" opens a nested map.
-  if (/:(\s|$)/.test(value)) return `an unquoted value cannot contain ": " — ${DROPS_EVERYTHING}`;
+  if (/:(\s|$)/.test(value)) return fatal('an unquoted value cannot contain ": "');
   // Parses, but " #" opens a comment: the value silently loses its tail.
-  if (/\s#/.test(value)) return '" #" opens a comment, so the value is cut off there';
-  return null;
+  if (/\s#/.test(value)) return lossy('" #" opens a comment, so the value is cut off there');
+
+  return { text: value };
 }
 
-function unquote(value) {
-  const quoted = /^(['"])(.*)\1$/.exec(value);
-  return quoted ? quoted[2] : value;
+/** At least one parser rejects the block outright, so no field in it loads. */
+function fatal(reason) {
+  return { problem: { reason: `${reason} — ${DROPS_EVERYTHING}`, fatal: true } };
+}
+
+/** The block parses, but this one value is not the text on the line. */
+function lossy(reason) {
+  return { problem: { reason, fatal: false } };
+}
+
+function unescape(body) {
+  return body.replace(/\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|[\s\S])/g, (_, esc) =>
+    esc.length > 1
+      ? String.fromCodePoint(Number.parseInt(esc.slice(1), 16))
+      : (UNESCAPE[esc] ?? esc),
+  );
 }

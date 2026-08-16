@@ -130,20 +130,22 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
-  const { name, description } = parsed.fields;
-  // A value YAML cannot read is not the value that loads, so measuring it below
-  // would pile a second, misleading error onto a line already reported.
-  const unreadable = new Set(parsed.invalid.map((entry) => entry.key));
+  // A parser that rejects one line drops the whole block, so nothing below it
+  // loads and measuring any of it would be measuring text no agent ever sees.
+  // A value that merely reads as something else costs only its own key.
+  if (parsed.invalid.some((entry) => entry.fatal)) return 0;
+  const lossy = new Set(parsed.invalid.map((entry) => entry.key));
 
+  // The rules below measure `fields`, which holds the decoded value a parser
+  // reads — not the raw text — so a doubled apostrophe or a `\n` counts once.
+  const { name, description } = parsed.fields;
   if (!name) reporter.error(rel, 'frontmatter is missing "name"');
-  else if (!unreadable.has('name') && name !== skillName)
+  else if (!lossy.has('name') && name !== skillName)
     reporter.error(rel, `frontmatter name "${name}" does not match directory "${skillName}"`);
 
   if (!description) {
     reporter.error(rel, 'frontmatter is missing "description" — without it the agent never triggers the skill');
-    return 0;
-  }
-  if (!unreadable.has('description')) {
+  } else if (!lossy.has('description')) {
     if (description.length > MAX_DESCRIPTION_CHARS) {
       reporter.error(rel, `description is ${description.length} chars; keep it under ${MAX_DESCRIPTION_CHARS}`);
     }
@@ -152,6 +154,8 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     }
   }
 
+  // Body length has nothing to do with the frontmatter, so it is reported even
+  // when the description above was missing or unreadable.
   if (parsed.bodyLines > MAX_BODY_LINES) {
     reporter.error(
       rel,
@@ -159,5 +163,5 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
-  return unreadable.has('description') ? 0 : description.length;
+  return description && !lossy.has('description') ? description.length : 0;
 }

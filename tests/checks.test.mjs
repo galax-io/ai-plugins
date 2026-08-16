@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { cpSync, mkdtempSync, readFileSync, rmSync, appendFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, appendFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -221,33 +221,179 @@ test('frontmatter parser flags every block scalar indicator', () => {
   }
 });
 
+/**
+ * Values a parser reads as something other than the text on the line, and
+ * values it reads verbatim. REJECTED and ACCEPTED are the corpus the
+ * differential test below replays against real parsers; the assertions here
+ * pin the wording, which runs with no node_modules at all.
+ */
+const REJECTED = [
+  ['Use when scaffolding on Maven: pom.xml layout', /cannot contain ": "/],
+  ['Use when the build fails:', /cannot contain ": "/], // trailing ":" opens a nested map
+  ['Use when fixing issue #27 today', /opens a comment/],
+  ["'Don't scaffold: it breaks'", /text follows the closing '/], // quoting, gone wrong
+  ["'Use when the quote never closes", /never closed/],
+  ['"Use when it closes" and then keeps going', /text follows the closing "/],
+  ['"Use when the report is at C:\\Users\\me"', /does not open a YAML escape/],
+  ['"Use when matching \\d+ in the log"', /does not open a YAML escape/],
+  ['@Use when the at sign opens the value', /cannot start with "@"/],
+  ['* Use when a star opens the value', /cannot start with "\*"/],
+  ['% Use when a percent opens the value', /cannot start with "%"/],
+  ['`Use when a backtick opens the value', /cannot start with "`"/],
+  ['- Use when a dash and a space open it', /cannot start with "-"/],
+  ['? Use when a question mark opens it', /cannot start with "\?"/],
+  ['|Use when a pipe opens the value', /cannot start with "\|"/],
+  ['>Use when a chevron opens the value', /cannot start with ">"/],
+  ['[Read, Grep]', /reads as a list/], // legal YAML, but not a string
+  ['[Read, Grep', /reads as a list/],
+  ['{tier: pro}', /reads as a map/],
+  ['#1 choice for load tests', /reads as a comment/], // parsers read null
+  ['&anchor Use when an anchor opens it', /reads as an anchor/],
+  ['!tag Use when a tag opens the value', /reads as a tag/],
+  [', Use when a comma opens the value', /depends on the agent/], // yaml throws, js-yaml keeps
+];
+
+const ACCEPTED = [
+  'Use when the ratio is 3:15 and no space follows',
+  'Use when the sources are C# and F# files',
+  'Use when a path like a/b#c has no space before the hash',
+  "'Use when scaffolding: quoted and safe'",
+  '"Use when it\'s fine: double quoted"',
+  "'Use when it''s fine: a doubled apostrophe'",
+  '"Use when an escape \\" is legal"',
+  "'Use when a comment follows the value' # kept under 1024",
+  '"Use when a comment follows a double-quoted value" # note',
+  'Use when nothing about the value is special',
+  '-leading dash without a space is a plain string',
+  '?leading question mark without a space is too',
+  'Use when a colon:without a space is fine',
+];
+
 test('frontmatter parser flags every value YAML would not read as written', () => {
   const reasons = (value) =>
     parseFrontmatter(['---', `description: ${value}`, '---'].join('\n')).invalid.map((i) => i.reason);
 
-  // Verified against yaml@2 and js-yaml: the first three throw, the fourth
-  // silently keeps "Use when fixing issue" and drops the rest.
-  assert.match(reasons('Use when scaffolding on Maven: pom.xml layout')[0], /cannot contain ": "/);
-  assert.match(reasons("'Don't scaffold: it breaks'")[0], /closes before the end of the line/);
-  assert.match(reasons('@Use when the at sign opens the value')[0], /cannot start with "@"/);
-  assert.match(reasons('Use when fixing issue #27 today')[0], /opens a comment/);
-
-  // A trailing colon opens a nested mapping just as ": " does.
-  assert.match(reasons('Use when the build fails:')[0], /cannot contain ": "/);
+  for (const [value, expected] of REJECTED) {
+    const [first] = reasons(value);
+    assert.ok(first, `not flagged: ${value}`);
+    assert.match(first, expected, value);
+  }
 
   // The other direction matters as much: over-rejecting would block a
-  // legitimate value, and every one of these round-trips through both parsers.
-  for (const legal of [
-    'Use when the ratio is 3:15 and no space follows',
-    'Use when the sources are C# and F# files',
-    "'Use when scaffolding: quoted and safe'",
-    '"Use when it\'s fine: double quoted"',
-    "'Use when it''s fine: a doubled apostrophe'",
-    'Use when nothing about the value is special',
-    '-leading dash without a space is a plain string',
-    '[Read, Grep]', // A closed flow sequence is valid YAML; it fails elsewhere, as a non-portable key.
+  // legitimate description, so every accepted value is pinned too.
+  for (const value of ACCEPTED) assert.deepEqual(reasons(value), [], value);
+});
+
+test('frontmatter parser decodes the value that loads, not the text on the line', () => {
+  const read = (value) =>
+    parseFrontmatter(['---', `description: ${value}`, '---'].join('\n')).fields.description;
+
+  // check-portability measures length against this, so a doubled apostrophe and
+  // an escape have to count once, the way the agent will see them.
+  assert.equal(read("'It''s fine'"), "It's fine");
+  assert.equal(read('"He said \\"hi\\""'), 'He said "hi"');
+  assert.equal(read('"An em dash \\u2014 here"'), 'An em dash \u2014 here');
+  assert.equal(read("'Use when quoted' # a comment"), 'Use when quoted');
+  assert.equal(read('Use when plain'), 'Use when plain');
+});
+
+test('a rejected block is not measured, and a rejected value costs only its own key', () => {
+  const skill = (frontmatter) => {
+    const root = copyFixture('valid');
+    const dir = path.join(root, 'plugins/demo-plugin/skills/demo-skill');
+    writeFileSync(path.join(dir, 'SKILL.md'), `---\n${frontmatter}\n---\n\nBody.\n`);
+    return runScript('check-portability.mjs', root).output;
+  };
+
+  // Fatal: a parser drops the block, so every field in it is gone. Reporting the
+  // 1100-char description on top would be measuring text no agent ever sees.
+  const long = `A${'x'.repeat(1100)}`;
+  const fatal = skill(`name: broken: name\ndescription: ${long}`);
+  assert.match(fatal, /an unquoted value cannot contain ": "/);
+  assert.doesNotMatch(fatal, /keep it under/, 'a dropped block must not be measured');
+
+  // Lossy: the block parses, so a bad description costs the description only —
+  // the name still has to match its directory.
+  const lossy = skill('name: wrong-name\ndescription: #1 choice');
+  assert.match(lossy, /reads as a comment/);
+  assert.match(lossy, /does not match directory "demo-skill"/, 'the readable key is still checked');
+  assert.doesNotMatch(lossy, /capital letter/, 'the unreadable key is not measured');
+});
+
+test('frontmatter parser reports a repeated key instead of letting the last one win', () => {
+  const parsed = parseFrontmatter(
+    ['---', 'name: first', 'description: A description.', 'name: second', '---'].join('\n'),
+  );
+  // Both parsers throw on a duplicate mapping key and drop the block with it.
+  assert.equal(parsed.invalid.length, 1);
+  assert.equal(parsed.invalid[0].line, 4);
+  assert.match(parsed.invalid[0].reason, /"name" is set twice/);
+});
+
+/**
+ * The claim `scripts/lib/frontmatter.mjs` makes is that it reads a value the way
+ * a YAML parser does. Here that is checked rather than asserted: every case in
+ * the corpus is read by both real parsers, and the reader has to flag exactly
+ * the values where at least one of them disagrees with what it recorded.
+ *
+ * Skipped when the packages are absent — the `manifests` CI job runs with no
+ * `npm install` on purpose, so this runs in the `prose` job, which installs.
+ */
+test('every rule agrees with yaml and js-yaml, in both directions', async (t) => {
+  // Both ship as ESM with named exports and as CJS behind a default; taking
+  // whichever is present keeps a wrong guess from reading as a disagreement.
+  // yaml goes through parseDocument on purpose: `parse` with `logLevel:
+  // 'silent'` swallows the very errors this test exists to observe, and without
+  // it an unknown tag prints a warning on every run. Errors are the signal;
+  // warnings are not.
+  const parsers = [];
+  for (const [name, method, wrap] of [
+    [
+      'yaml',
+      'parseDocument',
+      (parseDocument) => (text) => {
+        const doc = parseDocument(text);
+        if (doc.errors.length > 0) throw doc.errors[0];
+        return doc.toJS();
+      },
+    ],
+    ['js-yaml', 'load', (load) => (text) => load(text)],
   ]) {
-    assert.deepEqual(reasons(legal), [], legal);
+    try {
+      const module = await import(name);
+      const fn = module[method] ?? module.default?.[method];
+      assert.equal(typeof fn, 'function', `${name} exposes no ${method}()`);
+      parsers.push([name, wrap(fn)]);
+    } catch (error) {
+      if (error?.code !== 'ERR_MODULE_NOT_FOUND') throw error;
+    }
+  }
+
+  if (parsers.length < 2) {
+    return t.skip('yaml and js-yaml are not installed; run npm ci to check against them');
+  }
+
+  const THREW = Symbol('threw');
+  for (const value of [...REJECTED.map(([v]) => v), ...ACCEPTED]) {
+    const parsed = parseFrontmatter(['---', `description: ${value}`, '---'].join('\n'));
+    const recorded = parsed.fields.description;
+
+    const disagreed = parsers.filter(([, parse]) => {
+      let read;
+      try {
+        read = parse(`description: ${value}\n`)?.description;
+      } catch {
+        read = THREW;
+      }
+      return read !== recorded;
+    });
+
+    if (disagreed.length === 0) {
+      assert.deepEqual(parsed.invalid, [], `both parsers read ${value} as recorded, but it is flagged`);
+    } else {
+      const names = disagreed.map(([name]) => name).join(' and ');
+      assert.ok(parsed.invalid.length > 0, `${names} disagree(s) about ${value}, but it is accepted`);
+    }
   }
 });
 
