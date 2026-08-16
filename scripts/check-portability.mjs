@@ -130,14 +130,12 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
-  // A parser that rejects one line drops the whole block, so nothing below it
-  // loads and measuring any of it would be measuring text no agent ever sees.
-  // A value that merely reads as something else costs only its own key.
+  // A rejected line drops the whole block, so nothing in the file loads and the
+  // rules below would measure text no agent sees. A value that merely reads as
+  // something else costs only its own key.
   if (parsed.invalid.some((entry) => entry.fatal)) return 0;
   const lossy = new Set(parsed.invalid.map((entry) => entry.key));
 
-  // The rules below measure `fields`, which holds the decoded value a parser
-  // reads — not the raw text — so a doubled apostrophe or a `\n` counts once.
   const { name, description } = parsed.fields;
   if (!name) reporter.error(rel, 'frontmatter is missing "name"');
   else if (!lossy.has('name') && name !== skillName)
@@ -154,8 +152,7 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     }
   }
 
-  // Body length has nothing to do with the frontmatter, so it is reported even
-  // when the description above was missing or unreadable.
+  // Reported even when the description was missing or unreadable: unrelated.
   if (parsed.bodyLines > MAX_BODY_LINES) {
     reporter.error(
       rel,
