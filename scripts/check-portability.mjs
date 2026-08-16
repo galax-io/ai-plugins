@@ -115,6 +115,10 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     reporter.error(rel, `frontmatter line ${line} (${reason}) is not portable: ${text}`);
   }
 
+  for (const { line, key, reason } of parsed.invalid) {
+    reporter.error(rel, `frontmatter line ${line}: ${reason}. Quote it: ${key}: '...'`);
+  }
+
   for (const key of Object.keys(parsed.fields)) {
     if (PORTABLE_KEYS.has(key)) continue;
     const owner = AGENT_SPECIFIC_KEYS[key];
@@ -127,18 +131,25 @@ function checkSkill(root, skillsDir, skillName, reporter) {
   }
 
   const { name, description } = parsed.fields;
+  // A value YAML cannot read is not the value that loads, so measuring it below
+  // would pile a second, misleading error onto a line already reported.
+  const unreadable = new Set(parsed.invalid.map((entry) => entry.key));
+
   if (!name) reporter.error(rel, 'frontmatter is missing "name"');
-  else if (name !== skillName) reporter.error(rel, `frontmatter name "${name}" does not match directory "${skillName}"`);
+  else if (!unreadable.has('name') && name !== skillName)
+    reporter.error(rel, `frontmatter name "${name}" does not match directory "${skillName}"`);
 
   if (!description) {
     reporter.error(rel, 'frontmatter is missing "description" — without it the agent never triggers the skill');
     return 0;
   }
-  if (description.length > MAX_DESCRIPTION_CHARS) {
-    reporter.error(rel, `description is ${description.length} chars; keep it under ${MAX_DESCRIPTION_CHARS}`);
-  }
-  if (!/^[A-Z]/.test(description)) {
-    reporter.error(rel, 'description should start with a capital letter and lead with the primary use case');
+  if (!unreadable.has('description')) {
+    if (description.length > MAX_DESCRIPTION_CHARS) {
+      reporter.error(rel, `description is ${description.length} chars; keep it under ${MAX_DESCRIPTION_CHARS}`);
+    }
+    if (!/^[A-Z]/.test(description)) {
+      reporter.error(rel, 'description should start with a capital letter and lead with the primary use case');
+    }
   }
 
   if (parsed.bodyLines > MAX_BODY_LINES) {
@@ -148,5 +159,5 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
-  return description.length;
+  return unreadable.has('description') ? 0 : description.length;
 }

@@ -97,6 +97,20 @@ test('non-portable frontmatter is rejected and the owning agent is named', () =>
   assert.match(result.output, /folded-skill.*block or empty value/s);
 });
 
+test('an unquoted colon is rejected with the fix, not measured as if it loaded', () => {
+  // The case that shipped: seven SKILL.md files passed every gate in this repo
+  // and `claude plugin validate --strict` rejected all seven.
+  const result = runScript('check-portability.mjs', fixture('invalid-frontmatter'));
+  assert.equal(result.code, 1);
+
+  const reported = result.output.split('\n').filter((line) => line.includes('colon-skill'));
+  assert.equal(reported.length, 1, `one line, one error:\n${reported.join('\n')}`);
+  assert.match(reported[0], /skills\/colon-skill\/SKILL\.md/, 'the file must be named');
+  assert.match(reported[0], /frontmatter line 3: an unquoted value cannot contain ": "/);
+  assert.match(reported[0], /loads with no metadata/, 'the consequence must be stated');
+  assert.match(reported[0], /Quote it: description: '\.\.\.'/, 'the fix must be spelled out');
+});
+
 test('skills on disk are gated even when components.skills is undeclared', () => {
   const result = runScript('check-portability.mjs', fixture('undeclared-skills'));
   assert.equal(result.code, 1);
@@ -204,6 +218,36 @@ test('frontmatter parser flags every block scalar indicator', () => {
     const parsed = parseFrontmatter(['---', `description: ${indicator}`, '  text', '---'].join('\n'));
     assert.equal(parsed.fields.description, undefined, `${indicator} was parsed as a value`);
     assert.equal(parsed.unsupported[0].reason, 'block or empty value');
+  }
+});
+
+test('frontmatter parser flags every value YAML would not read as written', () => {
+  const reasons = (value) =>
+    parseFrontmatter(['---', `description: ${value}`, '---'].join('\n')).invalid.map((i) => i.reason);
+
+  // Verified against yaml@2 and js-yaml: the first three throw, the fourth
+  // silently keeps "Use when fixing issue" and drops the rest.
+  assert.match(reasons('Use when scaffolding on Maven: pom.xml layout')[0], /cannot contain ": "/);
+  assert.match(reasons("'Don't scaffold: it breaks'")[0], /closes before the end of the line/);
+  assert.match(reasons('@Use when the at sign opens the value')[0], /cannot start with "@"/);
+  assert.match(reasons('Use when fixing issue #27 today')[0], /opens a comment/);
+
+  // A trailing colon opens a nested mapping just as ": " does.
+  assert.match(reasons('Use when the build fails:')[0], /cannot contain ": "/);
+
+  // The other direction matters as much: over-rejecting would block a
+  // legitimate value, and every one of these round-trips through both parsers.
+  for (const legal of [
+    'Use when the ratio is 3:15 and no space follows',
+    'Use when the sources are C# and F# files',
+    "'Use when scaffolding: quoted and safe'",
+    '"Use when it\'s fine: double quoted"',
+    "'Use when it''s fine: a doubled apostrophe'",
+    'Use when nothing about the value is special',
+    '-leading dash without a space is a plain string',
+    '[Read, Grep]', // A closed flow sequence is valid YAML; it fails elsewhere, as a non-portable key.
+  ]) {
+    assert.deepEqual(reasons(legal), [], legal);
   }
 });
 
