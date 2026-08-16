@@ -1,6 +1,8 @@
 # Starter Tree
 
-The sources are Scala on sbt with Picatinny; Java and Kotlin use the same tree. The resource files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template — are in [resource-files.md](resource-files.md).
+The sources are Scala on sbt with Picatinny; Java and Kotlin use the same package tree under their own root. The resource files — `simulation.conf`, `logback.xml`, the feeder CSV and the body template — are in [resource-files.md](resource-files.md).
+
+**The two roots below are the sbt and Maven ones.** A Gradle project puts sources in `src/gatling/<language>` and resources in `src/gatling/resources`; written under `src/test/*` they fail to compile on their `io.gatling` imports. The roots table is in the Layout section of this skill's `SKILL.md`.
 
 Every import here is load-bearing.
 

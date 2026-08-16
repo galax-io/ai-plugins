@@ -54,8 +54,9 @@ Then, in the session:
 codex plugin marketplace add galax-io/ai-plugins
 ```
 
-Then `/plugins` to enable it. Invoke a skill with `$galaxio-gatling-pro`, `$gatling-migration` or
-`$gatling-versions` — though naming one is rarely needed, since their descriptions do not overlap.
+Then `/plugins` to enable it. Invoke a skill with `$galaxio-gatling-pro`, `$gatling-build`,
+`$gatling-migration` or `$gatling-versions` — though naming one is rarely needed, since their
+descriptions do not overlap.
 
 ### Cursor
 
@@ -75,11 +76,11 @@ flowchart TD
     DET["<b>Detect</b><br/>source root · build file · Gatling version · Galaxio pins"]
 
     DET --> L["<b>1. Language</b><br/>Scala · Java · Kotlin"]
-    L --> B["<b>2. Build tool</b><br/>sbt · Maven · Gradle<br/><i>7 valid cells</i>"]
+    L --> B["<b>2. Build tool</b><br/><i>only when the build file is edited</i><br/>gatling-build · 7 valid cells"]
     B --> V["<b>3. Gatling version</b><br/>3.13.x default · 3.9.x · 3.11.x · 3.15.x"]
     V --> P["<b>4. Protocol</b><br/>HTTP · JDBC · Kafka · AMQP · JMS"]
 
-    P --> OUT["<b>4–8 files loaded, of 23</b>"]
+    P --> OUT["<b>3–8 files loaded, of 24</b>"]
     INV["<b>Invariants</b><br/>always in context<br/>layers · feeders · secrets<br/>checks · session · Do Not"] --> OUT
 
     OUT --> WORK["Write · Review · Upgrade"]
@@ -89,9 +90,10 @@ Each step discards the references that cannot apply. Language goes first because
 widest filter — sbt serves Scala only, so a Kotlin project has already lost a third of the
 build matrix before the version is read.
 
-The split is there for correctness, not to save tokens: each build file describes one language
-and they contradict each other on purpose, so an agent that reads two produces advice matching no
-real project.
+The split is there for correctness first: each build file describes one language and they
+contradict each other on purpose, so an agent that reads two produces advice matching no real
+project. It saves context as a side effect — the build files live in `gatling-build` and a task
+that never opens the build file never loads them.
 
 ## First run
 
@@ -274,11 +276,14 @@ Three things worth knowing, because they change what you get:
 ## Layout
 
 ```text
-skills/galaxio-gatling-pro/     writing, reviewing and refactoring
+skills/galaxio-gatling-pro/     writing, reviewing and refactoring the test code
   SKILL.md              detection, dispatch, and the invariants every task needs
-  references/           one file per build tool, language and protocol
+  references/           one file per language and per protocol
   agents/openai.yaml    Codex UI sidecar
-skills/gatling-versions/        every number, for all three skills
+skills/gatling-build/           the build file, on all seven cells
+  SKILL.md              cell detection, the source and resource roots
+  references/           one file per build tool and language
+skills/gatling-versions/        every number, for all four skills
   SKILL.md              how to read a project's line off its build file
   references/           Gatling lines, Galaxio artifacts, what is published now
 skills/gatling-migration/       moving between Gatling lines, 3.9.x to 3.15.x
@@ -286,10 +291,10 @@ skills/gatling-migration/       moving between Gatling lines, 3.9.x to 3.15.x
   references/           the branch for a build that carries Galaxio libraries
 ```
 
-Each `SKILL.md` lists every reference with the condition that selects it. That dispatch table is
-the one place the tree is enumerated, so adding a reference means editing one file, not two.
+Each `SKILL.md` lists every reference with the condition that selects it, so adding a reference
+means editing that one dispatch table.
 
-`gatling-versions` owns the artifact matrix and `galaxio-gatling-pro` links into it. `gatling-migration`
+`gatling-versions` owns the artifact matrix; `galaxio-gatling-pro` and `gatling-build` link into it. `gatling-migration`
 is deliberately standalone — it has no path out of its own directory, so it lifts into another plugin
 whole, and the price is that the build-plugin floors are stated in both. Nothing else is restated.
 Migration is separate because an upgrade loads almost nothing the writing skill needs, and the writing

@@ -1,6 +1,6 @@
 ---
 name: galaxio-gatling-pro
-description: 'Use when creating, reviewing or refactoring Gatling JVM performance tests in Galaxio style: Gatling 3.9.x through 3.15.x, Scala, Java or Kotlin on sbt, Maven or Gradle, gatling-picatinny plus the Galaxio gatling-jdbc-plugin, gatling-kafka-plugin and gatling-amqp-plugin, HTTP, JDBC, Kafka, AMQP and JMS protocols, open and closed workload models, smoke and debug simulations, and the cases/feeders/scenarios/simulations layout.'
+description: 'Use when writing, reviewing or refactoring the Gatling test code itself in Galaxio style: simulations, scenarios, cases and feeders in Scala, Java or Kotlin, HTTP, JDBC, Kafka, AMQP and JMS protocols, gatling-picatinny and the Galaxio protocol plugins, open and closed workload models, smoke and debug simulations, simulation.conf and the cases/feeders/scenarios/simulations layout.'
 ---
 
 # Galaxio Gatling Pro
@@ -8,8 +8,8 @@ description: 'Use when creating, reviewing or refactoring Gatling JVM performanc
 ## How To Use This Skill
 
 1. Run the detection below. Reviews take the same route as writing.
-2. From dispatch read **one** language file, **one** build file for it, and only the protocol
-   files used. Never two build files: they contradict on purpose.
+2. From dispatch read **one** language file and only the protocol files used. Writing or changing
+   the build file itself is `gatling-build`; hand off only when the build file is in play.
 3. Apply the invariants below; on a review they are the checklist.
 
 Every version number is owned elsewhere — [gatling-lines.md](../gatling-versions/references/gatling-lines.md)
@@ -83,13 +83,12 @@ the query is in [galaxio-artifacts.md](../gatling-versions/references/galaxio-ar
 | `*/java`   | [references/lang-java.md](references/lang-java.md)     |
 | `*/kotlin` | [references/lang-kotlin.md](references/lang-kotlin.md) |
 
-**2. By build tool, within that language** — read one:
+**2. By build tool** — only when the task opens the build file. Adding a scenario, reviewing a
+simulation or answering a workload question does not, and the roots below cover those:
 
-| Language | `build.sbt`                                         | `pom.xml`                                                 | `build.gradle[.kts]`                                        |
-| -------- | --------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
-| Scala    | [build-sbt-scala.md](references/build-sbt-scala.md) | [build-maven-scala.md](references/build-maven-scala.md)   | [build-gradle-scala.md](references/build-gradle-scala.md)   |
-| Java     | not supported — sbt serves Scala only               | [build-maven-java.md](references/build-maven-java.md)     | [build-gradle-java.md](references/build-gradle-java.md)     |
-| Kotlin   | not supported                                       | [build-maven-kotlin.md](references/build-maven-kotlin.md) | [build-gradle-kotlin.md](references/build-gradle-kotlin.md) |
+| Task                                                             | Read                                                                           |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Adding a dependency, raising a build plugin, scaffolding a build | [gatling-build](../gatling-build/SKILL.md), which picks one of its seven cells |
 
 **3. By Gatling version** — every number lives in `gatling-versions`, read one:
 
@@ -153,8 +152,19 @@ One tree, with only the source root changing per build tool:
   logback.xml
 ```
 
-The source and resource roots come from the build tool, not from preference — they are in the
-build reference the dispatch table sent you to.
+The roots come from the build tool, not from preference:
+
+| Build tool | `<source-root>`          | `<resource-root>`       |
+| ---------- | ------------------------ | ----------------------- |
+| sbt        | `src/test/scala`         | `src/test/resources`    |
+| Maven      | `src/test/<language>`    | `src/test/resources`    |
+| Gradle     | `src/gatling/<language>` | `src/gatling/resources` |
+
+Under Gradle the Gatling source set is `src/gatling/*`; a simulation written under `src/test/*`
+fails to compile on its `io.gatling` imports, because Gatling's dependencies never reach that
+source set. Outside Java the Maven row is configuration rather than a default — an existing
+project reaches `src/test/kotlin` or `src/test/scala` only because its POM wires them, so follow
+what the repository already does. Writing the build file itself is `gatling-build`.
 
 Boundaries:
 

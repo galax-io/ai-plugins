@@ -63,7 +63,13 @@
     "line": "3.13",
     "prompt": "Update my Gatling project to a current version.",
     "reads": ["gatling-migration"],
-    "expect": [{ "file": "build.gradle", "matches": ["gatlingVersion = '3\\.13"] }],
+    "readsNone": ["galaxio-gatling-pro", "gatling-build"],
+    "expect": [
+      {
+        "file": "build.gradle",
+        "matches": ["gatlingVersion = '3\\.13"]
+      }
+    ],
     "unchanged": [
       "build.gradle",
       "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
@@ -82,6 +88,7 @@
       "src/gatling/scala/org/galaxio/performance/myservice/MaxPerformance.scala",
       "src/gatling/scala/org/galaxio/performance/myservice/cases/HttpActions.scala"
     ],
-    "why": "Above the default and carrying a Picatinny that targets 3.13 — the wrong-column pin that resolves, compiles and dies at the first transaction. The skill must say so and hand the decision back, not silently downgrade the build or edit the simulations."
+    "why": "Above the default and carrying a Picatinny that targets 3.13 \u2014 the wrong-column pin that resolves, compiles and dies at the first transaction. The skill must say so and hand the decision back, not silently downgrade the build or edit the simulations.",
+    "readsNone": ["galaxio-gatling-pro", "gatling-build"]
   }
 ]

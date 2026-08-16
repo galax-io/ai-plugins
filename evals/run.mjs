@@ -60,7 +60,7 @@ const ISOLATION = process.env.ANTHROPIC_API_KEY
   ? ['--bare']
   : ['--setting-sources', 'project'];
 
-/** All three skills go into every fixture. The negative assertions are the
+/** Every skill goes into every fixture. The negative assertions are the
  *  reason: "the router did not load" cannot be asserted against a tree where
  *  the router is absent. */
 function stageSkills(dir) {

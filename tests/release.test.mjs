@@ -31,8 +31,12 @@ function tempDir() {
 
 /**
  * A throwaway fixture copy with real history: the plan is a diff against the
- * previous release, so it needs commits. `-c` rather than `config` so a signing
- * key or hooks path in the developer's own gitconfig cannot fail the commit.
+ * previous release, so it needs commits. `-c` rather than `config` so nothing in
+ * the developer's own gitconfig can reach the fixture: `gpgsign` on both commits
+ * and tags (three tests tag), `core.hooksPath` for husky and friends, and
+ * `core.excludesFile` because a global ignore of `plugins/` would make `git add
+ * -A` silently commit a tree with no plugins. `--template=` is for the same
+ * reason one level down — a template's `info/exclude` drops files from `add`.
  */
 function gitFixture(name) {
   const root = tempDir();
@@ -40,10 +44,24 @@ function gitFixture(name) {
   const git = (...args) =>
     execFileSync(
       'git',
-      ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', '-c', 'commit.gpgsign=false', ...args],
+      [
+        '-c',
+        'user.name=Test',
+        '-c',
+        'user.email=test@example.com',
+        '-c',
+        'commit.gpgsign=false',
+        '-c',
+        'tag.gpgsign=false',
+        '-c',
+        'core.hooksPath=/dev/null',
+        '-c',
+        'core.excludesFile=/dev/null',
+        ...args,
+      ],
       { cwd: root, encoding: 'utf8', stdio: 'pipe' },
     );
-  git('init', '-q');
+  git('init', '-q', '--template=');
   git('add', '-A');
   git('commit', '-qm', 'fixture');
   return { root, git };

@@ -1,10 +1,10 @@
-# Gradle + Scala
+# Gradle + Java
 
 ## Roots And Commands
 
 | Concern            | Path or command                            |
 | ------------------ | ------------------------------------------ |
-| Simulations        | `src/gatling/scala`                        |
+| Simulations        | `src/gatling/java`                         |
 | Resources          | `src/gatling/resources`                    |
 | Compile            | `./gradlew gatlingClasses`                 |
 | Run one simulation | `./gradlew gatlingRun --simulation <fqcn>` |
@@ -15,13 +15,9 @@
 
 ## What To Add
 
-`plugins`: `id 'scala'` and `id 'io.gatling.gradle'`.
-
-**`id 'scala'` is not optional.** `gatling-gradle` stopped applying the Scala plugin itself at `3.11.1`, so a Scala project that omits it compiles nothing.
+`plugins`: `id 'java'` and `id 'io.gatling.gradle'`. The Gatling plugin pulls Gatling itself.
 
 `repositories`: `mavenCentral()`.
-
-Give the Scala compiler a larger stack — `tasks.withType(ScalaCompile)` with `scalaCompileOptions.forkOptions.jvmArgs = ['-Xss100m']`. Deeply chained DSL builders overflow the default.
 
 `dependencies`:
 
@@ -31,9 +27,9 @@ Give the Scala compiler a larger stack — `tasks.withType(ScalaCompile)` with `
 | `gatlingImplementation` | protocol plugins                                       |
 | `gatlingRuntimeOnly`    | JDBC drivers and other runtime-only artifacts          |
 
-Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is missing at run time — which is how a JDBC driver goes absent; see [protocol-jdbc.md](protocol-jdbc.md). A JMS broker client goes here too, and on `gatlingImplementation` instead when the simulation names a broker class — [protocol-messaging.md](protocol-messaging.md).
+Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is missing at run time — which is how a JDBC driver goes absent; see [protocol-jdbc.md](../../galaxio-gatling-pro/references/protocol-jdbc.md). A JMS broker client goes here too, and on `gatlingImplementation` instead when the simulation names a broker class — [protocol-messaging.md](../../galaxio-gatling-pro/references/protocol-messaging.md).
 
-Every Galaxio artifact needs the explicit `_2.13` even in a Scala project; Gradle cannot append it.
+Every Galaxio artifact needs the explicit `_2.13`; Gradle cannot append it. In a `.kts` build the dependency block takes parentheses — `gatling("coords")` — because a Groovy-style string call is a syntax error there.
 
 A Gradle project usually keeps the version literal in `gradle/libs.versions.toml`, `gradle.properties` or `settings.gradle[.kts]`. Bump it there; a second literal in `build.gradle` is the one that goes stale.
 
@@ -67,7 +63,7 @@ tasks.register("gatlingCp") {
 
 ```bash
 java --add-opens=java.base/java.lang=ALL-UNNAMED \
-  -cp "build/classes/scala/gatling:src/gatling/resources:$(./gradlew -q gatlingCp)" \
+  -cp "build/classes/java/gatling:src/gatling/resources:$(./gradlew -q gatlingCp)" \
   io.gatling.app.Gatling -s <fqcn> -rf build/reports/gatling
 ```
 

@@ -36,4 +36,4 @@ It wins even across lines — plugin `3.13.1` + `gatlingVersion = '3.15.1'` reso
 | `gatling-gradle 3.14.3.1` under Gradle 9       | the plugin       | `Could not get unknown property 'reportsDir'` when `gatlingRun` is realized — all of 3.11, all of 3.13, 3.14 to `3.14.3`. `gatlingClasses` still compiles          |
 | `gatling-gradle 3.11.1` for `--simulation`     | the plugin       | 3.9.x `gatlingRun` takes no options; plain `gatlingRun` runs every simulation                                                                                      |
 
-Raise the plugin and pin `gatlingVersion` to stay on the line. Only when the plugin cannot move, run Gatling by hand — the build reference has the command.
+Raise the plugin and pin `gatlingVersion` to stay on the line. Only when the plugin cannot move, run Gatling by hand — `gatling-build` has the command for the project's build tool.
