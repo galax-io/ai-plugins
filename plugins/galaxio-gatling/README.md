@@ -203,16 +203,17 @@ facade is used, and Java 8 on the 3.9.x profile.
 
 ### Protocols
 
-| Protocol | Comes from                      | Available on                         |
-| -------- | ------------------------------- | ------------------------------------ |
-| HTTP     | Gatling core                    | every line                           |
-| JDBC     | `gatling-jdbc-plugin`, Galaxio  | 3.9.x, 3.11.x, 3.13.x                |
-| Kafka    | `gatling-kafka-plugin`, Galaxio | 3.9.x, 3.11.x, 3.13.x                |
-| AMQP     | `gatling-amqp-plugin`, Galaxio  | 3.9.x, 3.11.x, 3.13.x                |
-| JMS      | Gatling core                    | every line; `javax.jms` up to 3.13.x |
+| Protocol | Comes from                         | Available on                         |
+| -------- | ---------------------------------- | ------------------------------------ |
+| HTTP     | Gatling core                       | every line                           |
+| JDBC     | `gatling-jdbc-plugin`, Galaxio     | 3.9.x, 3.11.x, 3.13.x                |
+| Kafka    | `gatling-kafka-plugin`, Galaxio    | 3.9.x, 3.11.x, 3.13.x                |
+| AMQP     | `gatling-amqp-plugin`, Galaxio     | 3.9.x, 3.11.x, 3.13.x                |
+| JMS      | Gatling core, plus a broker client | every line; `javax.jms` up to 3.13.x |
 
-The move from `javax.jms` to `jakarta.jms` lands at 3.14, which is why a 3.14+ project needs a
-broker client that speaks the Jakarta API.
+Gatling ships the JMS API and no broker, so a JMS project adds its broker's client on every line.
+Which one is decided by the package: the move from `javax.jms` to `jakarta.jms` lands at 3.14, so a
+project through 3.13.x takes a client on the javax side and a 3.14+ project one on the Jakarta side.
 
 All five work from all three languages: the Galaxio libraries ship first-party facades under
 `org.galaxio.gatling…javaapi`, so the `_2.13` suffix names the artifact, not the caller.

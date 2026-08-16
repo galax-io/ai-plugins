@@ -4,6 +4,40 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-08-16
+
+JMS was the one protocol a project could set up from the skill and still not run. Gatling ships the
+API and no broker, and nothing said so.
+
+### Added
+
+- **`protocol-messaging.md` gains a `## Client` section**, mirroring the `## Driver` section
+  `protocol-jdbc.md` has carried since 1.1.0. It names four broker clients, the Gatling lines each
+  suits and the `InitialContextFactory` each provides. The choice turns on a detail the artifact
+  name hides: every current client depends on `jakarta.jms:jakarta.jms-api`, but `2.0.3` of it
+  ships the `javax.jms` classes and `3.1.0` ships `jakarta.jms`, so the version that resolves is
+  what has to match the line. Mismatch fails differently per build tool — Maven evicts Gatling's
+  API by nearest-wins and breaks `test-compile`, Gradle takes the highest and dies at run time.
+
+### Fixed
+
+- **The JMS protocol snippet did not compile on any supported line.** It called
+  `connectionFactoryName` on `jms`, which only accepts a connection factory; the JNDI methods
+  belong to `jmsJndiConnectionFactory`. The corrected chain also ends in `contextFactory`, which
+  is not optional — it is the only call returning the type `connectionFactory` takes, and its
+  argument is the broker class that loads the client jar.
+- **`gatling-jms` is no longer listed as a dependency to add.** It arrives through
+  `gatling-charts-highcharts` → `gatling-app` on every line from 3.9.x to 3.15.x, Java facade
+  included, and Gradle's plugin adds that bundle itself. The row it had in `build-sbt-scala.md` is
+  gone, and the seven build references now state the fact where the bundle is declared.
+- **The Gradle configuration for a broker client depends on the code.** `gatlingRuntimeOnly`
+  serves the JNDI form; a simulation that constructs the factory itself names a broker class at
+  compile time and needs `gatlingImplementation`.
+- **`README.md` framed the broker client as a 3.14+ requirement.** It is needed on every line;
+  3.14 changes which client, not whether one is needed. The package-boundary note in
+  `protocol-messaging.md` was likewise corrected — adding a client can put a second JMS API jar
+  beside Gatling's, which the old wording said could not happen.
+
 ## [2.1.0] - 2026-08-07
 
 Migration and version coordinates leave the router and become skills of their own. An upgrade task

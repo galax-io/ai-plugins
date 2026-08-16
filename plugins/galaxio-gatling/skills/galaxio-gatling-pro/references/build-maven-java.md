@@ -23,6 +23,8 @@ Under `<dependencies>`, all `test`-scoped:
 | `org.galaxio:gatling-kafka-plugin_2.13`           |                        | Kafka only                                                    |
 | `org.galaxio:gatling-amqp-plugin_2.13`            |                        | AMQP only                                                     |
 
+A JMS project adds its broker's client here — [protocol-messaging.md](protocol-messaging.md).
+
 Under `<build><plugins>`: `io.gatling:gatling-maven-plugin`, no configuration. Nothing else — `maven-compiler-plugin` already compiles `.java` from `src/test/java`.
 
 ## The `_2.13` Suffix

@@ -20,12 +20,13 @@
 | `gatling-charts-highcharts` | `"io.gatling.highcharts" % …` | always                                                        |
 | `gatling-test-framework`    | `"io.gatling" % …`            | always                                                        |
 | `gatling-picatinny`         | `"org.galaxio" %% …`          | when using Picatinny                                          |
-| `gatling-jms`               | `"io.gatling" % …`            | JMS only                                                      |
 | `gatling-jdbc-plugin`       | `"org.galaxio" %% …`          | plus a JDBC driver — see [protocol-jdbc.md](protocol-jdbc.md) |
 | `gatling-kafka-plugin`      | `"org.galaxio" %% …`          | Kafka only                                                    |
 | `gatling-amqp-plugin`       | `"org.galaxio" %% …`          | AMQP only                                                     |
 
 `%%` appends the `_2.13` suffix for the Galaxio artifacts — never write the suffix by hand here.
+
+A JMS project adds its broker's client here, with a single `%` — [protocol-messaging.md](protocol-messaging.md).
 
 In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version>")`.
 

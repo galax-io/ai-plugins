@@ -27,6 +27,8 @@ Under `<dependencies>`, all `test`-scoped:
 | `org.galaxio:gatling-kafka-plugin_2.13`           |                        | Kafka only                                                    |
 | `org.galaxio:gatling-amqp-plugin_2.13`            |                        | AMQP only                                                     |
 
+A JMS project adds its broker's client here — [protocol-messaging.md](protocol-messaging.md).
+
 Under `<build><plugins>`:
 
 | Plugin                                  | Configuration it needs                          |

@@ -1,9 +1,9 @@
 # AMQP And JMS
 
-| Transport | Dependency                         | Languages           |
-| --------- | ---------------------------------- | ------------------- |
-| AMQP      | `gatling-amqp-plugin` from Galaxio | Scala, Java, Kotlin |
-| JMS       | `gatling-jms` from Gatling         | Scala, Java, Kotlin |
+| Transport | Dependency                                     | Languages           |
+| --------- | ---------------------------------------------- | ------------------- |
+| AMQP      | `gatling-amqp-plugin` from Galaxio             | Scala, Java, Kotlin |
+| JMS       | the broker's own client — see **Client** below | Scala, Java, Kotlin |
 
 The AMQP version comes from the project's Gatling line — [galaxio-artifacts.md](../../gatling-versions/references/galaxio-artifacts.md).
 
@@ -57,14 +57,20 @@ import io.gatling.jms.Predef._
 import org.galaxio.gatling.config.SimulationConfig._
 ```
 
-Protocol:
+Protocol. `connectionFactoryName`, `url` and `credentials` are on `jmsJndiConnectionFactory`, not on `jms`, which takes only a connection factory:
 
 ```scala
 val jmsProtocol = jms
-  .connectionFactoryName("ConnectionFactory")
-  .url(getStringParam("jmsUrl"))
-  .credentials(getStringParam("jmsUser"), getStringParam("jmsPassword"))
+  .connectionFactory(
+    jmsJndiConnectionFactory
+      .connectionFactoryName("ConnectionFactory")
+      .url(getStringParam("jmsUrl"))
+      .credentials(getStringParam("jmsUser"), getStringParam("jmsPassword"))
+      .contextFactory("org.apache.activemq.jndi.ActiveMQInitialContextFactory"),
+  )
 ```
+
+**`contextFactory` is mandatory** — the only call returning the type `connectionFactory` accepts, and its argument is the class that loads the client jar. Wrong class, and the run dies on `NoInitialContextException`.
 
 Case:
 
@@ -79,6 +85,23 @@ object JmsCases {
 
 Since Gatling 3.13 the `jmsProperty` check asserts on a property of an inbound message, which is how a reply is validated without parsing its body.
 
+### Client
+
+Gatling ships the JMS API and no broker; `gatling-jms` itself needs no entry, since `gatling-charts-highcharts` pulls it and its facade on every line. Add the broker's client, on every line and not only from 3.14, or the run dies resolving the connection factory. Gradle: `gatlingRuntimeOnly` for the JNDI form above, `gatlingImplementation` when the simulation names a broker class — `jms.connectionFactory(new ActiveMQConnectionFactory(url))`.
+
+The artifact name does not decide the namespace. Every client depends on `jakarta.jms:jakarta.jms-api`, and `2.0.3` of it ships `javax.jms` while `3.1.0` ships `jakarta.jms`:
+
+| Client                                    | `jakarta.jms-api`       | Lines          | `contextFactory`                                                 |
+| ----------------------------------------- | ----------------------- | -------------- | ---------------------------------------------------------------- |
+| `org.apache.activemq:activemq-client` 5.x | `2.0.3` → `javax.jms`   | 3.9.x–3.13.x   | `org.apache.activemq.jndi.ActiveMQInitialContextFactory`         |
+| `org.apache.activemq:activemq-client` 6.x | `3.1.0` → `jakarta.jms` | 3.14.x, 3.15.x | `org.apache.activemq.jndi.ActiveMQInitialContextFactory`         |
+| `org.apache.activemq:artemis-jms-client`  | `2.0.3` → `javax.jms`   | 3.9.x–3.13.x   | `org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory` |
+| `org.apache.qpid:qpid-jms-client`         | `3.1.0` → `jakarta.jms` | 3.14.x, 3.15.x | `org.apache.qpid.jms.jndi.JmsInitialContextFactory`              |
+
+Clients move their API version between releases; `mvn dependency:tree` or `./gradlew dependencies` shows which one lands.
+
+A mismatch on 3.14+ fails per build tool. Maven evicts Gatling's `3.1.0` by nearest-wins and `test-compile` fails on `cannot access jakarta.jms.ConnectionFactory`, with nothing in the sources naming a broker; Gradle takes the highest and dies at run time on `NoClassDefFoundError`. Match the client, or pin the API in `dependencyManagement`.
+
 ### Package Boundary
 
-The package moves from `javax.jms` to `jakarta.jms` at 3.14: the classpath carries `javax.jms-api` up to 3.13 and `jakarta.jms-api` from 3.14, and no line carries both. Neither spelling compiles on the other side, so the import rewrite happens at the crossing and cannot be staged ahead of it. Pick the broker client to match the Gatling line, not the other way round.
+Gatling brings `javax.jms:javax.jms-api` up to 3.13 and `jakarta.jms:jakarta.jms-api` `3.1.0` from 3.14. Neither spelling compiles on the other side, so the import rewrite happens at the crossing and cannot be staged ahead of it. A mismatched broker client puts a second API jar beside Gatling's — see **Client**.
