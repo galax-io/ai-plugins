@@ -17,7 +17,7 @@
 
 | Artifact                    | Written as                    | Notes                                                         |
 | --------------------------- | ----------------------------- | ------------------------------------------------------------- |
-| `gatling-charts-highcharts` | `"io.gatling.highcharts" % …` | always; brings `gatling-jms`                                  |
+| `gatling-charts-highcharts` | `"io.gatling.highcharts" % …` | always                                                        |
 | `gatling-test-framework`    | `"io.gatling" % …`            | always                                                        |
 | `gatling-picatinny`         | `"org.galaxio" %% …`          | when using Picatinny                                          |
 | `gatling-jdbc-plugin`       | `"org.galaxio" %% …`          | plus a JDBC driver — see [protocol-jdbc.md](protocol-jdbc.md) |
@@ -26,7 +26,7 @@
 
 `%%` appends the `_2.13` suffix for the Galaxio artifacts — never write the suffix by hand here.
 
-A JMS project adds its broker's client here too, with a single `%` like the Gatling artifacts, and which one depends on the line — [protocol-messaging.md](protocol-messaging.md).
+A JMS project adds its broker's client here, with a single `%` — [protocol-messaging.md](protocol-messaging.md).
 
 In `project/plugins.sbt`: `addSbtPlugin("io.gatling" % "gatling-sbt" % "<version>")`.
 

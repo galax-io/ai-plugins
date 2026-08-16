@@ -38,8 +38,6 @@ Add `kotlin { jvmToolchain(17) }`. Without it Kotlin compiles against whatever J
 
 Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is missing at run time — which is how a JDBC driver goes absent; see [protocol-jdbc.md](protocol-jdbc.md). A JMS broker client goes here too, and on `gatlingImplementation` instead when the simulation names a broker class — [protocol-messaging.md](protocol-messaging.md).
 
-The plugin pulls `gatling-jms` and its facade with the bundle, so neither is declared.
-
 Every Galaxio artifact needs the explicit `_2.13`; Gradle cannot append it. In `.kts` the dependency block takes parentheses — `gatling("coords")` — because a Groovy-style string call is a syntax error there.
 
 A Gradle project usually keeps the version literal in `gradle/libs.versions.toml`, `gradle.properties` or `settings.gradle.kts`. Bump it there; a second literal in `build.gradle.kts` is the one that goes stale.
