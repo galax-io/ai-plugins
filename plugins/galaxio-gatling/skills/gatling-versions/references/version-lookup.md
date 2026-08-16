@@ -22,6 +22,6 @@ Galaxio artifacts sit under `org/galaxio` with the `_2.13` suffix — [galaxio-a
 
 ## Writing The Coordinate
 
-- The number goes into the build file for your language and build tool — the build reference names it, and says where a version catalog keeps it instead.
+- The number goes into the build file for your language and build tool — `gatling-build` names it there, and says where a version catalog keeps it instead.
 - Test-scoped, and outside sbt every Galaxio artifact needs the explicit `_2.13` suffix.
 - The Scala patch is free: 2.13 is binary-compatible across patches, so any `2.13.x` works.

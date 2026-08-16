@@ -138,7 +138,7 @@ function checkSkill(root, skillDir, reporter) {
   });
   if (bundled.length === 0) return;
 
-  const ignored = gitIgnored(root, bundled);
+  const ignored = gitIgnored(root, bundled, reporter);
   const reachable = reach(entry, skillDir);
 
   for (const file of bundled) {

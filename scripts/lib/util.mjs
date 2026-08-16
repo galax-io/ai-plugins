@@ -121,13 +121,18 @@ export const EXTENSIONLESS_NAMES = new Set([
   'Dockerfile',
 ]);
 
-export function gitIgnored(root, files) {
+const unfiltered = new Set();
+
+export function gitIgnored(root, files, reporter) {
   if (files.length === 0) return new Set();
   try {
     const out = execFileSync('git', ['check-ignore', '--stdin'], {
       cwd: root,
       input: `${files.join('\n')}\n`,
       encoding: 'utf8',
+      // Ignored paths come back on stdout, so the 1 MiB default overflows on a
+      // large build-output tree — exactly when the filter matters most.
+      maxBuffer: 64 * 1024 * 1024,
     });
     return new Set(
       out
@@ -135,9 +140,18 @@ export function gitIgnored(root, files) {
         .filter(Boolean)
         .map((f) => path.resolve(root, f)),
     );
-  } catch {
-    // Exit 1 means nothing was ignored; any other failure means git could not
-    // answer (no work tree, no git). Either way, scan everything.
+  } catch (err) {
+    // Exit 1 means nothing was ignored; anything else means the answer was lost
+    // (no work tree, no git, output too large). Either way, scan everything —
+    // which for both callers means report everything, so stray build output
+    // becomes check failures rather than being silently skipped. Noted once per
+    // root: check-links calls this per skill.
+    if (err?.status !== 1 && reporter && !unfiltered.has(root)) {
+      unfiltered.add(root);
+      reporter.note(
+        `git check-ignore gave no answer in ${root}; scanning every file, including anything .gitignore would exclude`,
+      );
+    }
     return new Set();
   }
 }

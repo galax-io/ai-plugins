@@ -49,7 +49,7 @@ run(() => {
   const pluginsDir = path.join(root, 'plugins');
 
   const files = walk(pluginsDir, () => true);
-  const ignored = gitIgnored(root, files);
+  const ignored = gitIgnored(root, files, reporter);
 
   for (const file of files) {
     // Untracked local junk (.DS_Store, *.pyc) is not what this gate is about.

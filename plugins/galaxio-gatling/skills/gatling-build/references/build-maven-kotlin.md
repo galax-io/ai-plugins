@@ -17,16 +17,16 @@ Under `<build>`: set `<testSourceDirectory>` to `${project.basedir}/src/test/kot
 
 Under `<dependencies>`, all `test`-scoped:
 
-| Artifact                                          | Version                | Notes                                                         |
-| ------------------------------------------------- | ---------------------- | ------------------------------------------------------------- |
-| `io.gatling.highcharts:gatling-charts-highcharts` | `${gatling.version}`   | always                                                        |
-| `org.jetbrains.kotlin:kotlin-stdlib`              | `${kotlin.version}`    | Kotlin's own version is not pinned by Galaxio                 |
-| `org.galaxio:gatling-picatinny_2.13`              | `${picatinny.version}` | when using Picatinny                                          |
-| `org.galaxio:gatling-jdbc-plugin_2.13`            |                        | plus a JDBC driver — see [protocol-jdbc.md](protocol-jdbc.md) |
-| `org.galaxio:gatling-kafka-plugin_2.13`           |                        | Kafka only                                                    |
-| `org.galaxio:gatling-amqp-plugin_2.13`            |                        | AMQP only                                                     |
+| Artifact                                          | Version                | Notes                                                                                              |
+| ------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `io.gatling.highcharts:gatling-charts-highcharts` | `${gatling.version}`   | always                                                                                             |
+| `org.jetbrains.kotlin:kotlin-stdlib`              | `${kotlin.version}`    | Kotlin's own version is not pinned by Galaxio                                                      |
+| `org.galaxio:gatling-picatinny_2.13`              | `${picatinny.version}` | when using Picatinny                                                                               |
+| `org.galaxio:gatling-jdbc-plugin_2.13`            |                        | plus a JDBC driver — see [protocol-jdbc.md](../../galaxio-gatling-pro/references/protocol-jdbc.md) |
+| `org.galaxio:gatling-kafka-plugin_2.13`           |                        | Kafka only                                                                                         |
+| `org.galaxio:gatling-amqp-plugin_2.13`            |                        | AMQP only                                                                                          |
 
-A JMS project adds its broker's client here — [protocol-messaging.md](protocol-messaging.md).
+A JMS project adds its broker's client here — [protocol-messaging.md](../../galaxio-gatling-pro/references/protocol-messaging.md).
 
 Under `<build><plugins>`:
 

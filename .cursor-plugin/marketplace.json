@@ -12,7 +12,7 @@
       "name": "galaxio-gatling",
       "source": "plugins/galaxio-gatling",
       "description": "Gatling JVM performance testing in Galaxio style: Gatling 3.9.x through 3.15.x, Scala/Java/Kotlin on sbt, Maven or Gradle, Picatinny and the Galaxio JDBC, Kafka and AMQP plugins, and the cases/feeders/scenarios/simulations layout.",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "category": "testing"
     }
   ]

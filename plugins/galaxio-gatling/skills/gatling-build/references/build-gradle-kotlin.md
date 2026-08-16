@@ -1,10 +1,10 @@
-# Gradle + Java
+# Gradle + Kotlin
 
 ## Roots And Commands
 
 | Concern            | Path or command                            |
 | ------------------ | ------------------------------------------ |
-| Simulations        | `src/gatling/java`                         |
+| Simulations        | `src/gatling/kotlin`                       |
 | Resources          | `src/gatling/resources`                    |
 | Compile            | `./gradlew gatlingClasses`                 |
 | Run one simulation | `./gradlew gatlingRun --simulation <fqcn>` |
@@ -15,7 +15,16 @@
 
 ## What To Add
 
-`plugins`: `id 'java'` and `id 'io.gatling.gradle'`. The Gatling plugin pulls Gatling itself.
+`plugins`:
+
+| Plugin                    | Version              | Notes                 |
+| ------------------------- | -------------------- | --------------------- |
+| `kotlin("jvm")`           | the repository's own | not pinned by Galaxio |
+| `id("io.gatling.gradle")` | see the version file | pulls Gatling itself  |
+
+No `kotlin("plugin.allopen")`. Gatling instantiates a simulation reflectively through its no-argument constructor rather than extending it, so a final Kotlin class works.
+
+Add `kotlin { jvmToolchain(17) }`. Without it Kotlin compiles against whatever JDK the Gradle daemon happens to run, and a class file newer than the JDK that runs the simulation fails with `UnsupportedClassVersionError` — a mismatch that never appears at compile time.
 
 `repositories`: `mavenCentral()`.
 
@@ -27,11 +36,11 @@
 | `gatlingImplementation` | protocol plugins                                       |
 | `gatlingRuntimeOnly`    | JDBC drivers and other runtime-only artifacts          |
 
-Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is missing at run time — which is how a JDBC driver goes absent; see [protocol-jdbc.md](protocol-jdbc.md). A JMS broker client goes here too, and on `gatlingImplementation` instead when the simulation names a broker class — [protocol-messaging.md](protocol-messaging.md).
+Those three are what reach the `gatlingRun` classpath. A dependency on plain `implementation` is missing at run time — which is how a JDBC driver goes absent; see [protocol-jdbc.md](../../galaxio-gatling-pro/references/protocol-jdbc.md). A JMS broker client goes here too, and on `gatlingImplementation` instead when the simulation names a broker class — [protocol-messaging.md](../../galaxio-gatling-pro/references/protocol-messaging.md).
 
-Every Galaxio artifact needs the explicit `_2.13`; Gradle cannot append it. In a `.kts` build the dependency block takes parentheses — `gatling("coords")` — because a Groovy-style string call is a syntax error there.
+Every Galaxio artifact needs the explicit `_2.13`; Gradle cannot append it. In `.kts` the dependency block takes parentheses — `gatling("coords")` — because a Groovy-style string call is a syntax error there.
 
-A Gradle project usually keeps the version literal in `gradle/libs.versions.toml`, `gradle.properties` or `settings.gradle[.kts]`. Bump it there; a second literal in `build.gradle` is the one that goes stale.
+A Gradle project usually keeps the version literal in `gradle/libs.versions.toml`, `gradle.properties` or `settings.gradle.kts`. Bump it there; a second literal in `build.gradle.kts` is the one that goes stale.
 
 ## Plugin Floor, The JVM Option, And Gradle 9
 
@@ -63,7 +72,7 @@ tasks.register("gatlingCp") {
 
 ```bash
 java --add-opens=java.base/java.lang=ALL-UNNAMED \
-  -cp "build/classes/java/gatling:src/gatling/resources:$(./gradlew -q gatlingCp)" \
+  -cp "build/classes/kotlin/gatling:src/gatling/resources:$(./gradlew -q gatlingCp)" \
   io.gatling.app.Gatling -s <fqcn> -rf build/reports/gatling
 ```
 

@@ -4,6 +4,48 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-08-16
+
+The build file gets its own skill. `gatling-build` carries all seven tool-by-language cells, so a
+task that never opens the build file no longer loads a Maven or Gradle reference — adding a
+scenario, reviewing a simulation and answering a workload question all used to carry one.
+
+**Minor, not major: nothing installed goes away.** No skill is renamed or removed, the four ship in
+the one plugin and arrive together, and every question the plugin answered it still answers. A link
+written directly at `skills/galaxio-gatling-pro/references/build-*.md` is the one thing that
+breaks; the seven files kept their names under `gatling-build`.
+
+**One skill, not seven.** A cell is chosen by build tool _and_ language, and a request that says
+"raise the Gatling plugin" usually names neither. Seven skills would have to discriminate on the
+fact the user omitted; one skill detects both from the project and picks the cell in its own
+dispatch table, where all seven are visible and the never-read-two rule can be stated once.
+
+### Added
+
+- **`gatling-build`** — the seven build references, plus cell detection and the source and resource
+  roots per build tool. It owns the shape of the build file; it owns no version literal except a
+  threshold, and no simulation code.
+- **The Maven + Scala cell records that no template stands behind it.** `galax-io/templates-gatling`
+  ships six and `scala-maven` is not among them, so nothing there has been rendered and run end to
+  end — including its claim that `gatling-maven-plugin` v4+ cannot compile Scala without
+  `scala-maven-plugin`. It now says so where an agent reads it, not only in an issue.
+
+### Changed
+
+- **`galaxio-gatling-pro` is the test-code skill now.** Its description no longer claims the build
+  tools, so a build-file request stops pulling the 300-line router in alongside `gatling-build`.
+  It keeps the language, protocol, layout and workload material.
+
+### Fixed
+
+- **The source and resource roots are stated in the router again.** They had been reachable only
+  through a build reference, which the router no longer opens for a task that just adds a scenario
+  — and under Gradle the wrong root compiles nothing while reporting BUILD SUCCESSFUL.
+- **`starter-tree.md` showed the sbt roots with no caveat**, so a greenfield Gradle project got
+  `src/test/scala` instead of `src/gatling/scala`.
+- **`gatling-lines.md` and `version-lookup.md` pointed at "the build reference"** as if the router
+  still had one. Both name `gatling-build` now.
+
 ## [2.2.0] - 2026-08-16
 
 JMS was the one protocol a project could set up from the skill and still not run. Gatling ships the
