@@ -62,6 +62,13 @@ jobs:
       - run: npm run lint:md
       - run: npm run spell
 
+      # The manifests job runs the suite with no install, which is deliberate —
+      # so the one test that needs real YAML parsers skips there and runs here.
+      # It replays every frontmatter rule against yaml and js-yaml, in both
+      # directions, which is what keeps the hand-rolled reader honest.
+      - name: Cross-check the frontmatter rules against real YAML parsers
+        run: npm test
+
   security:
     name: security
     runs-on: ubuntu-latest

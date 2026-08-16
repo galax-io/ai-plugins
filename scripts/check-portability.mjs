@@ -115,6 +115,10 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     reporter.error(rel, `frontmatter line ${line} (${reason}) is not portable: ${text}`);
   }
 
+  for (const { line, key, reason } of parsed.invalid) {
+    reporter.error(rel, `frontmatter line ${line}: ${reason}. Quote it: ${key}: '...'`);
+  }
+
   for (const key of Object.keys(parsed.fields)) {
     if (PORTABLE_KEYS.has(key)) continue;
     const owner = AGENT_SPECIFIC_KEYS[key];
@@ -126,21 +130,29 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
+  // A rejected line drops the whole block, so nothing in the file loads and the
+  // rules below would measure text no agent sees. A value that merely reads as
+  // something else costs only its own key.
+  if (parsed.invalid.some((entry) => entry.fatal)) return 0;
+  const lossy = new Set(parsed.invalid.map((entry) => entry.key));
+
   const { name, description } = parsed.fields;
   if (!name) reporter.error(rel, 'frontmatter is missing "name"');
-  else if (name !== skillName) reporter.error(rel, `frontmatter name "${name}" does not match directory "${skillName}"`);
+  else if (!lossy.has('name') && name !== skillName)
+    reporter.error(rel, `frontmatter name "${name}" does not match directory "${skillName}"`);
 
   if (!description) {
     reporter.error(rel, 'frontmatter is missing "description" — without it the agent never triggers the skill');
-    return 0;
-  }
-  if (description.length > MAX_DESCRIPTION_CHARS) {
-    reporter.error(rel, `description is ${description.length} chars; keep it under ${MAX_DESCRIPTION_CHARS}`);
-  }
-  if (!/^[A-Z]/.test(description)) {
-    reporter.error(rel, 'description should start with a capital letter and lead with the primary use case');
+  } else if (!lossy.has('description')) {
+    if (description.length > MAX_DESCRIPTION_CHARS) {
+      reporter.error(rel, `description is ${description.length} chars; keep it under ${MAX_DESCRIPTION_CHARS}`);
+    }
+    if (!/^[A-Z]/.test(description)) {
+      reporter.error(rel, 'description should start with a capital letter and lead with the primary use case');
+    }
   }
 
+  // Reported even when the description was missing or unreadable: unrelated.
   if (parsed.bodyLines > MAX_BODY_LINES) {
     reporter.error(
       rel,
@@ -148,5 +160,5 @@ function checkSkill(root, skillsDir, skillName, reporter) {
     );
   }
 
-  return description.length;
+  return description && !lossy.has('description') ? description.length : 0;
 }
