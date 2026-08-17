@@ -52,15 +52,15 @@ Rows apply from their line upwards and nothing stops: 3.11.x → 3.13.x applies 
 
 | Target         | `gatling-maven-plugin`   | `gatling-sbt`            | `gatling-gradle`                              |
 | -------------- | ------------------------ | ------------------------ | --------------------------------------------- |
-| 3.11.x         | `4.8.0`+                 | 4.x                      | `3.11.1`–`3.11.x`, or `3.14.3.1`+ on Gradle 9 |
+| 3.11.x         | none                     | none                     | `3.11.1`–`3.11.x`, or `3.14.3.1`+ on Gradle 9 |
 | 3.13.x         | `4.10.2`+                | `4.10.2`+                | `3.13.1`–`3.13.x`, or `3.14.3.1`+ on Gradle 9 |
 | 3.14.x, 3.15.x | `4.10.2`+, top looked up | `4.10.2`+, top looked up | `3.14.3.1`–`3.15.x`                           |
 
 - **Java 17 on every target**, whatever the project ran before. Java 8 serves Scala on 3.9.x and nothing above it, so a 3.9 crossing raises the JDK or dies on `UnsupportedClassVersionError` after every step reads as done.
 - **3.10.x and 3.12.x have no row.** Read the POM; do not interpolate from the rows either side.
-- Below the 3.13 entry the plugin stops passing `--add-opens=java.base/java.lang=ALL-UNNAMED` and the run dies on `IllegalAccessException: module java.base does not open java.lang`. On 3.11 that flag is unnecessary and the entry is only a floor.
+- Below the 3.13 entry the plugin stops passing `--add-opens=java.base/java.lang=ALL-UNNAMED` and the run dies on `IllegalAccessException: module java.base does not open java.lang`. On 3.11 that flag is unnecessary, which is why the row has no floor — `gatling-maven-plugin 3.9.0` and `gatling-sbt 3.2.2` each run a 3.11.5 project. The bottom is lower and elsewhere: `gatling-maven-plugin 3.1.2` and below try to compile the simulations themselves and die on `ClassNotFoundException: io.gatling.compiler.ZincCompiler`, which Maven reports as `Simulations compilation failed`.
 - Below `gatling-gradle 3.14.3.1` on **Gradle 9** the symptom is different — `Could not get unknown property 'reportsDir'` when `gatlingRun` is realized, while `gatlingClasses` still compiles. That floor is on the plugin, not on Gatling.
-- `gatling-maven-plugin 4.8.0` needs Maven `3.6.3`+.
+- `gatling-maven-plugin` sets no Maven-binary floor — `4.21.10`, which asks for `3.9.16` in its descriptor, runs on Maven `3.3.9`. Another plugin can: `maven-compiler-plugin 3.15.0` declares `<prerequisites>` and Maven refuses it below `3.6.3`.
 - sbt 1.x only — `gatling-sbt` is published as `gatling-sbt_2.12_1.0` and nothing else.
 - `--simulation` arrives with the 3.11 plugin; 3.9.x `gatlingRun` takes no options.
 
@@ -75,7 +75,7 @@ curl -s https://plugins.gradle.org/m2/io/gatling/gradle/io.gatling.gradle.gradle
 ## 5. Procedure
 
 1. Raise Gatling — the project's pin on Maven and sbt, `gatling { gatlingVersion = '…' }` on Gradle. Add the block rather than leaning on the plugin default.
-2. Raise the build plugin to the **target** row above, not a higher one.
+2. Raise the build plugin to the **target** row above, not a higher one. A row reading `none` needs no move.
 3. `org.galaxio` libraries, if any — [references/galaxio-upgrade.md](references/galaxio-upgrade.md). Never raised silently.
 4. Apply every row above the old line and at or below the new one.
 5. Compile, then run one smoke simulation. A dependency left on the wrong line still resolves and still compiles; only the run finds it.
