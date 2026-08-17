@@ -47,4 +47,4 @@ Maven cannot append the Scala suffix, so every Galaxio artifact carries it expli
 
 Raise `gatling-maven-plugin` past the floor in [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) and it sets the JVM option 3.13 requires, `--add-opens=java.base/java.lang=ALL-UNNAMED`, on its own — the first fix. Only when it is pinned lower, add to the plugin's `<configuration>` a `<jvmArgs>` list containing that one flag.
 
-On the 3.11 line the flag is unnecessary; the floor there is lower and carries a minimum Maven version of its own — [gatling-lines.md](../../gatling-versions/references/gatling-lines.md) names both.
+On the 3.11 line the flag is unnecessary and `gatling-maven-plugin` sets no floor — any 4.x serves; `3.1.2` and below fail instead on `ClassNotFoundException: io.gatling.compiler.ZincCompiler`, trying to compile the simulations themselves. A Maven-binary minimum comes from another plugin's `<prerequisites>`, never from this one.

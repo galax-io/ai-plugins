@@ -4,6 +4,42 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-08-18
+
+The two 3.11 build-plugin cells nothing had ever executed were executed. A 3.11.5 project on Maven
+and one on sbt each ran a smoke simulation, and both floors turned out not to be floors.
+
+### Fixed
+
+- **`gatling-maven-plugin` on 3.11.x was `4.8.0`+ and is 4.x.** Measured against Gatling `3.11.5`
+  on JDK 17, over seventeen sampled releases from `3.9.0` to `4.21.10`: each compiles the project,
+  runs the simulation and generates reports. `4.8.0` is not a boundary — nothing changes at it.
+  The bottom is lower and elsewhere: `3.1.2` and `3.0.5` compile the simulations themselves and
+  die on `Simulations compilation failed`. The `gatling-sbt` cell, 4.x, is confirmed rather than
+  corrected: `3.2.2`, `3.9.0`, `4.0.0`, `4.8.0`, `4.10.2` and `4.19.1` all run the same project.
+- **The Maven `3.6.3` binary floor does not exist.** It was wrong three ways: `4.8.0` asks for
+  Maven `3.0` in its descriptor and `4.9.0` is the first to ask for `3.6.3`; that field went
+  unenforced in every pairing tried; and the stated symptom, resolution failure, never occurs.
+  `gatling-maven-plugin 4.21.10`, which asks for `3.9.16`, runs on Maven `3.3.9`. A Maven-binary
+  minimum does bite in a stock project, but from another plugin — `maven-compiler-plugin 3.15.0`
+  declares `<prerequisites>` and Maven refuses it below `3.6.3`.
+- **`--add-opens=java.base/java.lang=ALL-UNNAMED` stays unnecessary on 3.11 for both**, as
+  `build-gradle-*.md` already claimed for Gradle. The Maven plugin forks with `jvmArgs = []`, and
+  `Gatling / javaOptions` on `gatling-sbt 4.0.0` is four `-XX:` options and no `--add-opens`;
+  reports generate either way. That is why the line has no plugin floor — the floor at 3.13 is the
+  flag, and 3.11 does not need it.
+
+### Changed
+
+- **The three `build-maven-*.md` references no longer promise a floor.** Each said the 3.11 floor
+  "is lower and carries a minimum Maven version of its own" and pointed at `gatling-lines.md` for
+  both numbers; neither number is there any more, because neither belonged to
+  `gatling-maven-plugin`.
+- **`gatling-lines.md` records the `-rsf` warning.** `4.0.0` through `4.8.0` pass `-rsf`, which
+  3.11 does not take, so a run on one of them prints `Warning: Unknown option -rsf` and is
+  unaffected — Maven has already copied the resources onto the classpath. `4.9.0` and up are
+  silent.
+
 ## [2.3.0] - 2026-08-16
 
 The build file gets its own skill. `gatling-build` carries all seven tool-by-language cells, so a
