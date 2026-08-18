@@ -65,6 +65,14 @@ What a merge would announce, without announcing anything (needs `gh`, reads only
 node scripts/release.mjs --dry-run
 ```
 
+spec-kit and its extensions install into `.specify/` and `.claude/skills/` (additive, pinned tags — rerun to add what is missing):
+
+```bash
+bash setup-speckit.sh
+```
+
+Both trees are vendored: upstream owns their prose, so the format, lint, spell and link gates skip them, and a broken link there is repaired by bumping a pinned tag rather than by editing the file.
+
 ## Authored vs generated
 
 Authored — edit these:

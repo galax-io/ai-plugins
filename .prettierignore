@@ -9,3 +9,7 @@ plugins/*/.cursor-plugin/plugin.json
 plugins/*/.codex-plugin/plugin.json
 
 tests/fixtures/
+
+# spec-kit and its extensions, installed verbatim by setup-speckit.sh.
+.specify/
+.claude/skills/
