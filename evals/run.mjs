@@ -32,6 +32,12 @@
  *     ours, before and after.
  *   - An unmatched case filter is an error, not an empty green run.
  *
+ * Two kinds of case. The default renders a project, lets the agent migrate it
+ * and scores on what it left behind. `"mode": "ask"` asks a question instead:
+ * it builds a probe tree, withholds Edit and Write, and scores on where the
+ * agent went and what it said. That is the only way to assert a routing
+ * boundary — "this file was not loaded" leaves no trace in the tree.
+ *
  * Model output is not deterministic, so a case is a rate over N runs.
  *
  *   node evals/run.mjs                 all cases, 3 runs each
@@ -44,7 +50,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:f
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compiles, render } from './fixtures.mjs';
+import { compiles, probe, render } from './fixtures.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -69,7 +75,7 @@ function stageSkills(dir) {
   execFileSync('cp', ['-R', `${SKILLS}/.`, dest]);
 }
 
-function askAgent(dir, prompt) {
+function askAgent(dir, prompt, readOnly = false) {
   let raw = '';
   let crashed = null;
   try {
@@ -82,10 +88,13 @@ function askAgent(dir, prompt) {
         '--output-format',
         'stream-json',
         '--verbose',
+        // An ask case asserts where the agent went, not what it wrote. Taking
+        // Edit and Write away makes "it changed nothing" true by construction
+        // rather than by an assertion that has to enumerate the tree — the
+        // same reason Bash is withheld from every case.
         '--tools',
-        'Read,Skill,Edit,Write',
-        '--permission-mode',
-        'acceptEdits',
+        readOnly ? 'Read,Skill' : 'Read,Skill,Edit,Write',
+        ...(readOnly ? [] : ['--permission-mode', 'acceptEdits']),
       ],
       { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 },
     );
@@ -165,6 +174,16 @@ if (cases.length === 0) {
   process.exit(2);
 }
 
+// An ask case edits nothing, so `expect` and `unchanged` cannot carry it. With
+// no routing assertion either it passes on any answer at all, which reads as
+// evidence and is none.
+for (const c of cases) {
+  if (c.mode !== 'ask') continue;
+  if (c.reads?.length || c.readsNone?.length || c.says?.length || c.saysNone?.length) continue;
+  console.error(`ask case "${c.id}" asserts nothing — needs reads, readsNone, says or saysNone`);
+  process.exit(2);
+}
+
 // Outside the repository on purpose: a work tree inside it puts this repo's
 // CLAUDE.md, and through it AGENTS.md, into the agent's context.
 const WORK = mkdtempSync(path.join(os.tmpdir(), 'gatling-eval-'));
@@ -172,20 +191,25 @@ let worst = 1;
 
 for (const testCase of cases) {
   const failures = [];
+  const asks = testCase.mode === 'ask';
   let passes = 0;
   let broken = false;
 
   for (let i = 0; i < RUNS && !broken; i++) {
     const dir = path.join(WORK, `${testCase.id}-${i + 1}`);
     try {
-      render(testCase.line, dir, REGISTRY);
+      if (asks) probe(testCase.line, dir, testCase.tree);
+      else render(testCase.line, dir, REGISTRY);
     } catch (error) {
       console.log(`BROKEN ${testCase.id.padEnd(12)} render failed: ${error.message.slice(0, 120)}`);
       broken = true;
       break;
     }
 
-    if (!compiles(dir)) {
+    // A probe tree is not built to compile and is never edited, so the guard
+    // that separates a template regression from a skill regression has nothing
+    // to guard.
+    if (!asks && !compiles(dir)) {
       console.log(`BROKEN ${testCase.id.padEnd(12)} fixture does not compile before the agent runs`);
       broken = true;
       break;
@@ -193,7 +217,7 @@ for (const testCase of cases) {
 
     stageSkills(dir);
     const before = snapshot(dir, testCase.unchanged || []);
-    const { opened, said, failed } = askAgent(dir, testCase.prompt);
+    const { opened, said, failed } = askAgent(dir, testCase.prompt, asks);
     if (failed) {
       failures.push(`run ${i + 1}: ${failed}`);
       continue;
@@ -201,7 +225,7 @@ for (const testCase of cases) {
 
     const after = snapshot(dir, testCase.unchanged || []);
     const problems = [
-      ...(compiles(dir) ? [] : ['does not compile after the migration']),
+      ...(asks || compiles(dir) ? [] : ['does not compile after the migration']),
       ...checkFiles(dir, testCase.expect || []),
       ...Object.keys(before)
         .filter((f) => before[f] !== after[f])
@@ -215,6 +239,11 @@ for (const testCase of cases) {
       ...(testCase.says || [])
         .filter((p) => !new RegExp(p, 'i').test(said))
         .map((p) => `never said /${p}/`),
+      // `says` alone cannot fail a case whose fixture already contains the
+      // right substring; the wrong reading has to be nameable too.
+      ...(testCase.saysNone || [])
+        .filter((p) => new RegExp(p, 'i').test(said))
+        .map((p) => `said /${p}/`),
     ];
     if (problems.length === 0) passes++;
     else failures.push(`run ${i + 1}: ${problems.join('; ')}`);

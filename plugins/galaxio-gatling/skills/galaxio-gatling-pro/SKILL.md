@@ -15,7 +15,8 @@ description: 'Use when writing, reviewing or refactoring the Gatling test code i
 Every version number is owned elsewhere — [gatling-lines.md](../gatling-versions/references/gatling-lines.md)
 for Gatling, Scala, Java and the build plugins,
 [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for the four Galaxio
-libraries. Moving a project from one Gatling line to another is a migration, not a version choice.
+libraries, and [gatling-versions](../gatling-versions/SKILL.md) for reading a line off a build
+file. Moving a project from one Gatling line to another is a migration, not a version choice.
 
 Nothing detected? Greenfield default: Gatling `3.13.x`, Scala `2.13`, Java 17, sbt, and the 3.13
 column of [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md) for Picatinny.
@@ -41,37 +42,19 @@ Build file:
 ls -d build.sbt project pom.xml build.gradle build.gradle.kts settings.gradle settings.gradle.kts 2>/dev/null
 ```
 
-Gatling version — authored build inputs only, or a recursive walk of `project/` picks up sbt's
-own stale resolution-cache report:
+Dependencies, for the line and for Picatinny — authored build inputs only, or a recursive walk of
+`project/` picks up sbt's own stale resolution-cache report:
 
 ```bash
 grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
-  --include='*.toml' --include='*.properties' 'gatling|picatinny' . 2>/dev/null
+  --include='*.toml' --include='*.properties' 'gatling|picatinny|org\.galaxio' . 2>/dev/null
 ```
 
 Empty? Try `buildSrc/` and a Maven parent POM before concluding greenfield.
 
-Two numbering schemes come back; read the artifact, not the number:
-
-- `gatling-charts-highcharts`, `gatling-test-framework`, `gatling-app`, `${gatling.version}` —
-  **the Gatling line.**
-- `gatling-maven-plugin` and `gatling-sbt` (both 4.x) — build-plugin numbering, saying nothing
-  about the Gatling line.
-- `io.gatling.gradle` — only the **default** Gatling version. `gatling { gatlingVersion = '…' }`
-  overrides it and wins, so read that block first and fall back to the plugin number when it is
-  absent.
-
-Galaxio libraries:
-
-```bash
-grep -rnE --include='*.sbt' --include='*.gradle' --include='*.kts' --include='pom.xml' \
-  --include='*.toml' --include='*.properties' 'org\.galaxio' . 2>/dev/null
-```
-
-**A Galaxio version does not tell you the Gatling line.** Every Galaxio artifact declares
-`gatling-core` at `provided` scope, so the project's own pin is authoritative. Nor does version
-order: a `-latest` suffix jumps it and one release is mis-published out of sequence. Read the POM —
-the query is in [galaxio-artifacts.md](../gatling-versions/references/galaxio-artifacts.md).
+**Turning that output into a line is [gatling-versions](../gatling-versions/SKILL.md).** A
+`gatling-maven-plugin`, `gatling-sbt` or `org.galaxio` number is not the line; `io.gatling.gradle`
+is only the default, and `gatling { gatlingVersion = '…' }` overrides it.
 
 ## Dispatch
 

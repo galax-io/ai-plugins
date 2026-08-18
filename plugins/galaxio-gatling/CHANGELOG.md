@@ -4,6 +4,36 @@ All notable changes to this plugin are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the plugin uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-08-18
+
+The version-reading rules had two homes. `gatling-versions` was given them when it was created,
+and `galaxio-gatling-pro` kept its copy — 31 lines of a body that loads on every write, review and
+refactor, restating the one thing another skill exists to own. The copy is gone. No fact changed
+and no file moved; what changed is which skill states it.
+
+### Changed
+
+- **`galaxio-gatling-pro` no longer explains how to read a version.** Its detection section keeps
+  what it needs and nothing else: the language and source root, the build file, and one grep for
+  the dependencies. Turning that grep's output into a Gatling line is a link to `gatling-versions`
+  now, whose body is that procedure. What left is the copy, not the rule — a build-plugin number
+  and a Galaxio number are both still not the line, and that is still stated where it is read.
+  The body drops from 320 lines to 302.
+- **One grep instead of two.** The section ran `gatling|picatinny` and then `org\.galaxio`
+  separately; `gatling|picatinny|org\.galaxio` is one command. The third alternative is not
+  redundant: a Gradle version catalog states the pin on a bare `picatinny = "…"` line that names
+  neither of the other two, and the dispatch below routes on that pin.
+- **A line above the last column is a lookup**, stated where the columns are. `gatling-lines.md`
+  already refused to interpolate across the 3.10.x and 3.12.x gaps; it now refuses to extrapolate
+  upward too, and names the file that answers instead. Nothing above 3.15.x has been measured, and
+  a stored answer for a line nobody ran is how a matrix goes stale.
+
+**The build-plugin floors in `gatling-migration` stay where they are.** They read as a coordinate
+and are not one: a floor means something only while crossing a line, so it belongs to the skill
+that crosses, which is also what keeps that skill liftable on its own. The two tables are cut by
+consumer — artifact by line in `gatling-lines.md`, target by build tool with its failure symptom in
+`gatling-migration`.
+
 ## [2.3.1] - 2026-08-18
 
 The two 3.11 build-plugin cells nothing had ever executed were executed. A 3.11.5 project on Maven

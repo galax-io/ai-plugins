@@ -13,7 +13,7 @@
 
 - **Gatling itself** = `gatling-charts-highcharts` + `gatling-test-framework` + `gatling-app`, one patch for all three. `gatling-jms` ships with them.
 - Any `2.13.x` works — 2.13 is binary-compatible across patches.
-- **3.10.x and 3.12.x have no column.** Read the POM; do not interpolate from either side.
+- **A line with no column — 3.10.x, 3.12.x, or one above the last — is a lookup.** Read the artifact's own POM and [version-lookup.md](version-lookup.md); the columns interpolate neither between themselves nor upward.
 - No `gatling-gradle` `3.11.0` exists, nor the upstream guide's `3.14.01`.
 - **The Java 8 cell is Scala-only.** A Java or Kotlin project needs 17 on every line, 3.9.x included.
 - **sbt 1.x is a ceiling, not a floor.** `gatling-sbt` is published only as `gatling-sbt_2.12_1.0`; on sbt 2 it resolves `gatling-sbt_2.13_2.0`, which does not exist. Pin sbt 1.x in `project/build.properties`.

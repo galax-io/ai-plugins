@@ -90,5 +90,47 @@
     ],
     "why": "Above the default and carrying a Picatinny that targets 3.13 \u2014 the wrong-column pin that resolves, compiles and dies at the first transaction. The skill must say so and hand the decision back, not silently downgrade the build or edit the simulations.",
     "readsNone": ["galaxio-gatling-pro", "gatling-build"]
+  },
+  {
+    "id": "coords-311",
+    "mode": "ask",
+    "line": "3.11",
+    "tree": { "galaxio": false },
+    "prompt": "What are the version coordinates for this project's Gatling line?",
+    "reads": ["gatling-lines.md"],
+    "readsNone": ["galaxio-artifacts.md"],
+    "says": ["3\\.11"],
+    "why": "The two references are cut along the Gatling/Galaxio axis so that a coordinate question loads one of them. A build file with no `org.galaxio` in it has no Galaxio question to answer, and opening the Galaxio file anyway is the cut failing while every link check stays green. The package path is still `org/galaxio/performance` \u2014 the layout invariant mandates it \u2014 so the case also asks whether a package path is told apart from a dependency coordinate."
+  },
+  {
+    "id": "picatinny-313",
+    "mode": "ask",
+    "line": "3.13",
+    "prompt": "Which gatling-picatinny release goes with this project?",
+    "reads": ["galaxio-artifacts.md"],
+    "readsNone": ["gatling-lines.md"],
+    "says": ["1\\.(1[2-9]|[2-9][0-9])"],
+    "why": "The same cut in the other direction. Picatinny is a Galaxio coordinate, so the answer is one file \u2014 reaching for the Gatling table too means the dispatch is loading both whatever is asked."
+  },
+  {
+    "id": "above-the-table",
+    "mode": "ask",
+    "line": "3.15",
+    "tree": { "galaxio": false },
+    "prompt": "Which gatling-maven-plugin release goes with Gatling 3.16?",
+    "reads": ["gatling-lines.md"],
+    "says": ["look(ing|s)? (it|them) up|lookup|maven-metadata|repo1\\.maven\\.org|no column"],
+    "why": "3.16 is above the last column. The table has to answer with the lookup rather than extrapolating the 3.14/3.15 cell upward \u2014 a stored answer for a line nobody has measured is how the matrix goes stale. Bash is withheld, so running the lookup is impossible and naming it is the whole assertion."
+  },
+  {
+    "id": "line-off-maven",
+    "mode": "ask",
+    "line": "3.11",
+    "tree": { "tool": "maven", "galaxio": false },
+    "prompt": "Which Gatling line is this project on?",
+    "reads": ["gatling-versions"],
+    "says": ["3\\.11"],
+    "saysNone": ["gatling 4\\.", "4\\.21[\\d.]*\\s*(project|line)", "line is 4\\."],
+    "why": "The POM carries `gatling-maven-plugin 4.21.10` beside `gatling.version 3.11.5`, and the build plugin numbers independently. `4.21.10` is the wrong answer this routing exists to prevent, and it is what `galaxio-gatling-pro` stopped explaining in its own body \u2014 so this case is what proves the deletion left the rule reachable."
   }
 ]

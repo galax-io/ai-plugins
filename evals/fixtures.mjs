@@ -18,10 +18,11 @@
  * signal that one landed.
  */
 import { execFileSync } from 'node:child_process';
-import { chmodSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-const PKG = 'src/gatling/scala/org/galaxio/performance/myservice';
+const PACKAGE = 'org/galaxio/performance/myservice';
+const PKG = `src/gatling/scala/${PACKAGE}`;
 
 /** Coordinates per line, from gatling-versions/references. 3.9 takes Picatinny
  *  0.x, whose API differs; the higher lines take the 1.x column. */
@@ -31,6 +32,12 @@ export const LINES = {
   '3.13': { gatling: '3.13.5', plugin: '3.13.5.4', picatinny: '1.17.1' },
   '3.15': { gatling: '3.15.1', plugin: '3.15.1.2', picatinny: '1.25.0' },
 };
+
+/** The `gatling-maven-plugin` the Maven probe pins, from the `4.x` cell of
+ *  gatling-lines.md. The top of that range on purpose: `4.21.10` is above
+ *  every Gatling version that exists, so reading it as the line is the error
+ *  `gatling-versions` exists to stop. */
+const MAVEN_PLUGIN = '4.21.10';
 
 /** galaxio-cli defaults to `local:./galaxio-template-registry`, which is not
  *  where anyone running this has one. Name the registry outright. */
@@ -188,4 +195,120 @@ export function compiles(dir) {
   } catch {
     return false;
   }
+}
+
+/**
+ * The other fixture kind, for a case that asks a question instead of editing.
+ *
+ * `render()` argues against a committed fixture because what the agent edits
+ * has to still compile, and only the real template proves that. Neither half
+ * applies here: an ask case is run with Edit and Write withheld and is never
+ * compiled, so its whole input is the text of a build file. Writing that build
+ * file outright is also the only way to get the two trees routing has to be
+ * measured on and the template cannot render — one with no `org.galaxio` in it
+ * at all (`GatlingPicatinnyVersion` is a required `--set`), and a Maven one
+ * (the registry ships `gatling/scala-gradle`).
+ *
+ * Coordinates still come from `LINES`, so the two kinds cannot drift apart on
+ * the numbers.
+ */
+
+const SIMULATION = `package org.galaxio.performance.myservice
+
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
+import scala.concurrent.duration._
+
+class HomeSimulation extends Simulation {
+  private val protocol = http.baseUrl("http://localhost:8080")
+  private val scn = scenario("home").exec(http("GET /").get("/").check(status is 200))
+  setUp(scn.inject(atOnceUsers(1))).protocols(protocol).maxDuration(10.seconds)
+}
+`;
+
+export function probe(line, dest, { galaxio = true, tool = 'gradle' } = {}) {
+  const { gatling, plugin, picatinny } = LINES[line];
+  rmSync(dest, { recursive: true, force: true });
+
+  const sources = tool === 'maven' ? 'src/test/scala' : 'src/gatling/scala';
+  const pkg = path.join(dest, sources, PACKAGE);
+  mkdirSync(pkg, { recursive: true });
+  writeFileSync(path.join(pkg, 'HomeSimulation.scala'), SIMULATION);
+
+  const pinned = galaxio ? picatinny : null;
+  const [buildFile, text] =
+    tool === 'maven'
+      ? ['pom.xml', pom(gatling, pinned)]
+      : ['build.gradle', gradle(gatling, plugin, pinned)];
+  writeFileSync(path.join(dest, buildFile), text);
+  return dest;
+}
+
+function gradle(gatling, plugin, picatinny) {
+  return `plugins {
+    id 'scala'
+    id 'io.gatling.gradle' version '${plugin}'
+}
+
+repositories {
+    mavenCentral()
+}
+
+gatling {
+    gatlingVersion = '${gatling}'
+}
+${
+  picatinny
+    ? `
+dependencies {
+    gatlingImplementation 'org.galaxio:gatling-picatinny_2.13:${picatinny}'
+}
+`
+    : ''
+}`;
+}
+
+/** Two numbers come back from this POM and only one of them is the line. */
+function pom(gatling, picatinny) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.galaxio.performance</groupId>
+  <artifactId>perf</artifactId>
+  <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <gatling.version>${gatling}</gatling.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.gatling.highcharts</groupId>
+      <artifactId>gatling-charts-highcharts</artifactId>
+      <version>\${gatling.version}</version>
+      <scope>test</scope>
+    </dependency>${
+      picatinny
+        ? `
+    <dependency>
+      <groupId>org.galaxio</groupId>
+      <artifactId>gatling-picatinny_2.13</artifactId>
+      <version>${picatinny}</version>
+      <scope>test</scope>
+    </dependency>`
+        : ''
+    }
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.gatling</groupId>
+        <artifactId>gatling-maven-plugin</artifactId>
+        <version>${MAVEN_PLUGIN}</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+`;
 }
