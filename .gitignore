@@ -3,3 +3,7 @@ node_modules/
 *.log
 __pycache__/
 *.py[cod]
+
+# Claude Code local state — worktrees are checkouts, settings.local.json is personal.
+.claude/settings.local.json
+.claude/worktrees/

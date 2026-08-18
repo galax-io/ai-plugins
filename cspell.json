@@ -1,7 +1,13 @@
 {
   "version": "0.2",
   "language": "en",
-  "ignorePaths": ["node_modules/**", "LICENSE", "package-lock.json"],
+  "ignorePaths": [
+    "node_modules/**",
+    "LICENSE",
+    "package-lock.json",
+    ".specify/**",
+    ".claude/skills/**"
+  ],
   "ignoreRegExpList": ["-D[A-Za-z][A-Za-z0-9.]*"],
   "words": [
     "abps",
@@ -53,6 +59,7 @@
     "SECRETISH",
     "semver",
     "shellcheck",
+    "speckit",
     "sidecar",
     "sidecars",
     "stdlib",

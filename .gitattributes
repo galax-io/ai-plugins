@@ -9,3 +9,7 @@
 plugins/*/.claude-plugin/plugin.json linguist-generated=true
 plugins/*/.cursor-plugin/plugin.json linguist-generated=true
 plugins/*/.codex-plugin/plugin.json  linguist-generated=true
+
+# Installed by setup-speckit.sh from upstream spec-kit — never edit by hand.
+.specify/**      linguist-vendored=true
+.claude/skills/** linguist-vendored=true

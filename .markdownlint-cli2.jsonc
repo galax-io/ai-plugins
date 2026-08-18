@@ -1,6 +1,12 @@
 {
   "globs": ["**/*.md"],
-  "ignores": ["node_modules/**", "tests/fixtures/**"],
+  "ignores": [
+    "node_modules/**",
+    "tests/fixtures/**",
+    // Vendored by setup-speckit.sh; upstream owns their prose.
+    ".specify/**",
+    ".claude/skills/**",
+  ],
   "config": {
     // Tables and links in this repo are wider than any sane wrap column.
     "MD013": false,

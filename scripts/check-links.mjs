@@ -48,13 +48,20 @@ run(() => {
   const reporter = new Reporter('check-links');
 
   // tests/ holds deliberately broken inputs; the suite checks them with --root.
+  // .specify/ and .claude/skills/ are spec-kit and its extensions, installed
+  // verbatim by setup-speckit.sh — their links are the upstream repos' contract,
+  // repaired by bumping a pinned tag, not by editing a vendored file here.
   // Excluded by path, not by directory name, so a plugin may still ship a
   // directory called `tests` and have it scanned.
-  const testsDir = path.join(root, 'tests') + path.sep;
+  const notOurs = [
+    path.join(root, 'tests') + path.sep,
+    path.join(root, '.specify') + path.sep,
+    path.join(root, '.claude', 'skills') + path.sep,
+  ];
   const files = walk(
     root,
     (f) => PARSED_AS_MARKDOWN.has(path.extname(f)) || path.basename(f) === 'plugin.json',
-  ).filter((f) => !f.startsWith(testsDir));
+  ).filter((f) => !notOurs.some((dir) => f.startsWith(dir)));
 
   for (const file of files) {
     if (path.basename(file) === 'plugin.json') checkManifest(root, file, reporter);
