@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ai-plugins
+  description: Galaxio plugin marketplace of agent skills and plugins for Claude Code, Cursor, and Codex
+  annotations:
+    github.com/project-slug: galax-io/ai-plugins
+spec:
+  type: tool
+  lifecycle: production
+  owner: galaxio
