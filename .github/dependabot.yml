@@ -4,11 +4,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: friday
     commit-message:
       prefix: ci
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+      day: friday
     commit-message:
       prefix: chore
