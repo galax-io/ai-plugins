@@ -20,7 +20,7 @@
     "format:check": "prettier --check \"**/*.{json,jsonc,md}\""
   },
   "devDependencies": {
-    "cspell": "^10.3.3",
+    "cspell": "^10.3.5",
     "markdownlint-cli2": "^0.23.3",
     "prettier": "^3.9.8"
   }
