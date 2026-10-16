@@ -5,7 +5,26 @@ metadata:
   description: Galaxio plugin marketplace of agent skills and plugins for Claude Code, Cursor, and Codex
   annotations:
     github.com/project-slug: galax-io/ai-plugins
+    galaxio.io/uses.gatling-picatinny: "docs: galaxio-gatling plugin teaches agents the Picatinny DSL"
+    galaxio.io/uses.gatling-kafka-plugin: "docs: galaxio-gatling plugin teaches agents the Kafka protocol"
+    galaxio.io/uses.gatling-jdbc-plugin: "docs: galaxio-gatling plugin teaches agents the JDBC protocol"
+    galaxio.io/uses.gatling-amqp-plugin: "docs: galaxio-gatling plugin teaches agents the AMQP protocol"
+    galaxio.io/plans.sbt-schema-registry-plugin: "docs: skills for Schema Registry in Kafka projects"
+    galaxio.io/plans.galaxio-cli: "docs: skills drive scaffolding and run reports through the CLI"
+    galaxio.io/plans.galaxio-template-registry: "docs: skills pick templates from the registry"
+    galaxio.io/plans.templates-gatling: "docs: skills follow the project layout of the templates"
+    galaxio.io/plans.docker-images: "docs: skills build and run tests in the CI images"
+    galaxio.io/plans.parsec: "docs: skills analyse run results through parsec"
+    galaxio.io/plans.opennfr: "docs: skills write requirements in OpenNFR"
+    galaxio.io/plans.spec-kit-performance: "docs: skills follow the load-testing methodology"
+    galaxio.io/uses.spec-kit-galaxio-bootstrap: "process: created from the template, takes process updates via copier update"
 spec:
   type: tool
   lifecycle: production
   owner: galaxio
+  dependsOn:
+    - component:default/gatling-picatinny
+    - component:default/gatling-kafka-plugin
+    - component:default/gatling-jdbc-plugin
+    - component:default/gatling-amqp-plugin
+    - component:default/spec-kit-galaxio-bootstrap
