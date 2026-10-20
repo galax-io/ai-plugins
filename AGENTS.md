@@ -2,6 +2,8 @@
 
 Guidance for coding agents working in this repository — Claude Code, Cursor, Codex and anything else that reads `AGENTS.md`. This is the single source; `CLAUDE.md` only points here.
 
+**Constitution:** the principles of this repository are in `.specify/memory/constitution.md`; where they conflict with this file, the constitution wins.
+
 ## What this repository is
 
 Galaxio: a plugin marketplace whose plugins install into **Cursor**, **Claude Code** and **Codex** unchanged. A plugin is authored once, in one `plugin.meta.json` plus a `skills/` tree; the six agent-specific manifests are generated. The tooling in `scripts/` exists to keep that single-source promise enforceable.
