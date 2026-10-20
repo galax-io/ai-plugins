@@ -6,7 +6,8 @@
     "LICENSE",
     "package-lock.json",
     ".specify/**",
-    ".claude/skills/**"
+    ".claude/skills/**",
+    ".agents/skills/**"
   ],
   "ignoreRegExpList": ["-D[A-Za-z][A-Za-z0-9.]*"],
   "words": [

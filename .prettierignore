@@ -13,3 +13,4 @@ tests/fixtures/
 # spec-kit and its extensions, installed verbatim by setup-speckit.sh.
 .specify/
 .claude/skills/
+.agents/skills/

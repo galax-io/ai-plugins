@@ -7,3 +7,11 @@ __pycache__/
 # Claude Code local state — worktrees are checkouts, settings.local.json is personal.
 .claude/settings.local.json
 .claude/worktrees/
+
+# Spec Kit: Python caches and the CLI state, which the kit does not ship (scripts/check-speckit.sh)
+.specify/extensions/.registry
+.specify/extensions/.cache/
+.specify/extensions/.backup/
+.specify/presets/.registry
+.specify/integrations/*.manifest.json
+.specify/workflows/workflow-registry.json
