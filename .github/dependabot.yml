@@ -4,13 +4,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
-      day: friday
+      day: thursday
+      time: "03:00"
+      timezone: Etc/UTC
     commit-message:
       prefix: ci
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
-      day: friday
+      day: thursday
+      time: "03:20"
+      timezone: Etc/UTC
     commit-message:
       prefix: chore
