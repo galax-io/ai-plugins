@@ -97,6 +97,12 @@ jobs:
           fi
           shellcheck "${scripts[@]}"
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.9"
+          enable-cache: false
+
       - name: Byte-compile plugin Python scripts
         run: |
           shopt -s nullglob globstar
@@ -105,7 +111,7 @@ jobs:
             echo "no plugin python scripts"
             exit 0
           fi
-          python3 -m py_compile "${files[@]}"
+          uv run --no-project python -I -m py_compile "${files[@]}"
 
   release-gate:
     name: version bump
