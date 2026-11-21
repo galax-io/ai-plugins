@@ -211,12 +211,12 @@ A task of the backlog has one number across the organization: `BCKLG-<N>`, where
 
 Route work by the reasoning it needs, not by habit; parallelize only where agents would not rebuild the same context. Every model is the newest of its class that the accounts can run; an older one is never used.
 
-| Tier | Claude (effort) | Codex (effort) | Google (effort) | Work |
-|---|---|---|---|---|
-| deep | `claude-opus-5-5` (xhigh) | `gpt-6.2-sol` (xhigh) | `gemini-4-neon` (xhigh) | complex code, review and verification (every critic), research, root-cause analysis, specs/plans, architecture |
-| light | `claude-sonnet-5-5` (high) | `gpt-6.1-terra` (high) | `gemini-4-hydrogen` (high) | simpler work a plan already spells out: task/issue generation, mechanical infra (CI config, version pins, renames, doc fixes) |
-| trivial | `claude-haiku-5-5` (high) | `gpt-6-luna` (high) | `gemini-4-hydrogen` (low) | very simple edits, gathering context, finding files, bookkeeping |
-| exceptional | `claude-fable-5-2` (medium) | `gpt-6.2-astra` (xhigh) | `gemini-4-carbon` (xhigh) | only when the maintainer names the chosen model for a task; no automatic selection or vendor fallback |
+| Tier        | Claude (effort)             | Codex (effort)          | Google (effort)            | Work                                                                                                                          |
+| ----------- | --------------------------- | ----------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| deep        | `claude-opus-5-5` (xhigh)   | `gpt-6.2-sol` (xhigh)   | `gemini-4-neon` (xhigh)    | complex code, review and verification (every critic), research, root-cause analysis, specs/plans, architecture                |
+| light       | `claude-sonnet-5-5` (high)  | `gpt-6.1-terra` (high)  | `gemini-4-hydrogen` (high) | simpler work a plan already spells out: task/issue generation, mechanical infra (CI config, version pins, renames, doc fixes) |
+| trivial     | `claude-haiku-5-5` (high)   | `gpt-6-luna` (high)     | `gemini-4-hydrogen` (low)  | very simple edits, gathering context, finding files, bookkeeping                                                              |
+| exceptional | `claude-fable-5-2` (medium) | `gpt-6.2-astra` (xhigh) | `gemini-4-carbon` (xhigh)  | only when the maintainer names the chosen model for a task; no automatic selection or vendor fallback                         |
 
 - **Newest only.**
   - When a newer model of a class appears, this table and every pin of it move to it in the same change: `.claude/settings.json`, `.claude/agents/`, `setup-speckit.sh` (in spec-kit-galaxio-bootstrap), and any code that routes models.
